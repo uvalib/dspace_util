@@ -1,0 +1,134 @@
+#! /bin/bash
+#
+# Copy to the DSpace instance.
+#
+# Usage: dspace_cp [OPTIONS...] SOURCES... TARGET
+# Usage: dspace_cp --to [OPTIONS...] LOCAL_SOURCES...
+# Usage: dspace_cp --from [OPTIONS...] REMOTE_SOURCES...
+#
+# If copying from DSpace, remote sources cannot begin with "./" or "../".
+# If copying to DSpace, local sources cannot begin with "scp:" or ":".
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
+REMOTE_HOST="$REMOTE_PRIVATE"
+REMOTE_USER="$USER"
+PRIVATE_KEY="$HOME/.ssh/id_rsa"
+
+SEND='to'
+RECV='from'
+
+# =============================================================================
+# Functions
+# =============================================================================
+
+function remote() # path_name
+{
+    local REMOTE="$REMOTE_USER@$REMOTE_HOST"
+    local PATH_NAME="$1"
+    case "$PATH_NAME" in
+        :*)   echo "$REMOTE$PATH_NAME" ;;
+        *)    echo "$REMOTE:$PATH_NAME" ;;
+    esac
+}
+
+# =============================================================================
+# Process command-line ssh flags
+# =============================================================================
+
+KEY_GIVEN=''
+DIRECTION=''
+OPTIONS=()
+
+while [[ $# -gt 0 ]] ; do
+    [[ "$1" = '-i' ]] && KEY_GIVEN=true
+    case "$1" in
+        --from)       DIRECTION="$RECV" ;;
+        --to)         DIRECTION="$SEND" ;;
+        -[cDFiJloPS]) OPTIONS+=("$1" "$2"); shift ;;
+        -*)           OPTIONS+=("$1") ;;
+        *)            break ;;
+    esac
+    shift
+done
+
+[[ "$KEY_GIVEN" ]] || OPTIONS+=(-i "$PRIVATE_KEY")
+
+# =============================================================================
+# Process command-line name(s)
+# =============================================================================
+
+NAMES=("$@")
+LAST_INDEX=`expr $# - 1`
+INITIAL_NAMES=("${NAMES[@]:0:$LAST_INDEX}")
+FINAL_NAME="${NAMES[$LAST_INDEX]}"
+
+# Infer copy direction based on the final argument if not stated explicitly.
+TARGET=''
+if [[ "$DIRECTION" ]] ; then
+    case "$FINAL_NAME" in
+        .|..|./*|../*)  [[ "$DIRECTION" = "$RECV" ]] && TARGET="$FINAL_NAME" ;;
+        :*|scp:*)       [[ "$DIRECTION" = "$SEND" ]] && TARGET="$FINAL_NAME" ;;
+    esac
+else
+    case "$FINAL_NAME" in
+        .|..|./*|../*)  DIRECTION="$RECV" ;;
+        :*|scp:*)       DIRECTION="$SEND" ;;
+        *)              abort 'copy direction ambiguous' ;;
+    esac
+    TARGET="$FINAL_NAME"
+fi
+
+# Adjust source(s) based on whether the target is local or remote.
+SOURCE=()
+if [[ "$DIRECTION" = "$SEND" ]] ; then
+
+    case "$TARGET" in
+        scp:*)  ;; # Full remote target URI assumed
+        :)      TARGET=`remote "/home/$REMOTE_USER"` ;;
+        :*)     TARGET=`remote "$TARGET"` ;;
+        *)      TARGET='' ;;
+    esac
+    if [[ "$TARGET" ]] ; then
+        NAMES=("${INITIAL_NAMES[@]}")
+    else
+        TARGET=`remote "/home/$REMOTE_USER"`
+    fi
+
+    # Make sure sources do not appear to be remote items.
+    for FILE in "${NAMES[@]}" ; do
+        case "$FILE" in
+            scp:*)  abort "$0: local source '$FILE' begins with 'scp:'" ;;
+            :*)     abort "$0: local source '$FILE' begins with ':'" ;;
+        esac
+        SOURCE+=("$FILE")
+    done
+
+elif [[ "$DIRECTION" = "$RECV" ]] ; then
+
+    case "$TARGET" in
+        :*|scp:*|'') TARGET='.' ;;
+        *)           NAMES=("${INITIAL_NAMES[@]}") ;;
+    esac
+
+    # Make sure sources do not appear to be local items.
+    for FILE in "${NAMES[@]}" ; do
+        case "$FILE" in
+            ../*) abort "$0: remote source '$FILE' begins with '../'" ;;
+            ./*)  abort "$0: remote source '$FILE' begins with './'" ;;
+        esac
+        SOURCE+=(`remote "$FILE"`)
+    done
+
+else
+    abort "$0: invalid direction '$DIRECTION'"
+fi
+
+# =============================================================================
+# Run remote copy
+# =============================================================================
+
+scp "${OPTIONS[@]}" "${SOURCE[@]}" "$TARGET"

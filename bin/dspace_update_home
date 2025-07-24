@@ -1,0 +1,10 @@
+#! /bin/bash
+#
+# Update the DSpace user's home directory /bin with the current contents of
+# $PRJ_DIR/remote/bin.
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+PRJ_DIR=`dirname "$BIN_DIR"`
+
+exec dspace_cp_to -r "$PRJ_DIR/remote/bin"

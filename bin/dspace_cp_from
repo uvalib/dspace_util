@@ -1,0 +1,15 @@
+#! /bin/bash
+#
+# Copy from the DSpace instance.
+#
+# Usage: dspace_cp_from [OPTIONS...] DSPACE_PATHS... [LOCAL_TARGET]
+#
+# DSPACE_PATHS are relative to the home directory of the remote user.
+# LOCAL_TARGET if given must be "." or relative like "./dir" or "../dir".
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
+exec dspace_cp --from "$@"

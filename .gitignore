@@ -1,0 +1,187 @@
+# .gitignore
+
+# =============================================================================
+# Project-specific files and directories
+# =============================================================================
+
+# Host-specific files.
+/config/environment.yml
+
+# RubyMine inserts this on the fly when debugging with Passenger selected as
+# the web server.  It's harmless but probably wouldn't be useful in a deployed
+# setting without some additional effort.
+/config/initializers/rubymine_passenger_debug.rb
+
+# Ignore master key for decrypting credentials and more.
+/config/master.key
+
+# Documentation can be recreated at will and doesn't need to be stored with the
+# project.
+/doc/
+
+# Assets are completely recreated via `rake assets:precompile`.
+/public/assets/
+/public/assets-test/
+
+# Ignore links set up by bin/asset_build
+/public/javascripts
+/public/stylesheets
+
+# Ignore generated sitemaps.
+/public/sitemap*
+/public/Sitemap/*
+
+# =============================================================================
+# Generic system files
+# =============================================================================
+
+# === Linux / Unix
+nohup.out
+
+# === Mac OS / OS X
+._*
+.AppleDouble
+.DS_Store
+.DS_Store?
+.LSOverride
+.Spotlight-V100
+.Trashes
+Icon
+Icon?
+
+# === Windows
+desktop.ini
+Thumbs.db
+
+# =============================================================================
+# Editor files
+# =============================================================================
+
+# === Emacs
+.emacs.*
+.elc
+auto-save-list
+tramp
+*~
+\#*
+
+# === Textmate
+*.tmproj
+tmtags
+
+# === Vim
+*.sw?
+
+# =============================================================================
+# Development files
+# =============================================================================
+
+# === Ruby / Rails
+/app/assets/builds/
+!/app/assets/builds/.keep
+/pkg
+# /Gemfile.lock
+
+# === RBS / TypeProf / output of storage/script/rbs_tree
+/.gem_rbs_collection/
+/rbs_collection.*
+/sig.new/
+
+# === RubyMine
+/.idea/
+
+# === VSCode
+/.vscode/
+
+# === RVM / rbenv
+/.rbenv-version
+# /.ruby-version
+# /.ruby-gemset
+/.rvmrc
+/.versions.conf
+
+# === Cucumber
+/rerun.txt
+
+# === Bundler
+/.bundle
+
+# === Yarn/NPM
+/.yarnrc
+/.yarnrc.yml
+/node_modules/
+/yarn-error.log
+/yarn.lock
+/package-lock.json
+
+# === ByeBug gem
+.byebug_history
+
+# === Railroad gem
+# Output files at project root.
+/*.dot
+/*.svg
+
+# === Rcov
+/coverage/
+/coverage.data
+
+# === YARD
+/.yardoc/
+
+# === SQLite (development-only database)
+/db/*.sqlite
+/db/*.sqlite3
+/db/*.sqlite3-journal
+
+# === SASS
+.sass-cache/
+
+# === Ctags
+tags
+
+# === Eclipse
+/.buildpath
+/.classpath
+/.loadpath
+/.metadata/
+/.project
+/.settings/
+/*.launch
+/*.pydevproject
+/local.properties
+
+# =============================================================================
+# Other applications
+# =============================================================================
+
+# === Picasa
+.picasa.ini
+
+# =============================================================================
+# Generic files
+# =============================================================================
+
+# === Backup files
+*.bak
+
+# === Log files
+*.log
+/log/
+!/log/.keep
+
+# === Temporary files
+*.tmp
+/tmp/
+!/tmp/.keep
+
+# === File uploaded in development
+/storage/
+!/storage/.keep
+!/storage/bundle-config
+!/storage/gemrc
+!/storage/yarnrc
+!/storage/yarnrc.yml
+
+# === local environment configuration files
+env.*

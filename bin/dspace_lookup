@@ -1,0 +1,42 @@
+#! /bin/bash
+#
+# Get JSON details of a DSpace item by handle or UUID.
+#
+# Usage:
+# dspace_lookup item_handle
+# dspace_lookup item_uuid
+#
+# For convenience, a full path can be supplied and the item identifier will be
+# extracted from it.
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
+REMOTE_HOST="$REMOTE_PUBLIC"
+HANDLE_PREFIX='123456789'
+
+# =============================================================================
+# Parse argument.
+# =============================================================================
+
+ITEM="$1"
+
+case "$ITEM" in
+    */handle/*) ITEM="${ITEM#*/handle/}" ;;
+    */items/*)  ITEM="${ITEM#*/items/}" ;;
+esac
+
+# =============================================================================
+# Get remote value(s)
+# =============================================================================
+
+case "$ITEM" in
+    *-*)    URL_PATH="core/items/$ITEM"  ;; # Looks like a UUID
+    */*)    URL_PATH="pid/find?id=$ITEM" ;; # Looks like a handle
+    *)      URL_PATH="pid/find?id=$HANDLE_PREFIX/$ITEM" ;;
+esac
+
+curl -L "https://$REMOTE_HOST/server/api/$URL_PATH"
+echo

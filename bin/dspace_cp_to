@@ -1,0 +1,17 @@
+#! /bin/bash
+#
+# Copy to the DSpace instance.
+#
+# Usage: dspace_cp_to [OPTIONS...] LOCAL_PATHS... [REMOTE_TARGET]
+#
+# LOCAL_PATHS are relative to the home directory of the local user.
+# REMOTE_TARGET if given must begin with "scp:" or ":".
+#
+# The default remote target is the DSpace user's home directory.
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
+exec dspace_cp --to "$@"

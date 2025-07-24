@@ -1,0 +1,39 @@
+#! /bin/bash
+#
+# Run a command on the DSpace instance.
+#
+# If no command is given, an interactive shell is opened.
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
+REMOTE_HOST="$REMOTE_PRIVATE"
+REMOTE_USER="$USER"
+PRIVATE_KEY="$HOME/.ssh/id_rsa"
+
+# =============================================================================
+# Process command-line ssh flags
+# =============================================================================
+
+KEY_GIVEN=''
+OPTIONS=()
+
+while [[ $# -gt 0 ]] ; do
+    case "$1" in
+        -i)                      OPTIONS+=("$1" "$2"); KEY_GIVEN=true; shift ;;
+        -[BbcDEeFIJLlmOopQRSWw]) OPTIONS+=("$1" "$2"); shift ;;
+        -*)                      OPTIONS+=("$1") ;;
+        *)                       break ;;
+    esac
+    shift
+done
+
+[[ "$KEY_GIVEN" ]] || OPTIONS+=(-i "$PRIVATE_KEY")
+
+# =============================================================================
+# Run remote command (defaulting to remote login shell)
+# =============================================================================
+
+exec ssh "${OPTIONS[@]}" "$REMOTE_USER@$REMOTE_HOST" "$@"

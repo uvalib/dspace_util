@@ -1,0 +1,97 @@
+#! /bin/bash
+#
+# Import Libra exports to DSpace imports.
+#
+# Usage: @see remote/bin/dspace_import
+#
+# Usage: dspace_import [dspace_import_zip_options] [remote_options]
+# Usage: dspace_import --help
+#
+# The program passes its arguments to dspace_import_zip except for a limited
+# set of options accepted by the remote dspace_import script (and then only
+# with the long form using double dashes) to specify the collection or the
+# eperson submitter.
+#
+# As a safeguard, if the target directory already contains zip file(s) the
+# script will exit.
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
+LOCAL_ARGS=()   # Arguments passed to "bin/dspace_import_zip".
+REMOTE_ARGS=()  # Arguments passed to "remote/bin/dspace_import".
+
+# =============================================================================
+# Process command line arguments.
+# =============================================================================
+
+while [[ $# -gt 0 ]] ; do
+    case "$1" in
+        --collection=*) REMOTE_ARGS+=("$1") ;;
+        --collection)   REMOTE_ARGS+=("$1=$2"); shift ;;
+        --eperson=*)    REMOTE_ARGS+=("$1") ;;
+        --eperson)      REMOTE_ARGS+=("$1=$2"); shift ;;
+        *)              LOCAL_ARGS+=("$1") ;;
+    esac
+    shift
+done
+
+# =============================================================================
+# Create zip files(s), copy to DSpace, and import.
+# =============================================================================
+
+# For convenience, move to the directory containing $IMPORT_DIR.
+case "$IMPORT_DIR" in
+    /*) IMPORT_BASE=`dirname "$IMPORT_DIR"` ;;
+    *)  IMPORT_BASE="$COMMON_ROOT" ;;
+esac
+cd "$IMPORT_BASE" || exit $?
+
+# Make sure the target directory is clean.
+if [[ -e "$IMPORT_DIR" ]] ; then
+    abort "$IMPORT_BASE already contains an import subdirectory ($IMPORT_DIR)"
+fi
+ZIP_FILES=`ls *.zip 2>/dev/null`
+if [[ "$ZIP_FILES" ]] ; then
+    abort "$IMPORT_BASE already contains zip files: $ZIP_FILES"
+fi
+
+# Make sure user account on the DSpace instance has remote/bin/dspace_import
+# and the import subdirectory is created and prepared.
+REMOTE_IMPORT='bin/dspace_import'
+REMOTE_SUBDIR='import'
+dspace_sh "
+    test -x '$REMOTE_IMPORT' || exit 10
+    mkdir -p '$REMOTE_SUBDIR' &&
+    sudo chown dspace '$REMOTE_SUBDIR' &&
+    sudo chmod 775 '$REMOTE_SUBDIR'
+"
+case $? in
+    0)  ;; # Everything checks out.
+    10) abort "DSpace user missing '$REMOTE_IMPORT'; use dspace_update_home" ;;
+    *)  abort "DSpace user check failed" ;;
+esac
+
+# Generate the zip file(s).
+echo 'Generating zip file(s) ...'
+dspace_import_zip "${LOCAL_ARGS[@]}" || exit $?
+
+# Copy each zip file to DSpace in a pre-existing subdirectory of the DSpace
+# user account and import it.
+ZIP_FILES=`ls *.zip` || exit $?
+for ZIP_FILE in "$ZIP_FILES" ; do
+    echo
+    echo "Copying $ZIP_FILE ..."
+    #dspace_sh "sudo rm -f '$REMOTE_SUBDIR/$ZIP_FILE'" &&
+    dspace_cp "$ZIP_FILE" :"$REMOTE_SUBDIR" &&
+    dspace_sh "
+        cd '$REMOTE_SUBDIR' &&
+        sudo chmod g+w '$ZIP_FILE' &&
+        sudo chown dspace '$ZIP_FILE' &&
+        echo &&
+        echo 'Importing $ZIP_FILE ...' &&
+        \$HOME/$REMOTE_IMPORT '$ZIP_FILE' '${REMOTE_ARGS[@]}'
+    "
+done

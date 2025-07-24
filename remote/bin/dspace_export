@@ -1,0 +1,126 @@
+#! /bin/bash
+#
+# Export items from DSpace in a DSpace login shell.
+#
+# -i    The ID or Handle of target item (sets --type ITEM)
+# -c    The ID or Handle of target collection (sets --type COLLECTION)
+# -*    One of the "dspace export" flags below.
+#
+# For reference, "dspace export" command line arguments are:
+#
+# Argument          Description                     Notes
+# Short Long
+# ----- ---------   ------------------------------- ----------------------------------
+# -t    --type      Type of export                  "COLLECTION" or "ITEM"
+# -i    --id        The ID or Handle of target      Where target is collection or item
+# -d    --dest      The destination path for export
+# -n    --number    Starting sequence number
+# -m    --migrate   Export target for migration     Removes DSpace metadata
+# -z    --zip       Export as zipfile               Requires file name argument
+# -h    --help      Command help
+# -x    --exclude-bitstreams    Do not export bitstreams
+#
+# @see https://wiki.lyrasis.org/display/DSDOC8x/Importing+and+Exporting+Items+via+Simple+Archive+Format
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
+ITEM='' # ID or Handle of target item.
+COLL='' # ID or Handle of target collection.
+DST=''  # The destination path for export.
+NUM='0' # Starting sequence number.
+TYPE='' # Inferred from --id or --collection.
+
+ID=''   # Either $ITEM or $COLL depending on $TYPE.
+HELP='' # Detected -h or --help flag.
+ARGS=() # Other arguments passed to "dspace export".
+
+# =============================================================================
+# Functions
+# =============================================================================
+
+function flag_arg() # --flag=value | flag value
+{
+    local FLAG="$1"                         # "--flag=value" or "flag value".
+    local VALUE="${FLAG#*=}"                # Check for "--flag=value".
+    [[ "$VALUE" = "$FLAG" ]] && VALUE="$2"  # Default to "flag value".
+    [[ "$VALUE" ]] || abort "missing $FLAG argument"
+    echo "$VALUE"
+}
+
+function set_type() # "ITEM" | "COLLECTION"
+{
+    local VALUE="$1"
+    [[ "$TYPE" ]] || TYPE="$VALUE"
+    [[ "$TYPE" = "$VALUE" ]] || abort "type set to '$TYPE' instead of '$VALUE'"
+}
+
+# =============================================================================
+# Process command line arguments.
+# =============================================================================
+
+while [[ $# -gt 0 ]] ; do
+    case "$1" in
+        --id=*)             ITEM=`flag_arg "$1"` ;;
+        --id|-i)            ITEM=`flag_arg "$1" "$2"`; shift ;;
+        --collection=*)     COLL=`flag_arg "$1"` ;;
+        --collection|-c)    COLL=`flag_arg "$1" "$2"`; shift ;;
+        --dest=*)           DST=`flag_arg "$1"` ;;
+        --dest|-d)          DST=`flag_arg "$1" "$2"`; shift ;;
+        --number=*)         NUM=`flag_arg "$1"` ;;
+        --number|-n)        NUM=`flag_arg "$1" "$2"`; shift ;;
+        --type=*)           TYPE=`flag_arg "$1"` ;;
+        --type|-t)          TYPE=`flag_arg "$1" "$2"`; shift ;;
+        --help|-h)          HELP=true ;;
+        *)                  ARGS+=("$1") ;;
+    esac
+    shift
+done
+
+# Special case for --help.
+if [[ "$HELP" ]] ; then
+    PROGRAM=`basename "$0"`
+    echo "Usage: $PROGRAM -i target_item [flags]"
+    echo "Usage: $PROGRAM -c target_collection [flags]"
+    echo 'DSpace export flags:'
+    dspace export --help | sed -e '/^usage.*$/d' -e '/^\s*-t,/d'
+    exit 0
+fi
+
+# Ensure that arguments include "-i item_id" or "-c collection_id".
+if [[ "$ITEM" && "$COLL" ]] ; then
+    abort "Cannot give both '-i item_id' and '-c collection_id'"
+elif [[ "$ITEM" ]] ; then
+    set_type ITEM && ID="$ITEM"
+elif [[ "$COLL" ]] ; then
+    set_type COLLECTION && ID="$COLL"
+else
+    abort "Must give '-i item_id' or '-c collection_id'"
+fi
+
+# Normalize destination to an absolute path defaulting to "export" in the
+# current directory.
+case "$DST" in
+    /*) ;; # OK
+    '') DST="$PWD/export" ;;
+    *)  DST="$PWD/$DST" ;;
+esac
+
+# Create empty destination directory.
+if [[ ! -e "$DST" ]] ; then
+    mkdir "$DST" || exit $?
+    chmod a+w "$DST"
+elif [[ ! -d "$DST" ]] ; then
+    abort "Destination exists: `file '$DST'`"
+elif [[ `ls "$DST" | wc -l` -gt 0 ]] ; then
+    abort "Destination '$DST' is not empty"
+fi
+
+# =============================================================================
+# Run the export command.
+# =============================================================================
+
+dspace export -t "$TYPE" -i "$ID" -n "$NUM" -d "$DST" "${ARGS[@]}" &&
+sudo chown -R "$USER" "$DST"

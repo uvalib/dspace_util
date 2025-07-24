@@ -1,0 +1,56 @@
+#! /bin/bash
+#
+# View the DSpace Solr admin page.
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
+SOLR_HOST="$REMOTE_PRIVATE"
+SOLR_PORT=8983
+SOLR_CORE='search'
+
+LOCAL_HOST='localhost'
+LOCAL_PORT=$SOLR_PORT
+LOCAL_URL="http://$LOCAL_HOST:$LOCAL_PORT/solr"
+LOCAL_URL="$LOCAL_URL/#/$SOLR_CORE/core-overview"
+
+CHROME='google-chrome'
+FIREFOX='firefox'
+BROWSER="$CHROME"
+
+# =============================================================================
+# Select local browser on the command line.
+# =============================================================================
+
+for ARG in "$@" ; do
+    case "$ARG" in
+        -google*|-*chrome|google*|*chrome)  BROWSER="$CHROME" ;;
+        -firefox|firefox)                   BROWSER="$FIREFOX" ;;
+        *)                                  abort "unexpected arg '$ARG'" ;;
+    esac
+done
+
+# =============================================================================
+# Test to determine whether an SSH tunnel is needed.
+# =============================================================================
+
+curl -s "$LOCAL_URL" > /dev/null
+if [[ $? -ne 0 ]] ; then
+    ssh -N -L "$LOCAL_PORT:localhost:$SOLR_PORT" $SOLR_HOST &
+    echo "STARTED SSH TUNNEL; pid = $!"
+fi
+
+# =============================================================================
+# Open local browser to view the remote Solr admin page.
+# =============================================================================
+
+TPGID=`ps -o tpgid= -p $$`  # Terminal process group ID of this script.
+PGRP=`ps -o pgrp= -p $$`    # Progress group ID of this script.
+
+if [[ "$TPGID" = "$PGRP" ]] ; then
+    $BROWSER "$LOCAL_URL"                   # Script running in the foreground.
+else
+    $BROWSER "$LOCAL_URL" > /dev/null 2>&1  # Script running in the background.
+fi

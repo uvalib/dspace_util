@@ -1,0 +1,30 @@
+#! /bin/bash
+#
+# Script values -- intended to be "sourced" not run.
+
+ERROR_STATUS=127
+
+# DSpace instance URLs.
+[[ "$REMOTE_PUBLIC"  ]] || REMOTE_PUBLIC='dspace-staging.library.virginia.edu'
+[[ "$REMOTE_PRIVATE" ]] || REMOTE_PRIVATE='dspace-staging-private.internal.lib.virginia.edu'
+
+# Defaults for dspace_import_zip.
+[[ "$COMMON_ROOT" ]] || export COMMON_ROOT="$HOME/Work-test/libra-dspace"
+[[ "$EXPORT_DIR"  ]] || export EXPORT_DIR='libra-export'
+[[ "$IMPORT_DIR"  ]] || export IMPORT_DIR='dspace-import'
+
+# Ensure that dspace_util scripts are available
+[[ "$PROGRAM" ]] || PROGRAM=`realpath "$0"`
+[[ "$BIN_DIR" ]] || BIN_DIR=`dirname "$PROGRAM"`
+
+[[ ":$PATH:" = *":$BIN_DIR:"* ]] || PATH="$BIN_DIR:$PATH"
+
+# =============================================================================
+# Functions
+# =============================================================================
+
+function abort() # text...
+{
+    echo "$@" 1>&2
+    exit $ERROR_STATUS
+}

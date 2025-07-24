@@ -1,0 +1,158 @@
+#! /bin/bash
+#
+# Import items into DSpace in a DSpace login shell.
+#
+# The first argument to the script is the zip file, the remainder are
+# "dspace import" command line arguments although certain combinations are
+# untested.
+#
+# For reference, "dspace import" command line arguments are:
+#
+# Argument              Description                                 Notes
+# Short Long
+# ----- ------------    ----------------------------------------    -----------------------
+# -a    --add           Add items to DSpace                         Can't use with -r or -d
+# -r    --replace       Replace items listed in mapfile             Can't use with -a or -d
+# -d    --delete        Delete items listed in mapfile              Can't use with -a or -r
+# -s    --source        Source directory of zipfile
+# -c    --collection    Destination collection                      By Handle or database ID
+# -m    --mapfile       Mapfile for items                           Will be created by --add
+# -e    --eperson       Email of person doing import
+# -w    --workflow      Send through the collection's workflow
+# -n    --notify        Kicks off email reporting imported items
+# -v    --validate      Test run; do not actually import items
+# -p    --template      Apply the collection template
+# -R    --resume        Resume a failed import                      For --add only
+# -h    --help          Command help
+# -z    --zip           Zipfile
+# -q    --quiet         Don't display metadata                      Not on documentation page.
+# -u    --url           URL of zip file.                            Not on documentation page.
+# -x,   --exclude-bitstreams    Do not load content bitstreams      Not on documentation page.
+#
+# @see https://wiki.lyrasis.org/display/DSDOC8x/Importing+and+Exporting+Items+via+Simple+Archive+Format
+
+# While testing we're using a temporary "Import Test" collection so that items
+# can be removed at one time by deleting the collection.  Unfortunately, that
+# means having to recreate the collection named "Import Test" and updating the
+# variable here
+#
+# TEXT FOR "Import Test" INTRODUCTORY TEXT AND SHORT DESCRIPTION:
+# Temporary to allow en masse deletions. Do not add items you want to keep.
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
+ZIP_PATH=''                     # Path to zipfile.
+SRC_DIR=''                      # Directory of zipfile.
+MAP_FILE=''                     # Name of mapfile.
+ZIP_FILE=''                     # Name of zipfile.
+EPERSON='libra@virginia.edu'    # DSpace account of submitter.
+COLLECTION="$COLL_DEFAULT"      # Current default collection.
+
+KEEP_MAP=''                     # Do not backup existing mapfile.
+HELP=''                         # Detected -h or --help flag.
+ARGS=()                         # Other arguments passed to "dspace export".
+
+# =============================================================================
+# Functions
+# =============================================================================
+
+function flag_arg() # --flag=value | flag value
+{
+    local FLAG="$1"                         # "--flag=value" or "flag value".
+    local VALUE="${FLAG#*=}"                # Check for "--flag=value".
+    [[ "$VALUE" = "$FLAG" ]] && VALUE="$2"  # Default to "flag value".
+    [[ "$VALUE" ]] || abort "missing $FLAG argument"
+    echo "$VALUE"
+}
+
+function set_zip() # path_name
+{
+    [[ "$ZIP_PATH" ]] && abort "zipfile path already set to '$ZIP_PATH'"
+    ZIP_PATH="$1"
+}
+
+# =============================================================================
+# Process command line arguments.
+# =============================================================================
+
+while [[ $# -gt 0 ]] ; do
+    case "$1" in
+        --add|-a)           ;; # No-op: this script only handles "add".
+        --delete|-d)        abort "this script does not implement 'delete'" ;;
+        --replace|-r)       abort "this script does not implement 'replace'" ;;
+        --source=*)         SRC_DIR=`flag_arg "$1"` ;;
+        --source|-s)        SRC_DIR=`flag_arg "$1" "$2"`; shift ;;
+        --collection=*)     COLLECTION=`flag_arg "$1"` ;;
+        --collection|-c)    COLLECTION=`flag_arg "$1" "$2"`; shift ;;
+        --mapfile=*)        MAP_FILE=`flag_arg "$1"` ;;
+        --mapfile|-m)       MAP_FILE=`flag_arg "$1" "$2"`; shift ;;
+        --eperson=*)        EPERSON=`flag_arg "$1"` ;;
+        --eperson|-e)       EPERSON=`flag_arg "$1" "$2"`; shift ;;
+        --zip=*)            set_zip `flag_arg "$1"` ;;
+        --zip|-z)           set_zip `flag_arg "$1" "$2"`; shift ;;
+        --help|-h)          HELP=true; KEEP_MAP=true ;;
+        --resume|-R)        ARGS+=("$1"); KEEP_MAP=true ;;
+        --validate|-v)      ARGS+=("$1"); KEEP_MAP=true ;;
+        --url=*)            ARGS+=("$1") ;;
+        --url)              ARGS+=("$1=$2"); shift ;;
+        -u)                 ARGS+=("$1" "$2"); shift ;;
+        -*)                 ARGS+=("$1") ;;
+        *)                  set_zip "$1" ;;
+    esac
+    shift
+done
+
+# Special case for --help.
+if [[ "$HELP" ]] ; then
+    PROGRAM=`basename "$0"`
+    echo "Usage: $PROGRAM zip_file [flags]"
+    echo 'DSpace import flags:'
+    dspace import --help | sed '/^usage.*$/d'
+    exit 0
+fi
+
+# The zip file should be first argument to script; other flags like '-v' may
+# come after it.
+[[ "$ZIP_PATH" ]] || abort 'relative path to zip file not given'
+[[ "$SRC_DIR"  ]] || SRC_DIR=`dirname "$ZIP_PATH"`
+[[ "$ZIP_FILE" ]] || ZIP_FILE=`basename "$ZIP_PATH"`
+[[ "$MAP_FILE" ]] || MAP_FILE=`basename "$ZIP_FILE" .zip`.map
+
+# Make a relative source directory path absolute.
+case "$SRC_DIR" in
+    '') SRC_DIR="$HOME" ;;
+    *)  SRC_DIR=`realpath "$SRC_DIR"` ;;
+esac
+
+# Make sure the submitter is in the form of a DSpace user name.
+case "$EPERSON" in
+    *@*)    ;; # OK
+    '')     EPERSON="$USER@virginia.edu" ;;
+    *)      EPERSON="$EPERSON@virginia.edu" ;;
+esac
+
+# =============================================================================
+# Run the import command.
+# =============================================================================
+
+# Move into the zip directory, which should be writable by user "dspace".
+[[ "$SRC_DIR" = "$PWD" ]] || cd "$SRC_DIR"
+
+# If there is an existing mapfile, move it out of the way unless attempting to
+# resume a failed import.
+if [[ -z "$KEEP_MAP" && -e "$MAP_FILE" ]] ; then
+    mv "$MAP_FILE" "$MAP_FILE".`date +'%T.%N'`
+fi
+
+# Run import command which will generate $MAP_FILE with item subdirectory
+# mapped to the handle of the DSpace item generated from it.
+exec dspace import --add \
+    -s "$SRC_DIR" \
+    -c "$COLLECTION" \
+    -m "$MAP_FILE" \
+    -e "$EPERSON" \
+    -z "$ZIP_FILE" \
+    "${ARGS[@]}"

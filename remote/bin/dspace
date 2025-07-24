@@ -1,0 +1,7 @@
+#! /bin/bash
+#
+# Run a DSpace command in a DSpace login shell.
+#
+# @see https://wiki.lyrasis.org/display/DSDOC8x/Command+Line+Operations
+
+exec sudo -u dspace /opt/dspace/bin/dspace "$@"
