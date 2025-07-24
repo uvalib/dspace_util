@@ -4,4 +4,7 @@
 #
 # @see https://wiki.lyrasis.org/display/DSDOC8x/Command+Line+Operations
 
+MEMORY='512m' # Default is '256m'.
+[[ "$JAVA_OPTS" ]] || export JAVA_OPTS="-Xmx$MEMORY -Dfile.encoding=UTF-8"
+
 exec sudo -u dspace /opt/dspace/bin/dspace "$@"
