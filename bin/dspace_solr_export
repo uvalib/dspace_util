@@ -1,6 +1,8 @@
 #! /bin/bash
 #
 # Export DSpace Solr search records.
+#
+# Usage: dspace_solr_export [-s start_date] [-e end_date] [-r rows]
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`

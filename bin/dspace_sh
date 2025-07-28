@@ -2,7 +2,9 @@
 #
 # Run a command on the DSpace instance.
 #
-# If no command is given, an interactive shell is opened.
+# Usage: dspace_sh [ssh_opts]                   Interactive shell.
+# Usage: dspace_sh [ssh_opts] command           Remote command.
+# Usage: dspace_sh [ssh_opts] -- command args   Remote command with arguments.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
@@ -18,22 +20,23 @@ PRIVATE_KEY="$HOME/.ssh/id_rsa"
 # =============================================================================
 
 KEY_GIVEN=''
-OPTIONS=()
+SSH_OPT=()
 
 while [[ $# -gt 0 ]] ; do
     case "$1" in
-        -i)                      OPTIONS+=("$1" "$2"); KEY_GIVEN=true; shift ;;
-        -[BbcDEeFIJLlmOopQRSWw]) OPTIONS+=("$1" "$2"); shift ;;
-        -*)                      OPTIONS+=("$1") ;;
-        *)                       break ;;
+        --)                      shift; break ;; # Subsequent args to command.
+        -i)                      SSH_OPT+=("$1" "$2"); KEY_GIVEN=true; shift ;;
+        -[BbcDEeFIJLlmOopQRSWw]) SSH_OPT+=("$1" "$2"); shift ;;
+        -*)                      SSH_OPT+=("$1") ;;
+        *)                       break ;; # Remote command.
     esac
     shift
 done
 
-[[ "$KEY_GIVEN" ]] || OPTIONS+=(-i "$PRIVATE_KEY")
+[[ "$KEY_GIVEN" ]] || SSH_OPT+=(-i "$PRIVATE_KEY")
 
 # =============================================================================
 # Run remote command (defaulting to remote login shell)
 # =============================================================================
 
-exec ssh "${OPTIONS[@]}" "$REMOTE_USER@$REMOTE_HOST" "$@"
+exec ssh "${SSH_OPT[@]}" "$REMOTE_USER@$REMOTE_HOST" "$@"

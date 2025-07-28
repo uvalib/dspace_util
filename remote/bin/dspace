@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Run a DSpace command in a DSpace login shell.
+# Run a DSpace command within a DSpace login shell.
 #
 # @see https://wiki.lyrasis.org/display/DSDOC8x/Command+Line+Operations
 

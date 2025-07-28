@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Export items from DSpace in a DSpace login shell.
+# Export items from DSpace within a DSpace login shell.
 #
 # -i    The ID or Handle of target item (sets --type ITEM)
 # -c    The ID or Handle of target collection (sets --type COLLECTION)
@@ -111,7 +111,7 @@ esac
 # Create empty destination directory.
 if [[ ! -e "$DST" ]] ; then
     mkdir "$DST" || exit $?
-    chmod a+w "$DST"
+    chmod a+w "$DST" || exit $?
 elif [[ ! -d "$DST" ]] ; then
     abort "Destination exists: `file '$DST'`"
 elif [[ `ls "$DST" | wc -l` -gt 0 ]] ; then

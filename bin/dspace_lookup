@@ -2,9 +2,8 @@
 #
 # Get JSON details of a DSpace item by handle or UUID.
 #
-# Usage:
-# dspace_lookup item_handle
-# dspace_lookup item_uuid
+# Usage: dspace_lookup item_handle
+# Usage: dspace_lookup item_uuid
 #
 # For convenience, a full path can be supplied and the item identifier will be
 # extracted from it.

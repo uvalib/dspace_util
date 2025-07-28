@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Restart DSpace in a DSpace login shell with updated configuration from
+# Restart DSpace within a DSpace login shell with updated configuration from
 # https://github.com/uvalib/dspace_config
 #
 # If the repo is automated to deploy after a push then this script should not

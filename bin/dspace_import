@@ -63,15 +63,15 @@ fi
 REMOTE_IMPORT='bin/dspace_import'
 REMOTE_SUBDIR='import'
 dspace_sh "
-    test -x '$REMOTE_IMPORT' || exit 10
+    test -x '$REMOTE_IMPORT' || exit 9
     mkdir -p '$REMOTE_SUBDIR' &&
     sudo chown dspace '$REMOTE_SUBDIR' &&
     sudo chmod 775 '$REMOTE_SUBDIR'
 "
 case $? in
-    0)  ;; # Everything checks out.
-    10) abort "DSpace user missing '$REMOTE_IMPORT'; use dspace_update_home" ;;
-    *)  abort "DSpace user check failed" ;;
+    0) ;; # Everything checks out.
+    9) abort "DSpace user missing '$REMOTE_IMPORT'; use dspace_update_home" ;;
+    *) abort "DSpace user check failed" ;;
 esac
 
 # Generate the zip file(s).

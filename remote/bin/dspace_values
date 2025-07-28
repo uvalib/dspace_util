@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Script values -- intended to be "sourced" not run.
+# Script values -- intended to be "sourced" not run -- within a DSpace shell.
 
 # Handles for "UVA Open Community" collections:
 COLL_GENERAL='123456789/2'          # "General Collection"

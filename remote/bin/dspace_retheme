@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Restart DSpace UI in a DSpace login shell with updated configuration from
+# Restart DSpace UI within a DSpace login shell with updated configuration from
 # https://github.com/uvalib/dspace_theme
 #
 # If the repo is automated to deploy after a push then this script should not

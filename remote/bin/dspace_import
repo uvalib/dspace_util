@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Import items into DSpace in a DSpace login shell.
+# Import items into DSpace within a DSpace login shell.
 #
 # The first argument to the script is the zip file, the remainder are
 # "dspace import" command line arguments although certain combinations are
@@ -139,12 +139,12 @@ esac
 # =============================================================================
 
 # Move into the zip directory, which should be writable by user "dspace".
-[[ "$SRC_DIR" = "$PWD" ]] || cd "$SRC_DIR"
+[[ "$SRC_DIR" = "$PWD" ]] || cd "$SRC_DIR" || exit $?
 
 # If there is an existing mapfile, move it out of the way unless attempting to
 # resume a failed import.
 if [[ -z "$KEEP_MAP" && -e "$MAP_FILE" ]] ; then
-    mv "$MAP_FILE" "$MAP_FILE".`date +'%T.%N'`
+    mv "$MAP_FILE" "$MAP_FILE".`date +'%T.%N'` || exit $?
 fi
 
 # Run import command which will generate $MAP_FILE with item subdirectory

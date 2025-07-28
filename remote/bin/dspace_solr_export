@@ -1,15 +1,8 @@
 #! /bin/bash
 #
-# Export DSpace Solr search records in a DSpace login shell.
+# Export DSpace Solr search records within a DSpace login shell.
 #
-# Ideally, the following would work:
-#
-#   dspace dsrun org.dspace.util.SolrImportExport -a export -i search "$@"
-#
-# but it doesn't because that module as it is currently defined only accepts
-# the "authority" or "statistics" cores.
-#
-# SOLR_DATA='/opt/solr/server/solr/configsets/search/data'
+# Usage: dspace_solr_export [-s start_date] [-e end_date] [-r rows]
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
@@ -84,3 +77,12 @@ SOLR_FQ="dc.date.accessioned_dt:$RANGE"
 SOLR_URL="http://$SOLR_HOST:$SOLR_PORT/solr/$SOLR_CORE/select"
 
 exec curl "$SOLR_URL?q=$SOLR_Q&fq=$SOLR_FQ&rows=$ROWS"
+
+# Implementation Notes
+#
+# Ideally, the following would work:
+#
+#   dspace dsrun org.dspace.util.SolrImportExport -a export -i search "$@"
+#
+# but it doesn't because that module as it is currently defined only accepts
+# the "authority" or "statistics" cores.

@@ -131,4 +131,4 @@ fi
 # Run remote copy
 # =============================================================================
 
-scp "${OPTIONS[@]}" "${SOURCE[@]}" "$TARGET"
+exec scp "${OPTIONS[@]}" "${SOURCE[@]}" "$TARGET"
