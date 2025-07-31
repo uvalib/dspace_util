@@ -8,12 +8,12 @@ ERROR_STATUS=127
 [[ "$REMOTE_PUBLIC"  ]] || REMOTE_PUBLIC='dspace-staging.library.virginia.edu'
 [[ "$REMOTE_PRIVATE" ]] || REMOTE_PRIVATE='dspace-staging-private.internal.lib.virginia.edu'
 
-# Defaults for dspace_import_zip.
+# Default locations for import/export.
 [[ "$COMMON_ROOT" ]] || export COMMON_ROOT="$HOME/Work-test/libra-dspace"
 [[ "$EXPORT_DIR"  ]] || export EXPORT_DIR='libra-export'
 [[ "$IMPORT_DIR"  ]] || export IMPORT_DIR='dspace-import'
 
-# Ensure that dspace_util scripts are available
+# Ensure that dspace_util scripts are available.
 [[ "$PROGRAM" ]] || PROGRAM=`realpath "$0"`
 [[ "$BIN_DIR" ]] || BIN_DIR=`dirname "$PROGRAM"`
 
@@ -23,8 +23,10 @@ ERROR_STATUS=127
 # Functions
 # =============================================================================
 
-function abort() # text...
+function abort() # output_lines...
 {
-    echo "$@" 1>&2
+    for MSG in "$@" ; do
+        echo "$MSG" 1>&2
+    done
     exit $ERROR_STATUS
 }

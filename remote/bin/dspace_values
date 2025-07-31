@@ -17,8 +17,10 @@ ERROR_STATUS=127
 # Functions
 # =============================================================================
 
-function abort() # text...
+function abort() # output_lines...
 {
-    echo "$@" 1>&2
+    for MSG in "$@" ; do
+        echo "$MSG" 1>&2
+    done
     exit $ERROR_STATUS
 }

@@ -1,0 +1,170 @@
+#! /bin/bash
+#
+# Extract exports from LibraOpen for use in importing to DSpace.
+#
+# Usage: dspace_libra_export [options...]
+#
+# Options:
+#   --force         Overwrite existing destination subdirectory.
+#   --common dir    Common root for export and import directories.
+#   --export name   Destination subdirectory name for copied exports.
+#   --start  date   Export items submitted from this date through the present.
+#
+# If a common directory is given, libra-open-export is copied there rather than
+# the default ($COMMON_ROOT from dspace_values).
+#
+# If an export name is given, libra-open-export is placed into a subdirectory
+# with that name rather than the default ($EXPORT_DIR from dspace_values).
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+PRJ_DIR=`dirname "$BIN_DIR"`
+
+source "$BIN_DIR/dspace_values"
+
+# Terraform repo on the local system.
+TI_PRJ=`realpath "$PRJ_DIR/../terraform-infrastructure"`
+
+# Properties of the remote system.
+LIBRA_HOST='10.130.110.92'
+LIBRA_USER='ec2-user'
+EXPORT_SRC='libra-open-export' # Export subdirectory name.
+
+# =============================================================================
+# Functions
+# =============================================================================
+
+function announce() # output_lines...
+{
+    for MSG in "$@" ; do
+        echo
+        echo -n '***' "$MSG"
+    done
+    echo ' ...'
+}
+
+# =============================================================================
+# Process args
+# =============================================================================
+
+OUT_DIR="$COMMON_ROOT"
+OUT_NAME="$EXPORT_DIR"
+START_DATE='2025-05-01'
+FORCE=''
+
+while [[ $# -gt 0 ]] ; do
+    case "$1" in
+        -f|--force)     FORCE=true;      shift 1 ;;
+        -c|--common)    OUT_DIR="$2";    shift 2 ;;
+        -e|--export)    OUT_NAME="$2";   shift 2 ;;
+        -s|--start)     START_DATE="$2"; shift 2 ;;
+        *)              abort "invalid arg '$ARG'" ;;
+    esac
+done
+
+[[ "$OUT_DIR"  ]] || OUT_DIR="$PWD"
+[[ "$OUT_NAME" ]] || OUT_NAME="$EXPORT_SRC"
+
+# =============================================================================
+# Avoid overwriting an existing export subdirectory.
+# =============================================================================
+
+DST_DIR="$OUT_DIR/$OUT_NAME"
+
+if [[ -e "$DST_DIR" ]] ; then
+    if [[ "$FORCE" ]] ; then
+        rm -rf "$DST_DIR"
+    else
+        abort "$OUT_DIR already contains an export subdirectory ($OUT_NAME)"
+    fi
+fi
+
+mkdir -p "$OUT_DIR"
+
+# =============================================================================
+# Ensure terraform-infrastructure repo is on the local machine.
+# =============================================================================
+
+if [[ ! -d "$TI_PRJ" ]] ; then
+    TI_SRC='git@gitlab.com:uvalib/terraform-infrastructure.git'
+    abort "Missing $TI_PRJ" "Need to run git clone $TI_SRC"
+fi
+
+# =============================================================================
+# Make Docker credentials available.
+# =============================================================================
+
+cd "$TI_PRJ/docker.lib.virginia.edu/production/keys" || exit $?
+ENCRYPTED='docker_production.pem.cpt'
+UNENCRYPTED=`basename "$ENCRYPTED" .cpt`
+if [[ ! -f "$UNENCRYPTED" ]] ; then
+    announce "Generating '$UNENCRYPTED'"
+    SECRET='docker.lib.virginia.edu/production/keys/docker_production.pem'
+    "$TI_PRJ/scripts/decrypt-key.ksh" "$ENCRYPTED" "$SECRET" || exit $?
+fi
+REMOTE_CREDENTIALS="$PWD/$UNENCRYPTED"
+
+# =============================================================================
+# Ensure credentials are in place for the playbook.
+# =============================================================================
+
+cd "$TI_PRJ/libra-aptrust/production/ansible" || exit $?
+
+ENCRYPTED='aptrust-production.env.cpt'
+UNENCRYPTED=`basename "$ENCRYPTED" .cpt`
+if [[ ! -f "$UNENCRYPTED" ]] ; then
+    announce "Generating '$UNENCRYPTED'"
+    SECRET='aptrust/production/ansible/aptrust-production.env'
+    "$TI_PRJ/scripts/decrypt-key.ksh" "$ENCRYPTED" "$SECRET" || exit $?
+fi
+
+LIBRA_GEN='libra-open.env.generated'
+if [[ ! -f "$LIBRA_GEN" ]] ; then
+    announce "Generating '$LIBRA_GEN'"
+    LIBRA_PRJ="$TI_PRJ/libraopen.lib.virginia.edu"
+    LIBRA_ENV="$LIBRA_PRJ/production/backend/environment.vars"
+    awk -F '"' '{ printf "%s: \"%s\"\n", $4, $8 }' "$LIBRA_ENV" > "$LIBRA_GEN"
+fi
+
+# =============================================================================
+# Initialize Terraform
+# =============================================================================
+
+cd "$TI_PRJ/libra-aptrust/production" || exit $?
+
+export AWS_REGION='us-east-1'
+terraform init || exit $?
+terraform apply -auto-approve -var export_start_date=$START_DATE || exit $?
+
+# =============================================================================
+# Perform the LibraOpen export and recursively copy to $DST_DIR.
+# =============================================================================
+
+cd "$TI_PRJ/libra-aptrust/production/ansible" || exit $?
+
+SRC_DIR="/mnt/scratch/$EXPORT_SRC"
+
+announce 'Clearing remote export directory'
+ansible-playbook clean_libra_open_export.yml || exit $?
+
+announce 'Generating remote export'
+ansible-playbook deploy_libra_open_export.yml || exit $?
+
+announce 'Waiting for export completion'
+ssh -i "$REMOTE_CREDENTIALS" "$LIBRA_USER@$LIBRA_HOST" "
+    PAUSE=5
+    PREVIOUS=0
+    while sleep \$PAUSE ; do
+        COUNT=\`ls $SRC_DIR 2>/dev/null | wc -l\`
+        test \$COUNT -gt 0 -a \$COUNT -eq \$PREVIOUS && exit
+        echo waiting...
+        PREVIOUS=\$COUNT
+        test \$PREVIOUS -gt 0 && PAUSE=1
+    done
+"
+
+announce "Copying $EXPORT_SRC to $DST_DIR"
+scp -r -i "$REMOTE_CREDENTIALS" "$LIBRA_USER@$LIBRA_HOST:$SRC_DIR" "$DST_DIR"
+
+#announce "Interactive shell to $LIBRA_HOST"
+#ssh -i "$REMOTE_CREDENTIALS" "$LIBRA_USER@$LIBRA_HOST"

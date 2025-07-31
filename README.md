@@ -10,10 +10,39 @@ developer account on the DSpace instance itself.
 DSpace import requires a user account on the DSpace instance with administrator
 privileges.
 
+## Libra Export / DSpace Import
+
+Code here supports the activity of transferring items from LibraOpen to DSpace,
+in particular `dspace_import` which performs the full end-to-end transfer.
+
+Because large quantities of data may be transferred, a local directory with
+sufficiently large storage capacity should be set aside for the purpose of
+gathering exports from LibraOpen and converting them to DSpace imports.
+Programs here assume this directory can be found at the location defined as
+$COMMON_ROOT in `dspace_values`, along with the $EXPORT_DIR and $IMPORT_DIR
+subdirectory names.
+
+The `dspace_libra_export` program acquires LibraOpen export into the
+$COMMON_ROOT subdirectory referenced by $EXPORT_DIR.
+
+The `dspace_import_zip` program transforms $EXPORT_DIR item subdirectories into
+DSpace import items within the $COMMON_ROOT subdirectory referenced by
+$IMPORT_DIR and then into one or more zip files whose names are prefixed with
+$IMPORT_DIR.
+
+The `dspace_import` program will acquire export from LibraOpen via
+`dspace_libra_export` unless exports already exist in $EXPORT_DIR.
+It then runs `dspace_import_zip`, transfers the resulting zip files to the user
+account on the remote DSpace system, and runs the remote `dspace_import` on
+them to import the zipped items into DSpace.
+
 ## Developer desktop utilities
 
 Scripts from the "bin" directory are meant to be run on a developer
 workstation.
+
+Note that all scripts assume that AWS Command Line utilities have been
+installed and are available in the current $PATH.
 
 ### dspace_sh
 
@@ -67,11 +96,15 @@ home ~/bin directory.
 
 ### dspace_import
 
-This script performs `bin/dspace_import_zip` to generate an import zip file,
-copies it to the remote system, and then runs `remote/bin/dspace_import`.
+This script performs
+`bin/dspace_libra_export` to acquire exports from LibraOpen,
+`bin/dspace_import_zip` to generate import zip file(s),
+copies the zip file(s) to the remote system,
+and then runs `remote/bin/dspace_import` to import items into DSpace.
 
-All options are passed to the local `bin/dspace_import_zip` script except for
-"--eperson" and "--collection" which are passed to `remote/bin/dspace_import`.
+All options are passed to the local `bin/dspace_import_zip` script except:
+* "--start date" is passed to `bin/dspace_libra_export`
+* "--eperson" and "--collection" are passed to `remote/bin/dspace_import`.
 
 #### Prerequisites
 
@@ -98,6 +131,26 @@ dspace_import script to bulk submit the items to DSpace.
 The program assumes that the Ruby version indicated by ".ruby-version" is
 installed via `rvm` with a gemset named by ".ruby-gemset".
 
+### dspace_libra_export
+
+This script generates "libra-open-export" in the current directory by 
+executing Ansible playbooks which run `rake libraoc:export:export_works`.
+
+Note that the intermediate destination is a shared resource also used by the
+Libra Open APTrust bagger.
+If that task is currently running this script should **not** be run at the same
+time.
+
+#### Prerequisites
+
+This script requires
+
+* ccrypt
+* terraform
+* ansible-playbook
+
+These are expected to be installed on the local workstation and available in
+the current $PATH.
 
 ## DSpace instance utilities
 

@@ -7,20 +7,28 @@
 # Usage: dspace_import [options] [dspace_import_zip_options] [remote_options]
 # Usage: dspace_import --help
 #
+# Script options:
+#   --force         Overwrite existing intermediate data directories and files.
+#   --start date    Acquire LibraOpen exports starting with `date`.
+#
 # The program passes its arguments to dspace_import_zip except for a limited
 # set of options accepted by the remote dspace_import script (and then only
 # with the long form using double dashes) to specify the collection or the
 # eperson submitter.
 #
 # As a safeguard, if the target directory already contains zip file(s) the
-# script will exit.
+# script will exit unless --force is used.
+#
+# However, note that if --force is used this causes an entire refresh including
+# acquisition of LibraOpen exports.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
 
 source "$BIN_DIR/dspace_values"
 
-LOCAL_ARGS=()   # Arguments passed to "bin/dspace_import_zip".
+EXPORT_ARGS=()  # Arguments passed to "bin/dspace_libra_export".
+IMPORT_ARGS=()  # Arguments passed to "bin/dspace_import_zip".
 REMOTE_ARGS=()  # Arguments passed to "remote/bin/dspace_import".
 FORCE=''        # Overwrite existing intermediate data directories and files.
 
@@ -35,7 +43,8 @@ while [[ $# -gt 0 ]] ; do
         --collection)   REMOTE_ARGS+=("$1=$2"); shift ;;
         --eperson=*)    REMOTE_ARGS+=("$1") ;;
         --eperson)      REMOTE_ARGS+=("$1=$2"); shift ;;
-        *)              LOCAL_ARGS+=("$1") ;;
+        --start)        EXPORT_ARGS+=("$1" "$2"); shift ;;
+        *)              IMPORT_ARGS+=("$1") ;;
     esac
     shift
 done
@@ -77,11 +86,22 @@ case $? in
 esac
 
 # =============================================================================
+# Acquire LibraOpen exports.
+# =============================================================================
+
+EXPORT_ITEMS=`ls "$EXPORT_DIR" 2>/dev/null | wc -l`
+if [[ "$FORCE" || $EXPORT_ITEMS -eq 0 || ${#EXPORT_ARGS[@]} -gt 0 ]] ; then
+    echo "Getting Libra exports ${EXPORT_ARGS[@]} ..."
+    [[ "$FORCE" ]] && EXPORT_ARGS+=('--force')
+    dspace_libra_export "${EXPORT_ARGS[@]}" || exit $?
+fi
+
+# =============================================================================
 # Generate the import zip file(s).
 # =============================================================================
 
 echo 'Generating zip file(s) ...'
-dspace_import_zip "${LOCAL_ARGS[@]}" || exit $?
+dspace_import_zip "${IMPORT_ARGS[@]}" || exit $?
 
 # =============================================================================
 # Copy zip files(s) to DSpace and import them.
