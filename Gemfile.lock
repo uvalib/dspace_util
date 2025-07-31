@@ -41,7 +41,7 @@ GEM
     nokogiri (1.18.9-x86_64-linux-musl)
       racc (~> 1.4)
     racc (1.8.1)
-    rubyzip (2.4.1)
+    rubyzip (3.0.0)
     securerandom (0.4.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
