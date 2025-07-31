@@ -70,7 +70,7 @@ def make_import_zip(parts: batch_count, size: batch_size, root: import_root)
     zips << create_zip(files, root: root)
   end
 
-  verify_zip(zips) unless silent
+  verify_zip(zips) unless quiet
 end
 
 # Create a new zip archive from the contents of `import_root`.

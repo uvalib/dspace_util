@@ -20,7 +20,7 @@ def info(msg = nil, &blk)
 end
 
 def warning(msg = nil, &blk)
-  output_line(msg, tag: 'WARNING', &blk) unless silent
+  output_line(msg, tag: 'WARNING', &blk) unless quiet
 end
 
 def error(msg = nil, &blk)
@@ -28,11 +28,11 @@ def error(msg = nil, &blk)
 end
 
 def show(msg = nil, &blk)
-  output_line(msg, &blk) unless silent
+  output_line(msg, &blk) unless quiet
 end
 
 def show_char(msg = nil, &blk)
-  output_char(msg, &blk) unless silent
+  output_char(msg, &blk) unless quiet
 end
 
 def output_line(msg = nil, tag: nil)

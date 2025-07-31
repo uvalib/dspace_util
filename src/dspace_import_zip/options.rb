@@ -21,7 +21,7 @@ def records     = option.records
 def max_records = option.max_records
 def batch_count = option.batch_count
 def batch_size  = option.batch_size
-def silent      = option.silent
+def quiet       = option.quiet
 def verbose     = option.verbose
 def debugging   = option.debugging
 
@@ -45,7 +45,7 @@ class Options
   M_DESC = 'Only process N exports'
   B_DESC = 'Split output into N zip files'
   Z_DESC = 'Make zip files of size N'
-  S_DESC = 'Suppress console output'
+  Q_DESC = 'Suppress console output'
   V_DESC = 'Verbose console output'
   D_DESC = 'Debug console output'
   H_DESC = 'Show this help message'
@@ -61,7 +61,7 @@ class Options
   attr_accessor :common_root, :export_root, :import_root
   attr_accessor :batch_count, :batch_size
   attr_accessor :records, :max_records
-  attr_accessor :silent, :verbose, :debugging
+  attr_accessor :quiet, :verbose, :debugging
 
   # Create a new instance.
   #
@@ -82,7 +82,7 @@ class Options
       p.on('-m', '--max-records N', Integer, M_DESC) { @max_records  = _1 }
       p.on('-b', '--batch-count N', Integer, B_DESC) { @batch_count  = _1 }
       p.on('-z', '--batch-size N',  Integer, Z_DESC) { @batch_size   = _1 }
-      p.on('-s', '--[no-]silent',            S_DESC) { @silent       = _1 }
+      p.on('-q', '--[no-]quiet',             Q_DESC) { @quiet        = _1 }
       p.on('-v', '--[no-]verbose',           V_DESC) { @verbose      = _1 }
       p.on('-d', '--[no-]debug',             D_DESC) { @debugging    = _1 }
       p.on('-h', '--help',                   H_DESC) { help_exit     = true }
@@ -97,9 +97,9 @@ class Options
     @batch_count = @batch_count.to_i
     @batch_size  = @batch_size.to_i
     @debugging   = false     if @debugging.nil?
-    @silent      = false     if @silent.nil?
+    @quiet       = false     if @quiet.nil?
     @verbose     = debugging if @verbose.nil?
-    @verbose     = false     if silent
+    @verbose     = false     if quiet
 
     if help_exit
       puts parser.to_s.gsub(/ {11}(\S)/, '    \1')
@@ -115,7 +115,7 @@ class Options
         output_line "HELP: max           = #{max_records.inspect}"
         output_line "HELP: batch_count   = #{batch_count.inspect}"
         output_line "HELP: batch_size    = #{batch_size.inspect}"
-        output_line "HELP: silent        = #{silent.inspect}"
+        output_line "HELP: quiet         = #{quiet.inspect}"
         output_line "HELP: verbose       = #{verbose.inspect}"
         output_line "HELP: debugging     = #{debugging.inspect}"
       end
