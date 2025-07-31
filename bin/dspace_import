@@ -4,7 +4,7 @@
 #
 # Usage: @see remote/bin/dspace_import
 #
-# Usage: dspace_import [dspace_import_zip_options] [remote_options]
+# Usage: dspace_import [options] [dspace_import_zip_options] [remote_options]
 # Usage: dspace_import --help
 #
 # The program passes its arguments to dspace_import_zip except for a limited
@@ -22,6 +22,7 @@ source "$BIN_DIR/dspace_values"
 
 LOCAL_ARGS=()   # Arguments passed to "bin/dspace_import_zip".
 REMOTE_ARGS=()  # Arguments passed to "remote/bin/dspace_import".
+FORCE=''        # Overwrite existing intermediate data directories and files.
 
 # =============================================================================
 # Process command line arguments.
@@ -29,6 +30,7 @@ REMOTE_ARGS=()  # Arguments passed to "remote/bin/dspace_import".
 
 while [[ $# -gt 0 ]] ; do
     case "$1" in
+        --force)        FORCE=true ;;
         --collection=*) REMOTE_ARGS+=("$1") ;;
         --collection)   REMOTE_ARGS+=("$1=$2"); shift ;;
         --eperson=*)    REMOTE_ARGS+=("$1") ;;
@@ -39,23 +41,23 @@ while [[ $# -gt 0 ]] ; do
 done
 
 # =============================================================================
-# Create zip files(s), copy to DSpace, and import.
+# Verify pre-conditions.
 # =============================================================================
 
-# For convenience, move to the directory containing $IMPORT_DIR.
-case "$IMPORT_DIR" in
-    /*) IMPORT_BASE=`dirname "$IMPORT_DIR"` ;;
-    *)  IMPORT_BASE="$COMMON_ROOT" ;;
-esac
-cd "$IMPORT_BASE" || exit $?
+# Move to the common import/export directory.
+cd "$COMMON_ROOT" || exit $?
 
-# Make sure the target directory is clean.
-if [[ -e "$IMPORT_DIR" ]] ; then
-    abort "$IMPORT_BASE already contains an import subdirectory ($IMPORT_DIR)"
-fi
-ZIP_FILES=`ls *.zip 2>/dev/null`
-if [[ "$ZIP_FILES" ]] ; then
-    abort "$IMPORT_BASE already contains zip files: $ZIP_FILES"
+# Avoid overwriting an existing import subdirectory or zip files.
+if [[ "$FORCE" ]] ; then
+    rm -rf "$IMPORT_DIR" *.zip
+else
+    if [[ -e "$IMPORT_DIR" ]] ; then
+        abort "$COMMON_ROOT already contains an import subdirectory ($IMPORT_DIR)"
+    fi
+    ZIP_FILES=`ls *.zip 2>/dev/null`
+    if [[ "$ZIP_FILES" ]] ; then
+        abort "$COMMON_ROOT already contains zip files: $ZIP_FILES"
+    fi
 fi
 
 # Make sure user account on the DSpace instance has remote/bin/dspace_import
@@ -74,12 +76,17 @@ case $? in
     *) abort "DSpace user check failed" ;;
 esac
 
-# Generate the zip file(s).
+# =============================================================================
+# Generate the import zip file(s).
+# =============================================================================
+
 echo 'Generating zip file(s) ...'
 dspace_import_zip "${LOCAL_ARGS[@]}" || exit $?
 
-# Copy each zip file to DSpace in a pre-existing subdirectory of the DSpace
-# user account and import it.
+# =============================================================================
+# Copy zip files(s) to DSpace and import them.
+# =============================================================================
+
 ZIP_FILES=`ls *.zip` || exit $?
 for ZIP_FILE in "$ZIP_FILES" ; do
     echo
