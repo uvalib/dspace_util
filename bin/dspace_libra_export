@@ -49,7 +49,7 @@ function announce() # output_lines...
 
 OUT_DIR="$COMMON_ROOT"
 OUT_NAME="$EXPORT_DIR"
-START_DATE='2025-05-01'
+START_DATE=''
 FORCE=''
 
 while [[ $# -gt 0 ]] ; do
@@ -157,7 +157,7 @@ ssh -i "$REMOTE_CREDENTIALS" "$LIBRA_USER@$LIBRA_HOST" "
     while sleep \$PAUSE ; do
         COUNT=\`ls $SRC_DIR 2>/dev/null | wc -l\`
         test \$COUNT -gt 0 -a \$COUNT -eq \$PREVIOUS && exit
-        echo waiting...
+        echo \"waiting - \$COUNT exported\"
         PREVIOUS=\$COUNT
         test \$PREVIOUS -gt 0 && PAUSE=1
     done
