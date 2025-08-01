@@ -14,7 +14,7 @@ require 'nokogiri'
 # :section: Methods
 # =============================================================================
 
-# Create "dublin_core.xml" file.
+# Create the "dublin_core.xml" file.
 #
 # @param [Components] export
 # @param [String]     output_file     Filename of output XML file.

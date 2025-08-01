@@ -11,6 +11,7 @@ require_relative 'options'
 require_relative 'components'
 require_relative 'content'
 require_relative 'metadata'
+require_relative 'entity'
 
 # =============================================================================
 # :section: Methods
@@ -34,6 +35,7 @@ def make_import_dir(max: max_records, numbers: records, src: export_root)
     next unless (export = export_components(dir, numbers: numbers, src: src))
     make_metadata(export)
     make_content(export)
+    make_entity(export)
     show_char '#' unless verbose
     break if max && (max -= 1).zero?
   end
