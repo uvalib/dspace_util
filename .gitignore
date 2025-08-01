@@ -4,32 +4,8 @@
 # Project-specific files and directories
 # =============================================================================
 
-# Host-specific files.
-/config/environment.yml
-
-# RubyMine inserts this on the fly when debugging with Passenger selected as
-# the web server.  It's harmless but probably wouldn't be useful in a deployed
-# setting without some additional effort.
-/config/initializers/rubymine_passenger_debug.rb
-
-# Ignore master key for decrypting credentials and more.
-/config/master.key
-
-# Documentation can be recreated at will and doesn't need to be stored with the
-# project.
-/doc/
-
-# Assets are completely recreated via `rake assets:precompile`.
-/public/assets/
-/public/assets-test/
-
-# Ignore links set up by bin/asset_build
-/public/javascripts
-/public/stylesheets
-
-# Ignore generated sitemaps.
-/public/sitemap*
-/public/Sitemap/*
+# Machine-specific values
+/bin/.values
 
 # =============================================================================
 # Generic system files

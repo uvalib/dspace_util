@@ -19,6 +19,10 @@ ERROR_STATUS=127
 
 [[ ":$PATH:" = *":$BIN_DIR:"* ]] || PATH="$BIN_DIR:$PATH"
 
+# Include local overrides if present.
+LOCAL_VALUES="$BIN_DIR/.values"
+[[ -f "$LOCAL_VALUES" ]] && source "$LOCAL_VALUES"
+
 # =============================================================================
 # Functions
 # =============================================================================
