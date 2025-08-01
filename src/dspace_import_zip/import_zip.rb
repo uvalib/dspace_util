@@ -96,7 +96,7 @@ def create_zip(files, part: nil, name: nil, root: import_root)
   start = Time.now
   zip64 = Zip.write_zip64_support
   Zip.write_zip64_support = true
-  Zip::File.open(name, Zip::File::CREATE) do |zip|
+  Zip::File.open(name, create: true) do |zip|
     files.each do |src|
       dst = src.delete_prefix("#{root}/")
       # debug "#{__method__}: #{dst}"
