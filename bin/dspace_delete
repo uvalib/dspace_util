@@ -1,0 +1,156 @@
+#! /bin/bash
+#
+# Remove items from DSpace.
+#
+# Usage: dspace_delete handle...
+# Usage: dspace_delete --mapfile FILE
+# Usage: dspace_delete --collection COLLECTION_TO_EMPTY
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+PRJ_DIR=`dirname "$BIN_DIR"`
+
+source "$BIN_DIR/dspace_values"
+
+MAP_FILE=''                     # Name of input map file.
+COLLECTION=''                   # Used only to specify items to delete.
+EPERSON='libra@virginia.edu'    # DSpace account of submitter.
+
+REMOTE_ARGS=()                  # Other arguments passed to "dspace import".
+HELP=''                         # Detected -h or --help flag.
+SRC=''                          # Handles of item(s) to delete.
+
+readonly NL='
+'
+
+# =============================================================================
+# Functions
+# =============================================================================
+
+function flag_arg() # --flag=value | flag value
+{
+    local FLAG="$1"                         # "--flag=value" or "flag value".
+    local VALUE="${FLAG#*=}"                # Check for "--flag=value".
+    [[ "$VALUE" = "$FLAG" ]] && VALUE="$2"  # Default to "flag value".
+    [[ "$VALUE" ]] || abort "missing $FLAG argument"
+    echo "$VALUE"
+}
+
+function set_map() # path_name
+{
+    local VALUE="$1"
+    [[ "$VALUE" ]] || return
+    [[ "$MAP_FILE" = "$VALUE" ]] && return
+    [[ "$MAP_FILE" ]] && abort "mapfile already set to '$MAP_FILE'"
+    MAP_FILE="$VALUE"
+}
+
+# =============================================================================
+# Process command line arguments.
+# =============================================================================
+
+while [[ $# -gt 0 ]] ; do
+    case "$1" in
+        --collection=*)     COLLECTION=`flag_arg "$1"` ;;
+        --collection|-c)    COLLECTION=`flag_arg "$1" "$2"`; shift ;;
+        --eperson=*)        EPERSON=`flag_arg "$1"` ;;
+        --eperson|-e)       EPERSON=`flag_arg "$1" "$2"`; shift ;;
+        --mapfile=*)        set_map `flag_arg "$1"` ;;
+        --mapfile|-m)       set_map `flag_arg "$1" "$2"`; shift ;;
+        --help|-h)          HELP=true; KEEP_MAP=true ;;
+        -*)                 REMOTE_ARGS+=("'$1'") ;;
+        *.map)              set_map "$1" ;;
+        *)                  SRC="$SRC $1" ;;
+    esac
+    shift
+done
+
+# Special case for --help.
+if [[ "$HELP" ]] ; then
+    PROGRAM=`basename "$0"`
+    echo "Usage: $PROGRAM map_file [flags]"
+    echo "Usage: $PROGRAM --mapfile FILE"
+    echo "Usage: $PROGRAM --collection COLLECTION_TO_EMPTY"
+    exit 0
+fi
+
+# If $MAP_FILE was not given, construct a temporary one from $SRC.
+if [[ ! "$MAP_FILE" ]] ; then
+    PROGRAM=`basename "$0"`
+    TMP_DIR="$PRJ_DIR/tmp"
+    TMP_SRC="$TMP_DIR/$PROGRAM.$$.txt"
+    TMP_MAP="$TMP_DIR/$PROGRAM.$$.map"
+    trap "rm -f '$TMP_SRC' '$TMP_MAP'" EXIT
+    readonly SED_STRIP='s/^[ \t]+|[ \t]+$//'
+    mkdir -p "$TMP_DIR"
+
+    if [[ ! "$SRC" ]] ; then
+        # If $SRC was not given get items to delete from --collection.
+        [[ "$COLLECTION" ]] || abort 'no collection, mapfile, or source given'
+        dspace_item --uuid --handle --scope "$COLLECTION" > "$TMP_SRC"
+        echo "NOTE: collection '${COLLECTION}' will be emptied but not removed"
+        COLLECTION='' # Don't need to pass this to "dspace import".
+
+    elif [[ -e "$SRC" ]] ; then
+        # Strip file lines.
+        sed -E "$SED_STRIP" "$SRC" > "$TMP_SRC"
+
+    elif `echo "$SRC" | grep -q "$NL"` ; then
+        # Strip literal lines.
+        echo "$SRC" | sed -E "$SED_STRIP" > "$TMP_SRC"
+
+    else
+        # Transform list into lines.
+        echo "$SRC" | sed -E 's/[,;| \t\n]+/\n/g' > "$TMP_SRC"
+    fi
+
+    if `head -1 "$TMP_SRC" | grep -q ' '` ; then
+        # Already in mapfile form.
+        mv "$TMP_SRC" "$TMP_MAP"
+    else
+        # Convert to mapfile form.
+        sed -E 's/^/x /' "$TMP_SRC" > "$TMP_MAP"
+    fi
+
+    MAP_FILE="$TMP_MAP"
+fi
+
+# Make sure the submitter is in the form of a DSpace user name.
+case "$EPERSON" in
+    *@*)    ;; # OK
+    '')     EPERSON="$USER@virginia.edu" ;;
+    *)      EPERSON="$EPERSON@virginia.edu" ;;
+esac
+
+# =============================================================================
+# Verify pre-conditions.
+# =============================================================================
+
+# Make sure the DSpace account import subdirectory is created and prepared.
+REMOTE_SUBDIR='import'
+dspace_sh mkdir -p "$REMOTE_DIR" ||
+    abort 'DSpace account import subdirectory failed'
+
+# =============================================================================
+# Copy mapfile to DSpace.
+# =============================================================================
+
+MAP_NAME=`basename "$MAP_FILE"`
+echo "Copying $MAP_NAME for remote 'dspace import --delete' command..."
+dspace_cp "$MAP_FILE" :"$REMOTE_SUBDIR" || exit $ERROR_STATUS
+MAP_FILE="$MAP_NAME" # Adjust for remote use.
+
+# =============================================================================
+# Run the import command.
+# =============================================================================
+
+# Run import command which will generate $MAP_FILE with item subdirectories
+# mapped to the handles of the DSpace items generated from them.
+[[ "$COLLECTION" ]] && REMOTE_ARGS+=(-c "'$COLLECTION'")
+[[ "$EPERSON"    ]] && REMOTE_ARGS+=(-e "'$EPERSON'")
+[[ "$MAP_FILE"   ]] && REMOTE_ARGS+=(-m "'$MAP_FILE'")
+dspace_sh "
+    cd '$REMOTE_SUBDIR' &&
+    \$HOME/bin/dspace import --delete ${REMOTE_ARGS[@]} &&
+    rm -f '$MAP_FILE'
+"
