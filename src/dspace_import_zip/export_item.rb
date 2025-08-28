@@ -5,7 +5,7 @@
 #
 # Export subdirectory file components.
 
-require_relative 'common'
+require 'common'
 
 # Organizes the files found in an export subdirectory along with optional
 # additional information needed to generate an import subdirectory from an

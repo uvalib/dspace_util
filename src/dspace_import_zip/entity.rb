@@ -5,8 +5,8 @@
 #
 # Methods for translating a Libra export to an import "metadata_dspace.xml".
 
-require_relative 'common'
-require_relative 'logging'
+require 'common'
+require 'logging'
 
 require 'nokogiri'
 

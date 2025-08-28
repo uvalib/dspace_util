@@ -5,8 +5,8 @@
 #
 # Methods for translating a Libra export to a DSpace import "dublin_core.xml".
 
-require_relative 'common'
-require_relative 'logging'
+require 'common'
+require 'logging'
 
 require 'nokogiri'
 

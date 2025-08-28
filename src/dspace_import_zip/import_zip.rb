@@ -5,8 +5,9 @@
 #
 # Creation of the zip output file to be copied to DSpace for import.
 
-require_relative 'common'
-require_relative 'logging'
+require 'common'
+require 'logging'
+
 require_relative 'options'
 
 require 'zip'

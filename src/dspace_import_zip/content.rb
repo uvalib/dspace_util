@@ -5,8 +5,8 @@
 #
 # Methods for translating exported Libra content to a DSpace import.
 
-require_relative 'common'
-require_relative 'logging'
+require 'common'
+require 'logging'
 
 # =============================================================================
 # :section: Methods

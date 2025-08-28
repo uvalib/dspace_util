@@ -5,8 +5,9 @@
 #
 # Create the DSpace import directory from Libra export directory.
 
-require_relative 'common'
-require_relative 'logging'
+require 'common'
+require 'logging'
+
 require_relative 'options'
 require_relative 'components'
 require_relative 'content'

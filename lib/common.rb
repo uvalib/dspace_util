@@ -1,4 +1,4 @@
-# src/dspace_import_zip/common.rb
+# lib/common.rb
 #
 # frozen_string_literal: true
 # warn_indent:           true
@@ -13,6 +13,36 @@ require 'json'
 # =============================================================================
 # :section: Constants
 # =============================================================================
+
+# Maximum number of items to create at once.
+#
+# @type [Integer]
+#
+BATCH_SIZE = 1000
+
+# The value of `option.phase` when only creating OrgUnit entities.
+#
+# @type [Integer]
+#
+NO_PHASE = 0
+
+# The value of `option.phase` when only creating OrgUnit entities.
+#
+# @type [Integer]
+#
+ORG_UNIT_PHASE = 1
+
+# The value of `option.phase` when only creating Person entities.
+#
+# @type [Integer]
+#
+PERSON_PHASE = ORG_UNIT_PHASE.next
+
+# The value of `option.phase` when only creating Person entities.
+#
+# @type [Integer]
+#
+PUBLICATION_PHASE = PERSON_PHASE.next
 
 # Indicate whether DOIs should be included as "dc.identifier.doi".
 #
@@ -51,7 +81,7 @@ IMPORT_PREFIX = 'import-'
 
 # Create a hash from a JSON file.
 #
-# @param [String, nil] file           Path to file
+# @param [String, nil] file           Path to file.
 #
 # @return [Hash{Symbol=>*}]
 #
