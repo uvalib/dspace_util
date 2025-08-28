@@ -13,8 +13,8 @@ BIN_DIR=`dirname "$PROGRAM"`
 
 source "$BIN_DIR/dspace_values"
 
-REMOTE_HOST="$REMOTE_PUBLIC"
-HANDLE_PREFIX='123456789'
+REMOTE_HOST="$DSPACE_PUBLIC"
+HANDLE_PREFIX="$DSPACE_PREFIX"
 
 # =============================================================================
 # Parse argument.

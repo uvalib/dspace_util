@@ -4,9 +4,15 @@
 
 ERROR_STATUS=127
 
-# DSpace instance URLs.
-[[ "$REMOTE_PUBLIC"  ]] || REMOTE_PUBLIC='dspace-staging.library.virginia.edu'
-[[ "$REMOTE_PRIVATE" ]] || REMOTE_PRIVATE='dspace-staging-private.internal.lib.virginia.edu'
+# DSpace system properties.
+[[ "$DSPACE_PREFIX"  ]] || export DSPACE_PREFIX='123456789'
+[[ "$DSPACE_PUBLIC"  ]] || export DSPACE_PUBLIC='dspace-staging.library.virginia.edu'
+[[ "$DSPACE_PRIVATE" ]] || export DSPACE_PRIVATE='dspace-staging-private.internal.lib.virginia.edu'
+
+# Names of "UVA Open Community" destination collections.
+[[ "$PUB_COLLECTION"  ]] || export PUB_COLLECTION='General'
+[[ "$USR_COLLECTION"  ]] || export USR_COLLECTION='Profiles'
+[[ "$ORG_COLLECTION"  ]] || export ORG_COLLECTION='OrgUnits'
 
 # Default locations for import/export.
 [[ "$COMMON_ROOT" ]] || export COMMON_ROOT="$HOME/Work-test/libra-dspace"
@@ -19,7 +25,7 @@ ERROR_STATUS=127
 
 [[ ":$PATH:" = *":$BIN_DIR:"* ]] || PATH="$BIN_DIR:$PATH"
 
-# Include local overrides if present.
+# Include local overrides and/or other environment variable exports.
 LOCAL_VALUES="$BIN_DIR/.values"
 [[ -f "$LOCAL_VALUES" ]] && source "$LOCAL_VALUES"
 

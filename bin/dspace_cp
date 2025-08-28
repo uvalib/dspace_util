@@ -1,10 +1,10 @@
 #! /bin/bash
 #
-# Copy to the DSpace instance.
+# Copy to/from the DSpace host.
 #
-# Usage: dspace_cp [OPTIONS...] SOURCES... TARGET
-# Usage: dspace_cp --to [OPTIONS...] LOCAL_SOURCES...
-# Usage: dspace_cp --from [OPTIONS...] REMOTE_SOURCES...
+# Usage: dspace_cp [SSH_OPT...] SOURCES... TARGET
+# Usage: dspace_cp --to [SSH_OPT...] LOCAL_SOURCES...
+# Usage: dspace_cp --from [SSH_OPT...] REMOTE_SOURCES...
 #
 # If copying from DSpace, remote sources cannot begin with "./" or "../".
 # If copying to DSpace, local sources cannot begin with "scp:" or ":".
@@ -14,7 +14,7 @@ BIN_DIR=`dirname "$PROGRAM"`
 
 source "$BIN_DIR/dspace_values"
 
-REMOTE_HOST="$REMOTE_PRIVATE"
+REMOTE_HOST="$DSPACE_PRIVATE"
 REMOTE_USER="$USER"
 PRIVATE_KEY="$HOME/.ssh/id_rsa"
 
@@ -39,23 +39,23 @@ function remote() # path_name
 # Process command-line ssh flags
 # =============================================================================
 
-KEY_GIVEN=''
 DIRECTION=''
-OPTIONS=()
+KEY_GIVEN=''
+SSH_OPT=()
 
 while [[ $# -gt 0 ]] ; do
-    [[ "$1" = '-i' ]] && KEY_GIVEN=true
     case "$1" in
-        --from)       DIRECTION="$RECV" ;;
-        --to)         DIRECTION="$SEND" ;;
-        -[cDFiJloPS]) OPTIONS+=("$1" "$2"); shift ;;
-        -*)           OPTIONS+=("$1") ;;
-        *)            break ;;
+        --from)      DIRECTION="$RECV" ;;
+        --to)        DIRECTION="$SEND" ;;
+        -i)          SSH_OPT+=("$1" "$2"); KEY_GIVEN=true; shift ;;
+        -[cDFJloPS]) SSH_OPT+=("$1" "$2"); shift ;;
+        -*)          SSH_OPT+=("$1") ;;
+        *)           break ;;
     esac
     shift
 done
 
-[[ "$KEY_GIVEN" ]] || OPTIONS+=(-i "$PRIVATE_KEY")
+[[ "$KEY_GIVEN" ]] || SSH_OPT+=(-i "$PRIVATE_KEY")
 
 # =============================================================================
 # Process command-line name(s)
@@ -131,4 +131,4 @@ fi
 # Run remote copy
 # =============================================================================
 
-exec scp "${OPTIONS[@]}" "${SOURCE[@]}" "$TARGET"
+exec scp "${SSH_OPT[@]}" "${SOURCE[@]}" "$TARGET"

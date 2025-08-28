@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Copy to the DSpace instance.
+# Copy to the DSpace host.
 #
 # Usage: dspace_cp_to [OPTIONS...] LOCAL_PATHS... [REMOTE_TARGET]
 #
