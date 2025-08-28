@@ -1,0 +1,42 @@
+#! /bin/bash
+#
+# Run a src/*.rb Ruby program from this project.
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+PRJ_DIR=`dirname "$BIN_DIR"`
+SRC_DIR="$PRJ_DIR/src"
+LIB_DIR="$PRJ_DIR/lib"
+
+source "$BIN_DIR/dspace_values"
+
+# =============================================================================
+# First argument is the name of the program.
+# =============================================================================
+
+RUBY_PROGRAM="$1"
+shift
+case "$RUBY_PROGRAM" in
+    */*.rb) ;; # OK as is
+    *.rb)   RUBY_PROGRAM="$SRC_DIR/$RUBY_PROGRAM" ;;
+    *)      RUBY_PROGRAM="$SRC_DIR/$RUBY_PROGRAM.rb" ;;
+esac
+
+# =============================================================================
+# Set Ruby version and gemset
+# =============================================================================
+
+RVM=`which rvm` || abort 'RVM not present'
+RVM_BIN=`dirname "$RVM"`
+RVM_BASE=`dirname "$RVM_BIN"`
+
+RVM_RUBY=`cat "$PRJ_DIR/.ruby-version"`
+RVM_GEMS=`cat "$PRJ_DIR/.ruby-gemset"`
+
+source "$RVM_BASE/scripts/rvm" && rvm use "$RVM_RUBY@$RVM_GEMS" > /dev/null
+
+# =============================================================================
+# Run the program.
+# =============================================================================
+
+exec ruby -I "$LIB_DIR" "$RUBY_PROGRAM" "$@"

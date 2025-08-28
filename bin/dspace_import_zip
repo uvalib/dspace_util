@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Conversion of Libra exports to a zip file of DSpace imports.
+# Conversion of LibraOpen exports to a zip file of DSpace imports.
 #
 # Usage: dspace_import_zip [options]
 # Usage: dspace_import_zip --help
@@ -11,25 +11,6 @@
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
-PRJ_DIR=`dirname "$BIN_DIR"`
+PROGNAME=`basename "$PROGRAM"`
 
-source "$BIN_DIR/dspace_values"
-
-# =============================================================================
-# Set Ruby version and gemset
-# =============================================================================
-
-RVM=`which rvm` || abort 'RVM not present'
-RVM_BIN=`dirname "$RVM"`
-RVM_BASE=`dirname "$RVM_BIN"`
-
-RVM_RUBY=`cat "$PRJ_DIR/.ruby-version"`
-RVM_GEMS=`cat "$PRJ_DIR/.ruby-gemset"`
-
-source "$RVM_BASE/scripts/rvm" && rvm use "$RVM_RUBY@$RVM_GEMS" > /dev/null
-
-# =============================================================================
-# Run the program (which ends by displaying the zip file(s) created).
-# =============================================================================
-
-exec ruby "$PRJ_DIR/src/dspace_import_zip.rb" "$@"
+exec "$BIN_DIR/run_ruby" "$PROGNAME" "$@"
