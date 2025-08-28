@@ -1,0 +1,12 @@
+#! /bin/bash
+#
+# Get information about DSpace items of any type.
+#
+# Usage: dspace_item [options] [name...]
+# Usage: dspace_item --help
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+PROGNAME=`basename "$PROGRAM"`
+
+exec "$BIN_DIR/run_ruby" "$PROGNAME" "$@"
