@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Methods for translating exported Libra content to a DSpace import.
+# Methods for translating exported LibraOpen content to a DSpace import.
 
 require 'common'
 require 'logging'
@@ -12,15 +12,20 @@ require 'logging'
 # :section: Methods
 # =============================================================================
 
-# Create the "contents" file and copy each content file.
+# Create the "contents" file for a Publication import and copy content files.
 #
-# @param [Components] export
+# NOTE: This method requires that the import subdirectory already exists.
+#
+# @param [ExportItem] item
 # @param [String]     output_file     Filename of output file.
+# @param [String]     root            Top-level import directory.
 #
-def make_content(export, output_file: 'contents')
-  file_map   = order_content(export.fileset, export.content).presence or return
-  read_group = get_read_group(export)
-  import_dir = export[:import_dir]
+# @return [Boolean]                   Currently always true.
+#
+def make_publication_content(item, output_file: 'contents', root: option.import_root)
+  file_map   = order_content(item.fileset, item.content).presence or return
+  read_group = get_read_group(item)
+  import_dir = File.expand_path(Publication.import_name(item), root)
   File.open("#{import_dir}/#{output_file}", 'w') do |contents|
     file_map.each_key do |name|
       entry = read_group ? "#{name}\tpermissions:-r '#{read_group}'" : name
@@ -30,17 +35,18 @@ def make_content(export, output_file: 'contents')
   file_map.each_pair do |name, path|
     FileUtils.cp(path, "#{import_dir}/#{name}")
   end
+  true
 end
 
 # If there are constraints on the visibility of content for the item, this
 # method returns with the DSpace group allowed to read the content.
 #
-# @param [Components] export
+# @param [ExportItem] item
 #
 # @return [String, nil]
 #
-def get_read_group(export)
-  case parse_json(export.visibility)[:visibility]
+def get_read_group(item)
+  case parse_json(item.visibility)[:visibility]
     when 'authenticated' then 'Authenticated Users'
     when 'restricted'    then 'Submitter Only'
   end

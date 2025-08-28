@@ -16,15 +16,15 @@ require 'zip'
 # :section: Methods
 # =============================================================================
 
-# Create a new zip archive from the contents of `import_root`.
+# Create a new zip archive from the contents of `root`.
 #
 # @param [Integer] parts              Break into N files.
 # @param [Integer] size               Break into files with N items.
-# @param [String]  root               Overrides `#import_root`.
+# @param [String]  root               Top-level import directory.
 #
-def make_import_zip(parts: batch_count, size: batch_size, root: import_root)
-  parts = nil unless parts.positive?
-  size  = nil unless size.positive?
+def make_import_zip(parts: option.batch_count, size: option.batch_size, root: option.import_root)
+  parts = nil if parts && (parts <= 1)
+  size  = nil if size  && (size  <= 0)
   info do
     args = { parts: parts, size: size }.compact.presence
     args &&= args.map { "#{_1}: #{_2}" }.join(', ')
@@ -35,6 +35,17 @@ def make_import_zip(parts: batch_count, size: batch_size, root: import_root)
   dirs  = Dir.glob("#{root}/*")
   count = dirs.size
   extra = nil
+
+  # Automatically generate zip files in batches if the total number of entities
+  # to create is too large.
+  if count.zero?
+    error { "#{__method__}: #{root} is empty" }
+    return
+  elsif count > (size || BATCH_SIZE)
+    show { "\nPARTITIONING #{count} ENTITIES INTO MULTIPLE ZIP FILES" }
+    size ||= BATCH_SIZE
+  end
+
   if size
     batch = size
     prev  = parts
@@ -55,7 +66,7 @@ def make_import_zip(parts: batch_count, size: batch_size, root: import_root)
 
   zips = []
   if parts > 1
-    show { "CREATING #{parts} ZIP ARCHIVES" }
+    show { "\nCREATING #{parts} ZIP ARCHIVES" }
     width = parts.to_s.size
     (1..parts).each do |part|
       items = batch.to_i
@@ -71,22 +82,22 @@ def make_import_zip(parts: batch_count, size: batch_size, root: import_root)
     zips << create_zip(files, root: root)
   end
 
-  verify_zip(zips) unless quiet
+  verify_zip(zips) unless option.quiet
 end
 
-# Create a new zip archive from the contents of `import_root`.
+# Create a new zip archive from the contents of `root`.
 #
 # @param [Array<String>]        files Files to include.
 # @param [String, Integer, nil] part  Modify with part number.
 # @param [String, nil]          name  Overrides `#zip_name.
-# @param [String]               root  Overrides `#import_root`.
+# @param [String]               root  Top-level import directory.
 #
 # @return [String]                    The name of the zip file created.
 #
-def create_zip(files, part: nil, name: nil, root: import_root)
+def create_zip(files, part: nil, name: nil, root: option.import_root)
   name ||= zip_name(part: part, root: root)
   info { "#{__method__} #{name}" }
-  show { "CREATING #{name.inspect} (#{files.size} FILES)" }
+  show { "\nCREATING #{name.inspect} (#{files.size} FILES)" }
 
   # noinspection RubyMismatchedArgumentType
   if File.exist?(name)
@@ -118,12 +129,12 @@ end
 # @param [Array<String>, String, nil] zips
 # @param [Integer, nil]               parts   If `zips` is not given.
 # @param [Integer, nil]               size    If `zips` is not given.
-# @param [String]                     root    Overrides `#import_root`.
+# @param [String]                     root    Top-level import directory.
 #
-def verify_zip(zips = nil, parts: nil, size: nil, root: import_root)
+def verify_zip(zips = nil, parts: option.batch_count, size: option.batch_size, root: option.import_root)
   info __method__
   zips ||=
-    if (parts || batch_count).positive? || (size || batch_size).positive?
+    if parts.positive? || size.positive?
       Dir.glob("#{root}-[0-9]*.zip")
     else
       zip_name(root: root)
@@ -137,10 +148,10 @@ end
 # File name of the output zip file.
 #
 # @param [String, Integer, nil] part  Modify with part number.
-# @param [String]               root  Overrides `#import_root`.
+# @param [String]               root  Top-level import directory.
 #
 # @return [String]
 #
-def zip_name(part: nil, root: import_root)
+def zip_name(part: nil, root: option.import_root)
   part ? "#{root}-#{part}.zip" : "#{root}.zip"
 end

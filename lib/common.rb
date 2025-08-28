@@ -63,17 +63,29 @@ DOI = true
 #
 DOI_URI = DOI
 
-# Directory name prefix for subdirectories under `#export_root`.
+# Name prefix for LibraOpen export subdirectories under `export_root`.
 #
 # @type [String]
 #
 EXPORT_PREFIX = 'export-'
 
-# Directory name prefix for subdirectories under `#import_root`.
+# Name prefix for Publication import subdirectories under `import_root`.
 #
 # @type [String]
 #
 IMPORT_PREFIX = 'import-'
+
+# Name prefix for Person import subdirectories under `import_root`.
+#
+# @type [String]
+#
+PERSON_PREFIX = 'person-'
+
+# Name prefix for OrgUnit import subdirectories under `import_root`.
+#
+# @type [String]
+#
+ORG_PREFIX = 'org-'
 
 # =============================================================================
 # :section: Methods
@@ -89,4 +101,11 @@ def parse_json(file)
   return {} if (file = file&.strip).blank?
   # noinspection RubyMismatchedArgumentType
   JSON.load_file(file, symbolize_names: true)
+end
+
+# Used within a base class function definition to indicate that it must be
+# defined by the subclass.
+#
+def to_be_overridden
+  raise "#{caller[0]} TO BE OVERRIDDEN BY THE SUBCLASS"
 end

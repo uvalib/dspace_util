@@ -3,101 +3,134 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Methods for translating a Libra export to a DSpace import "dublin_core.xml".
+# Methods for translating a LibraOpen export to the DSpace "dublin_core.xml"
+# for a Publication entity import.
 
 require 'common'
 require 'logging'
 
-require 'nokogiri'
+require_relative 'person'
+require_relative 'xml'
+
+# =============================================================================
+# :section: Classes
+# =============================================================================
+
+# Build a <dublin_core> element of metadata for a Publication.
+class MetadataXml < Xml
+
+  # @return [Hash{Symbol=>*}]
+  attr_reader :work
+
+  # Create a new MetadataXml instance.
+  #
+  # @param [String, Hash] work        LibraOpen work exported values.
+  # @param [Hash]         opt         Passed to super.
+  #
+  def initialize(work, **opt, &blk)
+    @work = work.is_a?(Hash) ? work : parse_json(work)
+    super(**opt, &blk)
+  end
+
+  # Emit one <dcvalue> element for a single-value field.
+  #
+  # @param [Symbol]      field        Work field holding the element value.
+  # @param [String]      e            Element name attribute.
+  # @param [String, nil] q            Qualifier attribute.
+  #
+  # @return [void]
+  #
+  def single(field, e, q = nil, &blk)
+    field = work[field]
+    super
+  end
+
+  # Emit one <dcvalue> element for a single-value field.
+  #
+  # @param [Symbol]      field        Work field holding the element value.
+  # @param [String]      e            Element name attribute
+  # @param [String, nil] q            Qualifier attribute
+  #
+  # @return [void]
+  #
+  def multi(field, e, q = nil, &blk)
+    field = work[field]
+    super
+  end
+
+end
 
 # =============================================================================
 # :section: Methods
 # =============================================================================
 
-# Create the "dublin_core.xml" file.
+# Content for the "dublin_core.xml" of a Publication entity import.
 #
-# @param [Components] export
-# @param [String]     output_file     Filename of output XML file.
+# As a side effect, `item.person` will be filled with the UUIDs of authors
+# associated with this item (but not contributors).
 #
-def make_metadata(export, output_file: 'dublin_core.xml')
-  xml_metadata = Nokogiri::XML::Builder.new { |xml|
-
-    # noinspection RubyUnusedLocalVariable
-    work        = parse_json(export.work)
-    author      = map_persons(export.author)
-    contributor = map_persons(export.contributor)
-
-    # Lamba to emit a <dcvalue> element for non-blank data.
-    element = ->(e, q, value, &blk) {
-      value = value&.strip
-      value = blk.(value) if blk
-      return if value.blank?
-      qualifier = q ? { qualifier: q } : {}
-      # noinspection RubyResolve
-      xml.dcvalue(value, element: e, **qualifier)
-    }
-
-    # Lambda to emit one element for a single-value field.
-    single = ->(field, e, q = nil, &blk) {
-      value = work[field]
-      element.(e, q, value, &blk)
-    }
-
-    # Lambda to emit multiple elements for a multi-value field.
-    multi = ->(field, e, q = nil, &blk) {
-      Array.wrap(work[field]).each do |value|
-        element.(e, q, value, &blk)
-      end
-    }
-
-    # Emit <dublin_core> and its contents.
-    # noinspection RubyResolve
-    xml.dublin_core do
-      #       Libra field         DSpace element  DSpace qualifier  Value translation
-      #       ------------------- --------------  ----------------  -------------------
-      multi.( :title,             'title')
-      multi.( :author_ids,        'contributor',  'author')         { author[_1] }
-      multi.( :contributor_ids,   'contributor')                    { contributor[_1] }
-      multi.( :language,          'language')
-      multi.( :language,          'language',     'iso')            { lang_iso(_1) }
-      multi.( :rights,            'rights')                         { rights(_1) }
-      multi.( :rights,            'rights',       'uri')            { rights_uri(_1) }
-      multi.( :keyword,           'subject')
-      multi.( :related_url,       'relation')
-      multi.( :sponsoring_agency, 'description',  'sponsorship')
-      single.(:resource_type,     'type')                           { resource(_1) }
-      single.(:publisher,         'publisher')
-      single.(:published_date,    'date',         'issued')
-      single.(:id,                'identifier')
-      single.(:doi,               'identifier',   'doi')            { doi(_1) }         if DOI
-      single.(:doi,               'identifier',   'uri')            { doi_uri(_1) }     if DOI_URI
-      single.(:source_citation,   'identifier',   'citation')
-      single.(:notes,             'description')
-      single.(:date_modified,     'description')                    { submit_date(_1) }
-      single.(:abstract,          'description',  'abstract')
-    end
+# @param [ExportItem] item
+#
+# @return [String]
+#
+def publication_metadata(item)
+  aut = map_persons(item, :author)
+  con = map_persons(item, :contributor)
+  MetadataXml.new(item.work) { |xml|
+    #          LibraOpen field     DSpace element  DSpace qualifier  Value translation
+    #          ------------------- --------------  ----------------  -------------------
+    xml.multi( :title,             'title')
+    xml.multi( :author_ids,        'contributor',  'author')         { aut[_1] }
+    xml.multi( :contributor_ids,   'contributor')                    { con[_1] }
+    xml.multi( :language,          'language')
+    xml.multi( :language,          'language',     'iso')            { lang_iso(_1) }
+    xml.multi( :rights,            'rights')                         { rights(_1) }
+    xml.multi( :rights,            'rights',       'uri')            { rights_uri(_1) }
+    xml.multi( :keyword,           'subject')
+    xml.multi( :related_url,       'relation')
+    xml.multi( :sponsoring_agency, 'description',  'sponsorship')
+    xml.single(:resource_type,     'type')                           { resource(_1) }
+    xml.single(:publisher,         'publisher')
+    xml.single(:published_date,    'date',         'issued')
+    xml.single(:id,                'identifier')
+    xml.single(:doi,               'identifier',   'doi')            { doi(_1) }         if DOI
+    xml.single(:doi,               'identifier',   'uri')            { doi_uri(_1) }     if DOI_URI
+    xml.single(:source_citation,   'identifier',   'citation')
+    xml.single(:notes,             'description')
+    xml.single(:date_modified,     'description')                    { submit_date(_1) }
+    xml.single(:abstract,          'description',  'abstract')
   }.to_xml
-  output_file = File.expand_path(output_file, export[:import_dir])
-  File.write(output_file, xml_metadata)
 end
 
 # Create a map of UUID to "last_name, first_name".
 #
-# @param [Array<String>] person_files   author-*.json or contributor-*.json
+# As a side effect, `export.person` will be filled with the UUIDs of authors
+# associated with this item (but not contributors).  For authors, this method
+# always returns an empty object so that "dc.contributor.author" is not created
+# to avoid duplication with "relation.isAuthorOfPublication".
+#
+# @param [ExportItem] item
+# @param [Symbol]     kind
 #
 # @return [Hash{String=>String}]
 #
-def map_persons(person_files)
-  info { "#{__method__}(#{person_files})" }
+def map_persons(item, kind)
+  files = item[kind]
+  info { "#{__method__}(#{files})" }
   res = {}
-  Array.wrap(person_files).each do |file|
-    json = parse_json(file)
-    if (id = json[:id]).blank?
-      error { "#{file}: no id" }
-      next
+  files.each do |file|
+    data = parse_json(file)
+    key  = Person.key_for(data)
+    if key.nil?
+      error { "#{file}: no computing_id or last_name" }
+    elsif kind != :author
+      debug { (val = res[key]) and "#{file}[#{key}]: override #{val.inspect}" }
+      res[key] = Person.title_name(data)
+    elsif item.person.include?(key)
+      debug { "#{file}[#{key}]: duplicate" }
+    else
+      item.person << key
     end
-    error { "#{file}[#{id}]: overrides #{res[id].inspect}" } if res.key?(id)
-    res[id] = json.values_at(:last_name, :first_name).compact_blank.join(', ')
   end
   res
 end
@@ -106,7 +139,7 @@ end
 # :section: Methods - language
 # =============================================================================
 
-# Translation of Libra "language" field value to a "dc.language.iso" value.
+# Translation of LibraOpen "language" field value to a "dc.language.iso" value.
 #
 # @type [Hash{String=>String}]
 #
@@ -120,9 +153,10 @@ LANGUAGE = {
   'Portuguese' => 'pt',
   'Spanish'    => 'es',
   'Turkish'    => 'tr', # not present in LibraOpen
+  'Russian'    => 'ru', # not configured in DSpace currently
 }.freeze
 
-# Produce a "dc.language.iso" value from a Libra "language" field value.
+# Produce a "dc.language.iso" value from a LibraOpen "language" field value.
 #
 # @param [String, Hash] value
 # @param [Symbol]       field
@@ -172,7 +206,7 @@ RIGHTS_URI = [
   'https://creativecommons.org/licenses/by-sa/4.0/',    # [8]
 ].freeze
 
-# Get a DSpace "dc.rights" value from a Libra "rights" field value.
+# Get a DSpace "dc.rights" value from a LibraOpen "rights" field value.
 #
 # @param [Integer, String, Hash] value
 # @param [Symbol]                field
@@ -190,7 +224,7 @@ def rights(value, field: :rights)
   RIGHTS[index] || value&.to_s if index
 end
 
-# Get a DSpace "dc.rights.uri" value from a Libra "rights" field value.
+# Get a DSpace "dc.rights.uri" value from a LibraOpen "rights" field value.
 #
 # @param [Integer, String, Hash] value
 # @param [Symbol]                field
@@ -212,7 +246,7 @@ end
 # :section: Methods - type
 # =============================================================================
 
-# Translation of Libra "resource_type" to DSpace "dc.type" value.
+# Translation of LibraOpen "resource_type" to DSpace "dc.type" value.
 #
 # Any values which are not included here are either the same in both cases or
 # they should be transmitted as-is (based on the assumption that DSpace will
@@ -227,7 +261,7 @@ RESOURCE_TYPE = {
   'Report'                        => 'Technical Report',
 }.freeze
 
-# Get a DSpace "dc.type" value from a Libra "resource_type" field value.
+# Get a DSpace "dc.type" value from a LibraOpen "resource_type" field value.
 #
 # @param [String, Hash] value
 # @param [Symbol]       field
@@ -245,7 +279,7 @@ end
 # :section: Methods - DOI
 # =============================================================================
 
-# Produce a "dc.identifier.doi" value from a Libra "doi" field value.
+# Produce a "dc.identifier.doi" value from a LibraOpen "doi" field value.
 #
 # @param [String, Hash] value
 # @param [Symbol]       field
@@ -257,10 +291,10 @@ def doi(value, field: :doi)
   value = value.to_s.strip.presence or return
   value.sub!(/^doi:/i, '')
   value.sub!(/^https?:\/\/(\w+\.)*doi\.org/i, '')
-  value.delete_prefix('/')
+  value.delete_prefix('/').presence
 end
 
-# Produce a "dc.identifier.uri" value from a Libra "doi" field value.
+# Produce a "dc.identifier.uri" value from a LibraOpen "doi" field value.
 #
 # @param [String, Hash] value
 # @param [Symbol]       field
@@ -276,7 +310,7 @@ end
 # :section: Methods - original submission date
 # =============================================================================
 
-# Produce a "dc.description" value from a Libra "date_modified" field value.
+# Produce a "dc.description" from a LibraOpen "date_modified" field value.
 #
 # @param [String, Hash] value
 # @param [Symbol]       field

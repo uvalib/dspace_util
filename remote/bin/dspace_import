@@ -31,25 +31,19 @@
 #
 # @see https://wiki.lyrasis.org/display/DSDOC8x/Importing+and+Exporting+Items+via+Simple+Archive+Format
 
-# While testing we're using a temporary "Import Test" collection so that items
-# can be removed at one time by deleting the collection.  Unfortunately, that
-# means having to recreate the collection named "Import Test" and updating the
-# variable here
-#
-# TEXT FOR "Import Test" INTRODUCTORY TEXT AND SHORT DESCRIPTION:
-# Temporary to allow en masse deletions. Do not add items you want to keep.
+# NOTE: Review bin/dspace_collection for proper target collections.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
 
 source "$BIN_DIR/dspace_values"
 
-ZIP_PATH=''                     # Path to zipfile.
-SRC_DIR=''                      # Directory of zipfile.
-MAP_FILE=''                     # Name of mapfile.
-ZIP_FILE=''                     # Name of zipfile.
+MAP_FILE=''                     # Name of output mapfile.
+ZIP_FILE=''                     # Name of input zip file.
+ZIP_PATH=''                     # Path to input zip file.
+SRC_DIR=''                      # Directory of input zip file.
+COLLECTION=''                   # Expect items to have a "collections" file.
 EPERSON='libra@virginia.edu'    # DSpace account of submitter.
-COLLECTION="$COLL_DEFAULT"      # Current default collection.
 
 KEEP_MAP=''                     # Do not backup existing mapfile.
 HELP=''                         # Detected -h or --help flag.
@@ -86,14 +80,14 @@ while [[ $# -gt 0 ]] ; do
         --add|-a)           ;; # No-op: this script only handles "add".
         --delete|-d)        abort "this script does not implement 'delete'" ;;
         --replace|-r)       abort "this script does not implement 'replace'" ;;
-        --source=*)         SRC_DIR=`flag_arg "$1"` ;;
-        --source|-s)        SRC_DIR=`flag_arg "$1" "$2"`; shift ;;
         --collection=*)     COLLECTION=`flag_arg "$1"` ;;
         --collection|-c)    COLLECTION=`flag_arg "$1" "$2"`; shift ;;
-        --mapfile=*)        MAP_FILE=`flag_arg "$1"` ;;
-        --mapfile|-m)       MAP_FILE=`flag_arg "$1" "$2"`; shift ;;
         --eperson=*)        EPERSON=`flag_arg "$1"` ;;
         --eperson|-e)       EPERSON=`flag_arg "$1" "$2"`; shift ;;
+        --mapfile=*)        MAP_FILE=`flag_arg "$1"` ;;
+        --mapfile|-m)       MAP_FILE=`flag_arg "$1" "$2"`; shift ;;
+        --source=*)         SRC_DIR=`flag_arg "$1"` ;;
+        --source|-s)        SRC_DIR=`flag_arg "$1" "$2"`; shift ;;
         --zip=*)            set_zip `flag_arg "$1"` ;;
         --zip|-z)           set_zip `flag_arg "$1" "$2"`; shift ;;
         --help|-h)          HELP=true; KEEP_MAP=true ;;
@@ -150,12 +144,11 @@ if [[ -z "$KEEP_MAP" && -e "$MAP_FILE" ]] ; then
     mv "$MAP_FILE" "$MAP_FILE".`date +'%T.%N'` || exit $?
 fi
 
-# Run import command which will generate $MAP_FILE with item subdirectory
-# mapped to the handle of the DSpace item generated from it.
-exec dspace import --add \
-    -s "$SRC_DIR" \
-    -c "$COLLECTION" \
-    -m "$MAP_FILE" \
-    -e "$EPERSON" \
-    -z "$ZIP_FILE" \
-    "${ARGS[@]}"
+# Run import command which will generate $MAP_FILE with item subdirectories
+# mapped to the handles of the DSpace items generated from them.
+[[ "$COLLECTION" ]] && ARGS+=(-c "$COLLECTION")
+[[ "$EPERSON"    ]] && ARGS+=(-e "$EPERSON")
+[[ "$MAP_FILE"   ]] && ARGS+=(-m "$MAP_FILE")
+[[ "$SRC_DIR"    ]] && ARGS+=(-s "$SRC_DIR")
+[[ "$ZIP_FILE"   ]] && ARGS+=(-z "$ZIP_FILE")
+exec dspace import --add "${ARGS[@]}"

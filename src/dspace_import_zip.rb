@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Conversion of Libra exports to a zip file of DSpace imports.
+# Conversion of LibraOpen exports to a zip file of DSpace imports.
 #
 # In order to actually cause the imports to be made, the resulting zip file
 # must be copied to DSpace and installed using `remote/bin/dspace_import`:
@@ -23,6 +23,5 @@ require_relative 'dspace_import_zip/import_zip'
 
 if $0 == __FILE__
   get_options
-  make_import_dir
-  make_import_zip
+  make_import_dir and make_import_zip
 end

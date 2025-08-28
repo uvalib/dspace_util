@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Import Libra exports to DSpace imports.
+# Import LibraOpen exports to DSpace imports.
 #
 # Usage: @see remote/bin/dspace_import
 #
@@ -8,7 +8,8 @@
 # Usage: dspace_import --help
 #
 # Script options:
-#   --force         Overwrite existing intermediate data directories and files.
+#   --retry         Regenerate imports and submit the new zips.
+#   --force         Re-acquire LibraOpen exports, generate imports, and submit.
 #   --start date    Acquire LibraOpen exports starting with `date`.
 #
 # The program passes its arguments to dspace_import_zip except for a limited
@@ -17,10 +18,10 @@
 # eperson submitter.
 #
 # As a safeguard, if the target directory already contains zip file(s) the
-# script will exit unless --force is used.
+# script will exit unless --retry or --force is used.
 #
-# However, note that if --force is used this causes an entire refresh including
-# acquisition of LibraOpen exports.
+# Since --start deals with acquiring LibraOpen exports, it is only meaningful
+# if $EXPORT_DIR is blank or if --force is used to re-create it.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
@@ -30,7 +31,8 @@ source "$BIN_DIR/dspace_values"
 EXPORT_ARGS=()  # Arguments passed to "bin/dspace_libra_export".
 IMPORT_ARGS=()  # Arguments passed to "bin/dspace_import_zip".
 REMOTE_ARGS=()  # Arguments passed to "remote/bin/dspace_import".
-FORCE=''        # Overwrite existing intermediate data directories and files.
+RETRY=''        # Regenerate imports and submit the new zips.
+FORCE=''        # Re-acquire LibraOpen exports, generate imports, and submit.
 
 # =============================================================================
 # Process command line arguments.
@@ -38,12 +40,14 @@ FORCE=''        # Overwrite existing intermediate data directories and files.
 
 while [[ $# -gt 0 ]] ; do
     case "$1" in
+        --retry)        RETRY=true ;;
         --force)        FORCE=true ;;
-        --collection=*) REMOTE_ARGS+=("$1") ;;
-        --collection)   REMOTE_ARGS+=("$1=$2"); shift ;;
-        --eperson=*)    REMOTE_ARGS+=("$1") ;;
-        --eperson)      REMOTE_ARGS+=("$1=$2"); shift ;;
         --start)        EXPORT_ARGS+=("$1" "$2"); shift ;;
+        --collection=*) REMOTE_ARGS+=("'$1'") ;;
+        --collection)   REMOTE_ARGS+=("'$1=$2'"); shift ;;
+        --eperson=*)    REMOTE_ARGS+=("'$1'") ;;
+        --eperson)      REMOTE_ARGS+=("'$1=$2'"); shift ;;
+        -p|--phase)     IMPORT_ARGS+=("$1"); RETRY=true ;;
         *)              IMPORT_ARGS+=("$1") ;;
     esac
     shift
@@ -57,7 +61,7 @@ done
 cd "$COMMON_ROOT" || exit $?
 
 # Avoid overwriting an existing import subdirectory or zip files.
-if [[ "$FORCE" ]] ; then
+if [[ "$FORCE" || "$RETRY" ]] ; then
     rm -rf "$IMPORT_DIR" *.zip
 else
     if [[ -e "$IMPORT_DIR" ]] ; then
@@ -69,21 +73,17 @@ else
     fi
 fi
 
-# Make sure user account on the DSpace instance has remote/bin/dspace_import
-# and the import subdirectory is created and prepared.
-REMOTE_IMPORT='bin/dspace_import'
+# Make sure the bin directory of the user account on the DSpace host includes a
+# copy of remote/bin/dspace_import.
+dspace_update_home --as-needed --quiet || abort 'DSpace account bin failed'
+
+# Make sure the DSpace account import subdirectory is created and prepared.
 REMOTE_SUBDIR='import'
 dspace_sh "
-    test -x '$REMOTE_IMPORT' || exit 9
     mkdir -p '$REMOTE_SUBDIR' &&
     sudo chown dspace '$REMOTE_SUBDIR' &&
     sudo chmod 775 '$REMOTE_SUBDIR'
-"
-case $? in
-    0) ;; # Everything checks out.
-    9) abort "DSpace user missing '$REMOTE_IMPORT'; use dspace_update_home" ;;
-    *) abort "DSpace user check failed" ;;
-esac
+" || abort "DSpace account ${REMOTE_SUBDIR} subdirectory failed"
 
 # =============================================================================
 # Acquire LibraOpen exports.
@@ -91,7 +91,7 @@ esac
 
 EXPORT_ITEMS=`ls "$EXPORT_DIR" 2>/dev/null | wc -l`
 if [[ "$FORCE" || $EXPORT_ITEMS -eq 0 || ${#EXPORT_ARGS[@]} -gt 0 ]] ; then
-    echo "Getting Libra exports ${EXPORT_ARGS[@]} ..."
+    echo "Getting LibraOpen exports ${EXPORT_ARGS[@]} ..."
     [[ "$FORCE" ]] && EXPORT_ARGS+=('--force')
     dspace_libra_export "${EXPORT_ARGS[@]}" || exit $?
 fi
@@ -107,11 +107,10 @@ dspace_import_zip "${IMPORT_ARGS[@]}" || exit $?
 # Copy zip files(s) to DSpace and import them.
 # =============================================================================
 
-ZIP_FILES=`ls *.zip` || exit $?
-for ZIP_FILE in "$ZIP_FILES" ; do
+ZIP_FILES=`ls *.zip 2>/dev/null` || exit $?
+for ZIP_FILE in $ZIP_FILES ; do
     echo
     echo "Copying $ZIP_FILE ..."
-    #dspace_sh "sudo rm -f '$REMOTE_SUBDIR/$ZIP_FILE'" &&
     dspace_cp "$ZIP_FILE" :"$REMOTE_SUBDIR" &&
     dspace_sh "
         cd '$REMOTE_SUBDIR' &&
@@ -119,6 +118,6 @@ for ZIP_FILE in "$ZIP_FILES" ; do
         sudo chown dspace '$ZIP_FILE' &&
         echo &&
         echo 'Importing $ZIP_FILE ...' &&
-        \$HOME/$REMOTE_IMPORT '$ZIP_FILE' '${REMOTE_ARGS[@]}'
+        \$HOME/bin/dspace_import '$ZIP_FILE' ${REMOTE_ARGS[@]}
     "
 done

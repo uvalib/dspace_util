@@ -2,15 +2,6 @@
 #
 # Script values -- intended to be "sourced" not run -- within a DSpace shell.
 
-# Handles for "UVA Open Community" collections:
-COLL_GENERAL='123456789/2'          # "General"
-COLL_IMPORT_TEST='123456789/2898'   # "Import Test"
-COLL_TEST_AUTH='123456789/15595'    # "Import Test - Authenticated"
-COLL_TEST_REST='123456789/15626'    # "Import Test - Restricted"
-COLL_TEST_OPEN='123456789/15667'    # "Import Test - Open"
-COLL_TEST_DOI='123456789/18345'     # "Import Test - DOI"
-COLL_DEFAULT="$COLL_GENERAL"        # Current default collection.
-
 ERROR_STATUS=127
 
 # =============================================================================

@@ -15,15 +15,6 @@ require 'base_options'
 
 def get_options = @option = Options.new
 def option      = @option || get_options
-def export_root = option.export_root
-def import_root = option.import_root
-def records     = option.records
-def max_records = option.max_records
-def batch_count = option.batch_count
-def batch_size  = option.batch_size
-def quiet       = option.quiet
-def verbose     = option.verbose
-def debugging   = option.debugging
 
 # =============================================================================
 # :section: Class

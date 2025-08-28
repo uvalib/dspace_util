@@ -1,17 +1,20 @@
-# src/dspace_import_zip/components.rb
+# src/dspace_import_zip/export_item.rb
 #
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Export subdirectory file components.
+# LibraOpen export subdirectory file components.
 
 require 'common'
 
-# Organizes the files found in an export subdirectory along with optional
-# additional information needed to generate an import subdirectory from an
-# export subdirectory.
+# =============================================================================
+# :section: Classes
+# =============================================================================
+
+# Organizes the files found in a LibraOpen export subdirectory along with added
+# information needed to generate a matching DSpace import subdirectory.
 #
-class Components < Hash
+class ExportItem < Hash
 
   # Exported item metadata.
   # @return [String]
@@ -45,7 +48,11 @@ class Components < Hash
   # @return [Array<String>]
   def content = self[:content]
 
-  # Create a new instance.
+  # Keys for `Person.import_table` of authors associated with this import.
+  # @return [Array<String>]
+  def person = self[:person]
+
+  # Create a new ExportItem instance.
   #
   # @param [Hash] hash                Initial values.
   #
@@ -55,7 +62,7 @@ class Components < Hash
       next if (v = self[single_field]).nil? || v.is_a?(String)
       raise "#{single_field}: #{v.class} instead of String"
     end
-    %i[author contributor fileset content].each do |multi_field|
+    %i[author contributor fileset content person].each do |multi_field|
       self[multi_field] = Array.wrap(self[multi_field])
     end
     yield self if block_given?

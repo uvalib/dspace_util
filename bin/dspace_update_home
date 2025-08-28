@@ -2,9 +2,82 @@
 #
 # Update the DSpace user's home directory /bin with the current contents of
 # $PRJ_DIR/remote/bin.
+#
+# Usage: dspace_update_home                         Copy remote/bin files
+# Usage: dspace_update_home --as-needed [--quiet]   Skip copy if up-to-date
+# Usage: dspace_update_home --check [--quiet]       Indicate whether up-to-date
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
 PRJ_DIR=`dirname "$BIN_DIR"`
+SRC_DIR="$PRJ_DIR/remote/bin"
 
-exec dspace_cp_to -r "$PRJ_DIR/remote/bin"
+source "$BIN_DIR/dspace_values"
+
+NEEDED=''
+CHECK=''
+QUIET=''
+
+# =============================================================================
+# Process command line arguments.
+# =============================================================================
+
+while [[ $# -gt 0 ]] ; do
+    case "$1" in
+        -a|--as-needed) NEEDED=true ;;
+        -i|--if-needed) NEEDED=true ;;
+        -c|--check)     CHECK=true ;;
+        -q|--quiet)     QUIET=true ;;
+    esac
+    shift
+done
+
+# =============================================================================
+# Determine if the remote bin directory is up-to-date.
+# =============================================================================
+
+if [[ "$CHECK" || "$NEEDED" ]] ; then
+    function show() # output_lines...
+    {
+        if [[ ! "$QUIET" ]] ; then
+            for MSG in "$@" ; do
+                echo "$MSG" 1>&2
+            done
+        fi
+    }
+    function quit() # output_lines...
+    {
+        show "$@"
+        exit 0
+    }
+    function abort() # output_lines...
+    {
+        show "$@"
+        exit $ERROR_STATUS
+    }
+    REMOTE=`
+        dspace_sh "
+            test -d bin || exit 9
+            ls -t bin/* | tail -1 | xargs stat -c '%Y'
+        "
+    `
+    case $? in
+        0)  # Done if the DSpace user account bin directory is up-to-date.
+            LOCAL=`ls -t "$SRC_DIR"/* | head -1 | xargs stat -c '%Y'`
+            [[ "$REMOTE" -ge "$LOCAL" ]] && quit 'DSpace bin is up-to-date'
+            [[ "$CHECK" ]] && abort 'DSpace account bin needs to be updated'
+            ;;
+        9)  # The DSpace user account has no bin directory.
+            [[ "$CHECK" ]] && abort 'DSpace account missing bin directory'
+            ;;
+        *)  # Failed to get the $REMOTE timestamp.
+            abort 'DSpace account check failed'
+            ;;
+    esac
+fi
+
+# =============================================================================
+# Copy files to the DSpace account.
+# =============================================================================
+
+exec dspace_cp_to -r "$SRC_DIR"
