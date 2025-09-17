@@ -91,7 +91,7 @@ def publication_metadata(item)
     xml.multi( :sponsoring_agency, 'description',  'sponsorship')
     xml.single(:resource_type,     'type')                           { resource(_1) }
     xml.single(:publisher,         'publisher')
-    xml.single(:published_date,    'date',         'issued')
+    xml.single(:published_date,    'date',         'issued')         { issue_date(_1) }
     xml.single(:id,                'identifier')
     xml.single(:doi,               'identifier',   'doi')            { doi(_1) }         if DOI
     xml.single(:doi,               'identifier',   'uri')            { doi_uri(_1) }     if DOI_URI
@@ -307,8 +307,39 @@ def doi_uri(value, field: :doi)
 end
 
 # =============================================================================
-# :section: Methods - original submission date
+# :section: Methods - date
 # =============================================================================
+
+# Produce a "dc.date.issued" from a LibraOpen "published_date" field value.
+#
+# @param [String, Hash] value
+# @param [Symbol]       field
+#
+# @return [String]                    "YYYY-MM-DD" or the original value.
+# @return [nil]                       If `value` was nil or blank.
+#
+def issue_date(value, field: :published_date)
+  value = value[field] if value.is_a?(Hash)
+  value = value.to_s.squish.sub(/^(forthcoming|in.progress)\D*/i, '').presence
+  yymmdd =
+    case value
+      when /^(\d{4})$/                             then [$1,  1,  1]
+      when /^spring (\d{4})$/                      then [$1,  3,  1]
+      when /^summer (\d{4})$/                      then [$1,  6,  1]
+      when /^fall (\d{4})$/                        then [$1,  9,  1]
+      when /^winter (\d{4})$/                      then [$1, 12,  1]
+      when /^(\d{4})-(\d{1,2})$/                   then [$1, $2,  1]
+      when /^(\d{4})-(\d{1,2})-(\d{1,2})( *T.*)?$/ then [$1, $2, $3]
+      when /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/       then [$3, $1, $2]
+      when /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/       then ["20#{$3}", $1, $2]
+    end
+  if yymmdd
+    '%04d-%02d-%02d' % yymmdd.map(&:to_i)
+  elsif value
+    # noinspection RubyMismatchedArgumentType
+    Date.parse(value).to_s rescue value
+  end
+end
 
 # Produce a "dc.description" from a LibraOpen "date_modified" field value.
 #
