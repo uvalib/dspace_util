@@ -35,7 +35,7 @@ class Options < BaseOptions
 
   attr_accessor :phase, :export_root, :import_root, :common_root
   attr_accessor :batch_count, :batch_size, :max_records
-  attr_accessor :select, :reject
+  attr_accessor :select, :reject, :fast
 
   # ===========================================================================
   # :section: BaseOptions overrides
@@ -72,6 +72,7 @@ class Options < BaseOptions
       p.on('-b', '--batch-count N', Integer, 'Split output into N zip files')                           { @batch_count  = _1 }
       p.on('-z', '--batch-size N',  Integer, 'Make zip files of size N')                                { @batch_size   = _1 }
       p.on('-p', '--phase N',       Integer, 'Execution phase')                                         { @phase        = _1 }
+      p.on('-f', '--[no-]fast',              'Use saved org and person data')                           { @fast         = _1 }
       blk&.call(p)
     end
   end
@@ -122,6 +123,7 @@ class Options < BaseOptions
     output_line "HELP: batch_count   = #{batch_count.inspect}"
     output_line "HELP: batch_size    = #{batch_size.inspect}"
     output_line "HELP: max           = #{max_records.inspect}"
+    output_line "HELP: fast          = #{fast.inspect}"
     output_line "HELP: phase         = #{phase.inspect}"
   end
 

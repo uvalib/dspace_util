@@ -206,6 +206,68 @@ class Entity
     end
 
     # =========================================================================
+    # :section: DSpace data
+    # =========================================================================
+
+    protected
+
+    # Acquire current entity data from DSpace.
+    #
+    # @return [Hash{String=>Dspace::Entity::Entry}]
+    #
+    def get_current_data = to_be_overridden
+
+    # Generate `current_table` contents from `saved_table_path` contents for
+    # the "--fast" option or from existing data acquired from DSpace.
+    #
+    # @return [Hash{String=>Dspace::Entity::Entry}]
+    #
+    def get_current_table
+      option.fast and (saved_table = get_saved_table) and return saved_table
+      get_current_data.map { |_, entry|
+        key = key_for(entry)
+        [key, entry]
+      }.to_h.tap { set_saved_table(_1) }
+    end
+
+    # The relative path to the `current_table` data storage file.
+    #
+    # @return [String]
+    #
+    def saved_table_path = to_be_overridden
+
+    # Get the value of `current_table` from the previous run.
+    #
+    # @param [String] table_file
+    #
+    # @return [Hash{String=>Dspace::Entity::Entry}]
+    # @return [nil] If the saved_table_path file is not found or empty.
+    #
+    def get_saved_table(table_file: saved_table_path)
+      debug { "#{__method__} #{table_file}" }
+      JSON.load_file(table_file).presence
+    rescue Errno::ENOENT
+      nil
+    end
+
+    # Store the value of `current_table` for future "--fast" runs.
+    #
+    # @param [Hash{String=>Dspace::Entity::Entry}] entries
+    # @param [String]                              table_file
+    #
+    def set_saved_table(entries, table_file: saved_table_path)
+      debug { "#{__method__} #{table_file}" }
+      table_file = File.expand_path(table_file, PROJECT_DIRECTORY)
+      unless Dir.exist?((dir = File.dirname(table_file)))
+        debug { "#{__method__}: creating #{dir.inspect}" }
+        Dir.mkdir(dir)
+      end
+      File.open(table_file, 'w') do |file|
+        JSON.dump(entries, file)
+      end
+    end
+
+    # =========================================================================
     # :section: Import files
     # =========================================================================
 

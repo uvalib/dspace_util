@@ -108,11 +108,8 @@ class OrgUnit < Entity
     # @return [Hash{String=>Dspace::OrgUnit::Entry}]
     #
     def current_table
-      @current_table ||=
-        Dspace.orgs.map { |_, entry|
-          key = key_for(entry)
-          [key, entry]
-        }.to_h
+      # noinspection RubyMismatchedReturnType
+      @current_table ||= get_current_table
     end
 
     # All OrgUnit entity imports.
@@ -142,6 +139,24 @@ class OrgUnit < Entity
       }
       write_import_files(subdir, files)
     end
+
+    # =========================================================================
+    # :section: DSpace data - Entity::ClassMethods overrides
+    # =========================================================================
+
+    protected
+
+    # Acquire current OrgUnit entity data from DSpace.
+    #
+    # @return [Hash{String=>Dspace::Entity::Entry}]
+    #
+    def get_current_data = Dspace.orgs
+
+    # The project-relative path to the `current_table` data storage file.
+    #
+    # @return [String]
+    #
+    def saved_table_path = 'tmp/saved/orgs'
 
     # =========================================================================
     # :section: Import files - Entity::ClassMethods overrides

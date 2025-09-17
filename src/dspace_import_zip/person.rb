@@ -151,11 +151,8 @@ class Person < Entity
     # @return [Hash{String=>Dspace::Person::Entry}]
     #
     def current_table
-      @current_table ||=
-        Dspace.persons.map { |_, entry|
-          key = key_for(entry)
-          [key, entry]
-        }.to_h
+      # noinspection RubyMismatchedReturnType
+      @current_table ||= get_current_table
     end
 
     # All Person entity imports.
@@ -186,6 +183,24 @@ class Person < Entity
       }
       write_import_files(subdir, files)
     end
+
+    # =========================================================================
+    # :section: DSpace data - Entity::ClassMethods overrides
+    # =========================================================================
+
+    protected
+
+    # Acquire current Person entity data from DSpace.
+    #
+    # @return [Hash{String=>Dspace::Entity::Entry}]
+    #
+    def get_current_data = Dspace.persons
+
+    # The project-relative path to the `current_table` data storage file.
+    #
+    # @return [String]
+    #
+    def saved_table_path = 'tmp/saved/persons'
 
     # =========================================================================
     # :section: Import files - Entity::ClassMethods overrides

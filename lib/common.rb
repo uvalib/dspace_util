@@ -14,6 +14,12 @@ require 'json'
 # :section: Constants
 # =============================================================================
 
+# The absolute path of the "dspace_util" project directory.
+#
+# @type [String]
+#
+PROJECT_DIRECTORY = File.dirname(__FILE__, 2)
+
 # Maximum number of items to create at once.
 #
 # @type [Integer]
