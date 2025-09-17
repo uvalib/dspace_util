@@ -39,4 +39,5 @@ done
 # Run remote command (defaulting to remote login shell)
 # =============================================================================
 
+[[ $# -eq 0 ]] && echo "Login to $REMOTE_HOST"
 exec ssh "${SSH_OPT[@]}" "$REMOTE_USER@$REMOTE_HOST" "$@"

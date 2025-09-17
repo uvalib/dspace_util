@@ -87,6 +87,7 @@ if [[ ! "$MAP_FILE" ]] ; then
     if [[ ! "$SRC" ]] ; then
         # If $SRC was not given get items to delete from --collection.
         [[ "$COLLECTION" ]] || abort 'no collection, mapfile, or source given'
+        echo "Fetching collection '${COLLECTION}'..."
         dspace_item --uuid --handle --scope "$COLLECTION" > "$TMP_SRC"
         echo "NOTE: collection '${COLLECTION}' will be emptied but not removed"
         COLLECTION='' # Don't need to pass this to "dspace import".
@@ -128,7 +129,7 @@ esac
 
 # Make sure the DSpace account import subdirectory is created and prepared.
 REMOTE_SUBDIR='import'
-dspace_sh mkdir -p "$REMOTE_DIR" ||
+dspace_sh mkdir -p "$REMOTE_SUBDIR" ||
     abort 'DSpace account import subdirectory failed'
 
 # =============================================================================

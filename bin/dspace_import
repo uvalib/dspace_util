@@ -80,6 +80,7 @@ dspace_update_home --as-needed --quiet || abort 'DSpace account bin failed'
 # Make sure the DSpace account import subdirectory is created and prepared.
 REMOTE_SUBDIR='import'
 dspace_sh "
+    chmod +x $HOME &&
     mkdir -p '$REMOTE_SUBDIR' &&
     sudo chown dspace '$REMOTE_SUBDIR' &&
     sudo chmod 775 '$REMOTE_SUBDIR'

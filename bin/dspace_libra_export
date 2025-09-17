@@ -87,7 +87,7 @@ mkdir -p "$OUT_DIR"
 
 if [[ ! -d "$TI_PRJ" ]] ; then
     TI_SRC='git@gitlab.com:uvalib/terraform-infrastructure.git'
-    abort "Missing $TI_PRJ" "Need to run git clone $TI_SRC"
+    abort "Missing $TI_PRJ" "Need to run: git clone $TI_SRC"
 fi
 
 # =============================================================================
@@ -121,8 +121,8 @@ fi
 LIBRA_GEN='libra-open.env.generated'
 if [[ ! -f "$LIBRA_GEN" ]] ; then
     announce "Generating '$LIBRA_GEN'"
-    LIBRA_PRJ="$TI_PRJ/libraopen.lib.virginia.edu"
-    LIBRA_ENV="$LIBRA_PRJ/production/backend/environment.vars"
+    LIBRA_DIR="$TI_PRJ/libraopen.lib.virginia.edu"
+    LIBRA_ENV="$LIBRA_DIR/production/backend/environment.vars"
     awk -F '"' '{ printf "%s: \"%s\"\n", $4, $8 }' "$LIBRA_ENV" > "$LIBRA_GEN"
 fi
 
@@ -132,7 +132,7 @@ fi
 
 cd "$TI_PRJ/libra-aptrust/production" || exit $?
 
-export AWS_REGION='us-east-1'
+[[ "$AWS_REGION" ]] || export AWS_REGION='us-east-1'
 terraform init || exit $?
 terraform apply -auto-approve -var export_start_date=$START_DATE || exit $?
 
