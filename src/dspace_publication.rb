@@ -27,12 +27,13 @@ end
 
 # Generate an output table of DSpace Publications.
 #
-# @param [Array<String>] publication  All Publications if empty.
+# @param [Array<String>] item         All Publications if empty.
 # @param [String, nil]   scope        Limit to the given collection.
+# @param [Boolean]       no_show      If false show page progress.
 # @param [Hash]          opt          Passed to PublicationListing.
 #
-def lookup_publications(*publication, scope: option.scope, **opt)
-  results = Dspace.lookup_publications(*publication, scope: scope)
+def lookup_publications(*item, scope: option.scope, no_show: true, **opt)
+  results = Dspace.lookup_publications(*item, scope: scope, no_show: no_show)
   columns = []
   columns << :uuid   if option.uuid
   columns << :handle if option.handle

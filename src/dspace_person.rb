@@ -29,10 +29,11 @@ end
 #
 # @param [Array<String>] person       All Persons if empty.
 # @param [String, nil]   scope        Limit to the given collection.
+# @param [Boolean]       no_show      If false show page progress.
 # @param [Hash]          opt          Passed to PersonListing.
 #
-def lookup_persons(*person, scope: option.scope, **opt)
-  results = Dspace.lookup_persons(*person, scope: scope)
+def lookup_persons(*person, scope: option.scope, no_show: true, **opt)
+  results = Dspace.lookup_persons(*person, scope: scope, no_show: no_show)
   columns = []
   columns << :uuid   if option.uuid
   columns << :handle if option.handle

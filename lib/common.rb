@@ -90,3 +90,46 @@ end
 def to_be_overridden
   raise "#{caller[0]} TO BE OVERRIDDEN BY THE SUBCLASS"
 end
+
+# Iterate over the data, displaying a marker on $stdout for each iteration.
+#
+# A marker is not shown for "--debug" or "--verbose" because it is assumed that
+# each step will produce its own output line.
+#
+# @param [Enumerable]   enumerable
+# @param [Time]         start
+# @param [String]       marker        Marks completion of an iteration.
+# @param [Boolean, nil] no_show       If false then show page progress.
+#
+# @return [Integer]               Number of successful iterations.
+#
+# @yield [key, value]             Operate on the current iteration Hash pair.
+# @yield [value]                  Operate on the current iteration value.
+#
+def show_steps(enumerable, start: Time.now, marker: '#', no_show: nil, **)
+  success = 0
+  no_show = show_steps_off if no_show.nil?
+  if enumerable.respond_to?(:each_pair)
+    enumerable.each_pair do |key, value|
+      yield(key, value) and success += 1
+      show_char marker unless no_show
+    end
+  elsif enumerable.respond_to?(:each)
+    enumerable.each do |value|
+      yield(value) and success += 1
+      show_char marker unless no_show
+    end
+  else
+    raise "#{enumerable.class} is not acceptable"
+  end
+  show { ' (%0.1f seconds)' % (Time.now - start) } unless no_show
+  success
+end
+
+# Indicate whether #show_steps will actually show a marker for each step.
+#
+# @return [Boolean]
+#
+def show_steps_off
+  option.debug || option.verbose
+end

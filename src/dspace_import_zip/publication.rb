@@ -70,6 +70,19 @@ class Publication < Entity
     # :section: Class methods
     # =========================================================================
 
+    # Add import subdirectories for each export.
+    #
+    # @param [Array<ExportItem>] exports
+    # @param [Hash] opt                   Passed to #show_steps.
+    #
+    # @return [Integer]                   Number of subdirectories created.
+    #
+    def make_imports(exports, **opt)
+      show_steps(exports, **opt) do |export|
+        make_import(export)
+      end
+    end
+
     # Create a subdirectory for a Publication entity import.
     #
     # @param [ExportItem] export

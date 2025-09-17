@@ -44,14 +44,16 @@ def make_import_dir(max: option.max_records, src: option.export_root)
   # running from the command line.
   if true
     show { "\nGETTING CURRENT DSPACE ORGANIZATIONS" }
-    show { "#{OrgUnit.current_table.size} entries" }
+    count = OrgUnit.current_table.size
+    show { "#{count} entries" }
   end
 
   # Pre-fetch persons since this may be result in a noticeable delay when
   # running from the command line.
   unless org_unit_phase
     show { "\nGETTING CURRENT DSPACE PERSONS" }
-    show { "#{Person.current_table.size} entries" }
+    count = Person.current_table.size
+    show { "#{count} entries" }
   end
 
   # Build Person and OrgUnit import tables, pre-processing each export to
@@ -134,13 +136,8 @@ def make_import_dir(max: option.max_records, src: option.export_root)
     imported += Person.make_imports
   end
   if pub_count
-    show { "\nCREATING #{exports.size} PUBLICATION IMPORT ITEMS" }
-    start = Time.now
-    exports.each do |export|
-      Publication.make_import(export) and imported += 1
-      show_char '#' unless option.verbose
-    end
-    show { ' (%0.1f seconds)' % (Time.now - start) }
+    show { "\nCREATING #{pub_count} PUBLICATION IMPORT ITEMS" }
+    imported += Publication.make_imports(exports)
   end
   imported > 0
 end

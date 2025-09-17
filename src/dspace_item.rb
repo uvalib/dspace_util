@@ -26,10 +26,11 @@ end
 #
 # @param [Array<String>] name         All items if empty.
 # @param [String, nil]   scope        Limit to the given collection.
+# @param [Boolean]       no_show      If false show page progress.
 # @param [Hash]          opt          Passed to ItemListing.
 #
-def lookup_items(*name, scope: option.scope, **opt)
-  results = Dspace.lookup_items(*name, scope: scope)
+def lookup_items(*name, scope: option.scope, no_show: true, **opt)
+  results = Dspace.lookup_items(*name, scope: scope, no_show: no_show)
   columns = []
   columns << :uuid   if option.uuid
   columns << :handle if option.handle

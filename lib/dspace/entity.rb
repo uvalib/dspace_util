@@ -49,25 +49,39 @@ module Dspace::Entity
     #
     # @param [Array<String,Hash>] entity
     # @param [String, nil]        scope     Limit to the given collection.
+    # @param [Boolean, nil]       no_show   If false then show page progress.
     # @param [Symbol, nil]        sort_key  One of `Entry#keys`.
     # @param [Hash]               opt       Passed to #get_objects.
     #
     # @return [Hash{String=>Entry}]
     #
-    def execute(*entity, scope: nil, sort_key: :name, **opt)
+    def execute(*entity, scope: nil, no_show: nil, sort_key: :name, **opt)
       opt[:query] = entity_query(*entity) unless opt.key?(:query)
       opt[:scope] = entity_scope(scope)   unless scope.nil?
+
+      # Get the initial page of results.
+      start       = Time.now
       list, pages = get_entity_objects(**opt)
       result = transform_entity_objects(list, **opt)
-      (1...pages).each do |p|
-        list, _ = get_entity_objects(**opt, page: p)
-        result.merge!(transform_entity_objects(list, **opt))
+
+      # If more pages are available, get each of them in sequence.
+      if pages > 1
+        no_show = show_steps_off if no_show.nil?
+        ss_opt  = { start: start, marker: '.', no_show: no_show }
+        show_char ss_opt[:marker] unless no_show # For completion of page 0.
+        show_steps(1...pages, **ss_opt) do |page|
+          list, _ = get_entity_objects(**opt, page: page)
+          result.merge!(transform_entity_objects(list, **opt))
+        end
       end
+
+      # Allow the subclass to adjust the results.
       if block_given?
         result.each_pair do |_, entry|
           yield(result, entry)
         end
       end
+
       sort_key ? result.sort_by { |_, entry| entry[sort_key] }.to_h : result
     end
 

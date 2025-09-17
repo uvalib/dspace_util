@@ -145,14 +145,14 @@ class Entity
 
     # Add import subdirectories for each entity referenced by the subclass.
     #
+    # @param [Hash] opt               Passed to #show_steps.
+    #
     # @return [Integer]               Number of subdirectories created.
     #
-    def make_imports
-      count = 0
-      import_table.each_pair do |key, data|
-        make_import(key, data) and count += 1
+    def make_imports(**opt)
+      show_steps(import_table, **opt) do |key, data|
+        make_import(key, data)
       end
-      count
     end
 
     # Create a subdirectory for an entity import.
