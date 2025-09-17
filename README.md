@@ -296,6 +296,21 @@ Retrieve DSpace Solr search records.
 A convenience script for copying the files of "remote/bin" to the user's DSpace
 home ~/bin directory.
 
+### `dspace_restart`
+
+Restart DSpace with updated configuration from either
+[production/ansible/config/dspace](https://github.com/uvalib/terraform-infrastructure/dspace.library.virginia.edu/production/ansible/config/dspace)
+or
+[staging/ansible/config/dspace](https://github.com/uvalib/terraform-infrastructure/dspace.library.virginia.edu/staging/ansible/config/dspace)
+from the local copy of terraform-infrastructure on the developer workstation.
+
+### `dspace_retheme`
+
+Restart DSpace UI with updated configuration from
+https://github.com/uvalib/dspace_theme
+.
+(Both "staging" and "production" have the same UI configuration.)
+
 ### `dspace_import`
 
 This script performs
@@ -441,22 +456,6 @@ large bulk submissions into batches.
 This command can be run manually on the DSpace host, however it may be
 preferable to run the entire end-to-end LibraOpen-export-to-DSpace-import
 process from the local development machine through the `dspace_import` command.
-
-### dspace_restart
-
-Restart DSpace with updated configuration from
-https://github.com/uvalib/dspace_config
-
-Because the GitHub repository is automated to deploy after a push,
-this script should not be necessary normally.
-
-### dspace_retheme
-
-Restart DSpace UI with updated configuration from
-https://github.com/uvalib/dspace_theme
-
-Because the GitHub repository is automated to deploy after a push,
-this script should not be necessary normally.
 
 <!---------------------------------------------------------------------------->
 <!-- Directory link references used above:

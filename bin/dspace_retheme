@@ -1,0 +1,12 @@
+#! /bin/bash
+#
+# Restart DSpace UI with updated configuration from terraform-infrastructure.
+#
+# Usage: dspace_retheme [DEPLOYMENT]
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
+exec dspace_restart "$@" --target UI

@@ -1,0 +1,98 @@
+#! /bin/bash
+#
+# Restart DSpace with updated configuration from terraform-infrastructure.
+#
+# Usage: dspace_restart [DEPLOYMENT]                        New system config
+# Usage: dspace_restart [DEPLOYMENT] --target UI            New UI config
+#
+# Options:
+#   --target [system|UI]              Target subsystem (default: "system").
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+PRJ_DIR=`dirname "$BIN_DIR"`
+
+source "$BIN_DIR/dspace_values"
+
+# Terraform repo on the local system.
+TI_PRJ=`realpath "$PRJ_DIR/../terraform-infrastructure"`
+DSPACE="dspace.library.virginia.edu/$DSPACE_DEPLOYMENT"
+
+# =============================================================================
+# Functions
+# =============================================================================
+
+function announce() # output_lines...
+{
+    for MSG in "$@" ; do
+        echo
+        echo -n '***' "$MSG"
+    done
+    echo ' ...'
+}
+
+# =============================================================================
+# Process args
+# =============================================================================
+
+TARGET='system'
+PLAYBOOK=''
+
+while [[ $# -gt 0 ]] ; do
+    case "$1" in
+        -t|--target) TARGET="$2"; shift 2 ;;
+        *)           abort "invalid arg '$ARG'" ;;
+    esac
+done
+
+# Determine the appropriate playbook name.
+case "${TARGET,,}" in
+    system|tomcat*) PLAYBOOK='deploy_config.yml' ;;
+    ui|node)        PLAYBOOK='deploy_theme.yml' ;;
+    *)              abort "--target '$TARGET' unexpected" ;;
+esac
+
+# =============================================================================
+# Ensure terraform-infrastructure repo is up-to-date on the local machine.
+# =============================================================================
+
+if [[ -d "$TI_PRJ" ]] ; then
+    announce "Updating $TI_PRJ"
+    cd $TI_PRJ
+    git pull || exit $?
+else
+    TI_SRC='git@gitlab.com:uvalib/terraform-infrastructure.git'
+    abort "Missing $TI_PRJ" "Need to run: git clone $TI_SRC"
+fi
+
+# =============================================================================
+# Ensure credentials are in place for the playbook.
+# =============================================================================
+
+cd "$TI_PRJ/$DSPACE/keys" || exit $?
+
+ENCRYPTED="dspace_${DSPACE_DEPLOYMENT}_new.pem.cpt"
+UNENCRYPTED=`basename "$ENCRYPTED" .cpt`
+if [[ ! -f "$UNENCRYPTED" ]] ; then
+    announce "Generating '$UNENCRYPTED'"
+    SECRET="$DSPACE/keys/dspace_${DSPACE_DEPLOYMENT}.pem"
+    "$TI_PRJ/scripts/decrypt-key.ksh" "$ENCRYPTED" "$SECRET" || exit $?
+fi
+
+# =============================================================================
+# Initialize Terraform
+# =============================================================================
+
+cd "$TI_PRJ/$DSPACE" || exit $?
+
+[[ "$AWS_REGION" ]] || export AWS_REGION='us-east-1'
+terraform init || exit $?
+terraform apply -auto-approve || exit $?
+
+# =============================================================================
+# Update DSpace and restart.
+# =============================================================================
+
+announce "Updating configuration and restarting $DSPACE_DEPLOYMENT DSpace"
+cd "$TI_PRJ/$DSPACE/ansible" || exit $?
+ansible-playbook "$PLAYBOOK"
