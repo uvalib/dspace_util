@@ -13,6 +13,30 @@ require_relative 'person'
 require_relative 'xml'
 
 # =============================================================================
+# :section: Constants
+# =============================================================================
+
+# Indicate whether DOIs should be included as "dc.identifier.doi" in
+# Publication metadata.
+#
+# This is the old LibraOpen DOI which will eventually be mapped to the new
+# DSpace item.
+#
+# @type [Boolean]
+#
+DOI = true
+
+# Indicate whether DOIs should appear as "dc.identifier.uri" in addition to
+# "dc.identifier.doi" in Publication metadata.
+#
+# This will make the old LibraOpen DOI appear as a link on DSpace item show
+# pages under the "URI" section.
+#
+# @type [Boolean]
+#
+DOI_URI = DOI
+
+# =============================================================================
 # :section: Classes
 # =============================================================================
 
@@ -20,15 +44,15 @@ require_relative 'xml'
 class MetadataXml < Xml
 
   # @return [Hash{Symbol=>*}]
-  attr_reader :work
+  attr_reader :work_metadata
 
   # Create a new MetadataXml instance.
   #
-  # @param [String, Hash] work        LibraOpen work exported values.
-  # @param [Hash]         opt         Passed to super.
+  # @param [ExportItem, Hash] item    LibraOpen work exported values.
+  # @param [Hash]             opt     Passed to super.
   #
-  def initialize(work, **opt, &blk)
-    @work = work.is_a?(Hash) ? work : parse_json(work)
+  def initialize(item, **opt, &blk)
+    @work_metadata = item.is_a?(ExportItem) ? item.work_metadata : item
     super(**opt, &blk)
   end
 
@@ -41,7 +65,7 @@ class MetadataXml < Xml
   # @return [void]
   #
   def single(field, e, q = nil, &blk)
-    field = work[field]
+    field = work_metadata[field]
     super
   end
 
@@ -54,7 +78,7 @@ class MetadataXml < Xml
   # @return [void]
   #
   def multi(field, e, q = nil, &blk)
-    field = work[field]
+    field = work_metadata[field]
     super
   end
 
@@ -76,7 +100,7 @@ end
 def publication_metadata(item)
   aut = map_persons(item, :author)
   con = map_persons(item, :contributor)
-  MetadataXml.new(item.work) { |xml|
+  MetadataXml.new(item) { |xml|
     #          LibraOpen field     DSpace element  DSpace qualifier  Value translation
     #          ------------------- --------------  ----------------  -------------------
     xml.multi( :title,             'title')
@@ -115,13 +139,11 @@ end
 # @return [Hash{String=>String}]
 #
 def map_persons(item, kind)
-  files = item[kind]
-  info { "#{__method__}(#{files})" }
+  info { "#{__method__}(#{kind})" }
   res = {}
-  files.each do |file|
-    data = parse_json(file)
-    key  = Person.key_for(data)
-    if key.nil?
+  set = (kind == :author) ? item.author_metadata : item.contributor_metadata
+  set.each_pair do |file, data|
+    if (key = Person.key_for(data)).nil?
       error { "#{file}: no computing_id or last_name" }
     elsif kind != :author
       debug { (val = res[key]) and "#{file}[#{key}]: override #{val.inspect}" }
@@ -151,9 +173,9 @@ LANGUAGE = {
   'Italian'    => 'it', # not present in LibraOpen
   'Japanese'   => 'ja', # not present in LibraOpen
   'Portuguese' => 'pt',
+  'Russian'    => 'ru', # not configured in DSpace currently
   'Spanish'    => 'es',
   'Turkish'    => 'tr', # not present in LibraOpen
-  'Russian'    => 'ru', # not configured in DSpace currently
 }.freeze
 
 # Produce a "dc.language.iso" value from a LibraOpen "language" field value.

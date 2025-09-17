@@ -18,7 +18,6 @@ require_relative 'xml'
 # =============================================================================
 
 UVA_ORG_NAME = 'University of Virginia'
-UVA_ORG_UUID = '9262c185-ff27-414c-9a93-0f3ef8fb22b4'
 
 # =============================================================================
 # :section: Classes
@@ -91,21 +90,6 @@ class OrgUnit < Entity
     #
     def description(data)
       Import.wrap(data)[:description]
-    end
-
-    # The parent OrgUnit associated with the entity.
-    #
-    # @param [Hash] data
-    #
-    # @return [String, nil]
-    #
-    def entity_org(data)
-      org = Import.wrap(data)[:institution]
-      if org == UVA_ORG_NAME
-        UVA_ORG_UUID
-      elsif data[:department].present?
-        org
-      end
     end
 
   end
@@ -182,13 +166,9 @@ class OrgUnit < Entity
     # @return [String]
     #
     def schema_xml(data)
-      name = title_name(data)
-      org  = entity_org(data)
-      key  = key_for(data)
       Xml.new(schema: 'organization') { |xml|
-        xml.single(name, 'legalName')
-        xml.single(key,  'identifier')
-        xml.single(org,  'parentOrganization')
+        xml.single(data.title_name, 'legalName')
+        xml.single(data.key_for,    'identifier')
       }.to_xml
     end
 
@@ -199,11 +179,9 @@ class OrgUnit < Entity
     # @return [String]
     #
     def metadata_xml(data)
-      name = title_name(data)
-      desc = description(data)
       Xml.new { |xml|
-        xml.single(name, 'title')
-        xml.multi( desc, 'description')
+        xml.single(data.title_name, 'title')
+        xml.multi(data.description, 'description')
       }.to_xml
     end
 
@@ -231,7 +209,6 @@ class OrgUnit < Entity
     def import_name (data = nil) = super(data || self)
     def title_name  (data = nil) = super(data || self)
     def description (data = nil) = super(data || self)
-    def entity_org  (data = nil) = super(data || self)
 
     # The top-level organization prefix for a UVA department name.
     #
@@ -332,13 +309,9 @@ class OrgUnit < Entity
       end
     end
 
-    def normalize_department(name)
-      return '' if name.blank?
-      name = name.dup
-      name.sub!(/^(Department|Dept) +(of|for) +/, '')
-      name.sub!(/ *[.,;:]+$/, '')
-      DEPARTMENT[name]&.dup || name
-    end
+    # =========================================================================
+    # :section: Entity::Import overrides
+    # =========================================================================
 
     # The key for this instance in OrgUnit::ImportTable.
     #
@@ -358,6 +331,23 @@ class OrgUnit < Entity
     def self.wrap(data)
       # noinspection RubyMismatchedReturnType
       super
+    end
+
+    # =========================================================================
+    # :section:
+    # =========================================================================
+
+    # Transform to a standardized department name.
+    #
+    # @param [String, nil] name
+    #
+    # @return [String]                Blank if name is nil or blank.
+    #
+    def normalize_department(name)
+      name = name&.squish&.presence or return ''
+      name.sub!(/^(Department|Dept\.|Dept) (of|for) /, '')
+      name.sub!(/[ .,;:]+$/, '')
+      DEPARTMENT[name]&.dup || name
     end
 
   end

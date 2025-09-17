@@ -73,14 +73,6 @@ class Entity
     #
     def entity_email(data) = to_be_overridden
 
-    # The OrgUnit associated with the entity.
-    #
-    # @param [Hash] data
-    #
-    # @return [String, nil]
-    #
-    def entity_org(data) = to_be_overridden
-
     # For strings, strip leading and trailing whitespace, reduce internal
     # whitespace to a single space.  If the result is blank or nil, return nil.
     #
@@ -92,12 +84,6 @@ class Entity
       v = v.squish.gsub(/\\u0026/, '&').sub(/[.,;:]+$/, '') if v.is_a?(String)
       v.presence
     end
-
-    # =========================================================================
-    # :section:
-    # =========================================================================
-
-    protected
 
     # Form a key from individual part(s).
     #
@@ -131,16 +117,6 @@ class Entity
     # @return [Hash{String=>Dspace::Entity::Entry}]
     #
     def current_table = to_be_overridden
-
-    # The UUID for an existing entity.
-    #
-    # @return [String, nil]
-    #
-    def current_uuid_for(data)
-      key   = key_for(data)
-      entry = current_table[key]
-      entry.uuid if entry.present?
-    end
 
     # All entity imports.
     #

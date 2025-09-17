@@ -26,6 +26,10 @@ class Publication < Entity
 
     include Entity::Methods
 
+    # =========================================================================
+    # :section: Entity::Methods overrides
+    # =========================================================================
+
     # The name of the import subdirectory for a Publication entity import.
     #
     # @param [Hash, String] data
@@ -35,6 +39,24 @@ class Publication < Entity
     def import_name(data)
       name = data.is_a?(Hash) ? data[:import_name] : normalize(data)
       "#{IMPORT_PREFIX}#{name}" if name.present?
+    end
+
+    # =========================================================================
+    # :section:
+    # =========================================================================
+
+    # Update `item` to include a mapping of depositor to ORCID.
+    #
+    # @param [ExportItem] item
+    #
+    # @return [ExportItem]            The item with `orcid` modified.
+    # @return [nil]                   If :author_orcid_url was not present.
+    #
+    def set_orcid!(item)
+      dat = item.work_metadata
+      orc = Person.normalize_orcid(dat, field: :author_orcid_url) or return
+      cid = Person.normalize_cid(dat, field: :depositor)
+      item.orcid.merge!(cid => orc)
     end
 
   end

@@ -95,6 +95,46 @@ class Person < Entity
       cid.include?('@') ? cid : "#{cid}@#{UVA_DOMAIN}" if cid.present?
     end
 
+    # =========================================================================
+    # :section:
+    # =========================================================================
+
+    # Return a normalized UVA computing ID value.
+    #
+    # @param [String, Hash] value
+    # @param [Symbol]       field
+    #
+    # @return [String, nil]
+    #
+    def normalize_cid(value, field: :computing_id)
+      value = value[field] if value.is_a?(Hash)
+      value.to_s.strip.downcase.sub(/@(\w+\.)*virginia\.edu$/, '').presence
+    end
+
+    # Return a normalized ORCID value.
+    #
+    # @param [String, Hash] value
+    # @param [Symbol]       field
+    #
+    # @return [String, nil]
+    #
+    def normalize_orcid(value, field: :orcid)
+      value = value[field] if value.is_a?(Hash)
+      value.to_s.strip.sub(%r{^https?://(\w+\.)*orcid\.org/}i, '').presence
+    end
+
+    # Return a normalized given name.
+    #
+    # @param [String, Hash] value
+    # @param [Symbol]       field
+    #
+    # @return [String, nil]
+    #
+    def normalize_first_name(value, field: :first_name)
+      value = value[field] if value.is_a?(Hash)
+      value.to_s.squish.delete_prefix('Dr. ').presence
+    end
+
   end
 
   module ClassMethods
@@ -148,7 +188,7 @@ class Person < Entity
     end
 
     # =========================================================================
-    # :section: Internal Entity::ClassMethods overrides
+    # :section: Import files - Entity::ClassMethods overrides
     # =========================================================================
 
     protected
@@ -170,15 +210,12 @@ class Person < Entity
     # @return [String]
     #
     def schema_xml(data)
-      key   = data[:computing_id]
-      first = data[:first_name]
-      last  = data[:last_name]
-      email = entity_email(data)
       Xml.new(schema: 'person') { |xml|
-        xml.single(key,   'identifier')
-        xml.single(first, 'givenName')
-        xml.single(last,  'familyName')
-        xml.single(email, 'email')
+        xml.single(data[:computing_id], 'identifier')
+        xml.single(data[:orcid],        'identifier', 'orcid')
+        xml.single(data[:first_name],   'givenName')
+        xml.single(data[:last_name],    'familyName')
+        xml.single(data.entity_email,   'email')
       }.to_xml
     end
 
@@ -189,11 +226,9 @@ class Person < Entity
     # @return [String]
     #
     def metadata_xml(data)
-      name  = title_name(data)
-      email = entity_email(data)
       Xml.new { |xml|
-        xml.single(name,  'title')
-        xml.single(email, 'identifier')
+        xml.single(data.title_name,   'title')
+        xml.single(data.entity_email, 'identifier')
       }.to_xml
     end
 
@@ -235,24 +270,37 @@ class Person < Entity
     def key_for     (data = nil) = super(data || self)
     def import_name (data = nil) = super(data || self)
     def title_name  (data = nil) = super(data || self)
-    def entity_org  (data = nil) = super(data || self)
     def entity_email(data = nil) = super(data || self)
 
     # Create a new Person::Import instance with computing_id and names
     # normalized.
     #
+    # If `data[:export]` is present, `data[:export].orcid` is used to set
+    # :orcid if :computing_id is found there.
+    #
     # @param [Hash] data
     #
     def initialize(data)
+      export = data[:export]
       super
       each_pair do |k, v|
         case k
-          when :computing_id then self[k] = v.downcase
-          when :first_name   then self[k] = v.delete_prefix('Dr. ')
+          when :computing_id then self[k] = normalize_cid(v)
+          when :first_name   then self[k] = normalize_first_name(v)
         end
       end
+      if export.is_a?(ExportItem)
+        self[:orcid] = export.orcid[self[:computing_id]]
+      elsif (orc = self[:orcid])
+        self[:orcid] = normalize_orcid(orc)
+      end
+      compact_blank!
       add_org(to_h)
     end
+
+    # =========================================================================
+    # :section: Entity::Import overrides
+    # =========================================================================
 
     # The key for this instance in Person::ImportTable.
     #
@@ -274,6 +322,18 @@ class Person < Entity
       super
     end
 
+    # Return a duplicate of the current instance.
+    #
+    # @return [Import]
+    #
+    def dup
+      super.tap { _1.add_org(self) }
+    end
+
+    # =========================================================================
+    # :section:
+    # =========================================================================
+
     # All of the OrgUnits associated with this Person.
     #
     # @return [Array<OrgUnit::Import>]
@@ -294,10 +354,6 @@ class Person < Entity
         added = other.map { _1.dup unless keys.include?(_1.table_key) }.compact
         @orgs = prepend ? (added + @orgs) : (@orgs + added)
       end
-    end
-
-    def dup
-      super.tap { _1.add_org(self) }
     end
 
   end

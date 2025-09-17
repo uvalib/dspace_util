@@ -30,6 +30,7 @@ require_relative 'publication'
 def make_import_dir(max: option.max_records, src: option.export_root)
   max = nil unless max.positive?
   info { max ? "#{__method__}(max: #{max.inspect})" : __method__ }
+  org_unit_phase = (option.phase == ORG_UNIT_PHASE)
 
   # Organize LibraOpen exports.
   exports = Dir.entries(src).map { export_item(_1, src: src) }.compact
@@ -48,18 +49,19 @@ def make_import_dir(max: option.max_records, src: option.export_root)
 
   # Pre-fetch persons since this may be result in a noticeable delay when
   # running from the command line.
-  unless option.phase == ORG_UNIT_PHASE
+  unless org_unit_phase
     show { "\nGETTING CURRENT DSPACE PERSONS" }
     show { "#{Person.current_table.size} entries" }
   end
 
-  # Build Person and OrgUnit import tables.
-  show { "\nSCANNING #{exports.size} PUBLICATION EXPORTS FROM #{src.inspect}" }
-  exports.each do |export|
-    (export.author + export.contributor).each do |file|
-      data = parse_json(file)
+  # Build Person and OrgUnit import tables, pre-processing each export to
+  # extract depositor-to-ORCID mappings.
+  show { "\nSCANNING #{exports.size} EXPORTS FROM #{src.inspect}" }
+  exports.each do |e|
+    Publication.set_orcid!(e) unless org_unit_phase
+    (e.author_metadata.values + e.contributor_metadata.values).each do |data|
       OrgUnit.add_import(data)
-      Person.add_import(data) unless option.phase == ORG_UNIT_PHASE
+      Person.add_import(data.merge(export: e)) unless org_unit_phase
     end
   end
 

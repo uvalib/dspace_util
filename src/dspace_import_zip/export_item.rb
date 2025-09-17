@@ -16,31 +16,31 @@ require 'common'
 #
 class ExportItem < Hash
 
-  # Exported item metadata.
+  # File for exported item metadata.
   # @return [String]
   def work = self[:work]
 
-  # Exported item rights.
+  # File for exported item rights.
   # @return [String]
   def rights = self[:rights]
 
-  # Exported item embargo status.
+  # File for exported item embargo status.
   # @return [String, nil]
   def embargo = self[:embargo]
 
-  # Exported item visibility.
+  # File for exported item visibility.
   # @return [String]
   def visibility = self[:visibility]
 
-  # Exported item author(s).
+  # File(s) for exported item author(s).
   # @return [Array<String>]
   def author = self[:author]
 
-  # Exported item non-author contributor(s).
+  # File(s) for exported item non-author contributor(s).
   # @return [Array<String>]
   def contributor = self[:contributor]
 
-  # Exported item content file description(s).
+  # File(s) for exported item content file description(s).
   # @return [Array<String>]
   def fileset = self[:fileset]
 
@@ -52,12 +52,16 @@ class ExportItem < Hash
   # @return [Array<String>]
   def person = self[:person]
 
+  # Depositor ORCID association.
+  # @return [Hash{String=>String}]
+  def orcid = self[:orcid]
+
   # Create a new ExportItem instance.
   #
-  # @param [Hash] hash                Initial values.
+  # @param [Hash] values              Initial values.
   #
-  def initialize(**hash)
-    update(hash)
+  def initialize(**values)
+    update(values)
     %i[work rights embargo visibility].each do |single_field|
       next if (v = self[single_field]).nil? || v.is_a?(String)
       raise "#{single_field}: #{v.class} instead of String"
@@ -65,7 +69,32 @@ class ExportItem < Hash
     %i[author contributor fileset content person].each do |multi_field|
       self[multi_field] = Array.wrap(self[multi_field])
     end
+    self[:orcid] = {}
     yield self if block_given?
+  end
+
+  # The values read from the `work` file.
+  #
+  # @return [Hash{Symbol=>*}]
+  #
+  def work_metadata
+    @work_metadata ||= parse_json(work)
+  end
+
+  # A map of the values read from the `author` files.
+  #
+  # @return [Hash{String=>Hash{Symbol=>*}}]
+  #
+  def author_metadata
+    @author_metadata ||= author.map { [_1, parse_json(_1)] }.to_h
+  end
+
+  # A map of the values read from the `contributor` files.
+  #
+  # @return [Hash{String=>Hash{Symbol=>*}}]
+  #
+  def contributor_metadata
+    @contributor_metadata ||= contributor.map { [_1, parse_json(_1)] }.to_h
   end
 
 end

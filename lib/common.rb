@@ -44,25 +44,6 @@ PERSON_PHASE = ORG_UNIT_PHASE.next
 #
 PUBLICATION_PHASE = PERSON_PHASE.next
 
-# Indicate whether DOIs should be included as "dc.identifier.doi".
-#
-# This is the old LibraOpen DOI which will eventually be mapped to the new
-# DSpace item.
-#
-# @type [Boolean]
-#
-DOI = true
-
-# Indicate whether DOIs should appear as "dc.identifier.uri" in addition to
-# "dc.identifier.doi".
-#
-# This will make the old LibraOpen DOI appear as a link on DSpace item show
-# pages under the "URI" section.
-#
-# @type [Boolean]
-#
-DOI_URI = DOI
-
 # Name prefix for LibraOpen export subdirectories under `export_root`.
 #
 # @type [String]
