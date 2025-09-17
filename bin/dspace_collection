@@ -2,7 +2,7 @@
 #
 # Get information about DSpace collections.
 #
-# Usage: dspace_collection [options] [name...]
+# Usage: dspace_collection [DEPLOYMENT] [OPTIONS] [NAME...]
 # Usage: dspace_collection --help
 
 PROGRAM=`realpath "$0"`

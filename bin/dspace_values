@@ -4,21 +4,6 @@
 
 ERROR_STATUS=127
 
-# DSpace system properties.
-[[ "$DSPACE_PREFIX"  ]] || export DSPACE_PREFIX='123456789'
-[[ "$DSPACE_PUBLIC"  ]] || export DSPACE_PUBLIC='dspace-staging.library.virginia.edu'
-[[ "$DSPACE_PRIVATE" ]] || export DSPACE_PRIVATE='dspace-staging-private.internal.lib.virginia.edu'
-
-# Names of "UVA Open Community" destination collections.
-[[ "$PUB_COLLECTION"  ]] || export PUB_COLLECTION='General'
-[[ "$USR_COLLECTION"  ]] || export USR_COLLECTION='Profiles'
-[[ "$ORG_COLLECTION"  ]] || export ORG_COLLECTION='OrgUnits'
-
-# Default locations for import/export.
-[[ "$COMMON_ROOT" ]] || export COMMON_ROOT="$HOME/Work-test/libra-dspace"
-[[ "$EXPORT_DIR"  ]] || export EXPORT_DIR='libra-export'
-[[ "$IMPORT_DIR"  ]] || export IMPORT_DIR='dspace-import'
-
 # Ensure that dspace_util scripts are available.
 [[ "$PROGRAM" ]] || PROGRAM=`realpath "$0"`
 [[ "$BIN_DIR" ]] || BIN_DIR=`dirname "$PROGRAM"`
@@ -28,6 +13,34 @@ ERROR_STATUS=127
 # Include local overrides and/or other environment variable exports.
 LOCAL_VALUES="$BIN_DIR/.values"
 [[ -f "$LOCAL_VALUES" ]] && source "$LOCAL_VALUES"
+
+# Extract the script argument indicating which deployment to interact with.
+# This is the option indicated by [DEPLOYMENT] in script comments.
+SCRIPT_ARGS=()
+for ARG in "$@" ; do
+    case "$ARG" in
+        --deployment=p*|--prod*) export DSPACE_DEPLOYMENT='production' ;;
+        --deployment=s*|--stag*) export DSPACE_DEPLOYMENT='staging' ;;
+        *)                       SCRIPT_ARGS+=("$ARG") ;;
+    esac
+done
+set -- "${SCRIPT_ARGS[@]}"
+
+# DSpace system properties.
+[[ "$DSPACE_DEPLOYMENT" ]] || export DSPACE_DEPLOYMENT='production'
+[[ "$DSPACE_PRIVATE"    ]] || export DSPACE_PRIVATE="dspace-$DSPACE_DEPLOYMENT-private.internal.lib.virginia.edu"
+[[ "$DSPACE_PUBLIC"     ]] || export DSPACE_PUBLIC="dspace-$DSPACE_DEPLOYMENT.library.virginia.edu"
+[[ "$DSPACE_PREFIX"     ]] || export DSPACE_PREFIX='123456789'
+
+# Names of "UVA Open Community" destination collections.
+[[ "$PUB_COLLECTION"  ]] || export PUB_COLLECTION='General'
+[[ "$USR_COLLECTION"  ]] || export USR_COLLECTION='Profiles'
+[[ "$ORG_COLLECTION"  ]] || export ORG_COLLECTION='OrgUnits'
+
+# Default locations for import/export.
+[[ "$COMMON_ROOT" ]] || export COMMON_ROOT="$HOME/libra-dspace"
+[[ "$EXPORT_DIR"  ]] || export EXPORT_DIR='libra-export'
+[[ "$IMPORT_DIR"  ]] || export IMPORT_DIR='dspace-import'
 
 # =============================================================================
 # Functions

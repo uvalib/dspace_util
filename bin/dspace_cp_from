@@ -2,7 +2,7 @@
 #
 # Copy from the DSpace host.
 #
-# Usage: dspace_cp_from [OPTIONS...] DSPACE_PATHS... [LOCAL_TARGET]
+# Usage: dspace_cp_from [DEPLOYMENT] [OPTIONS] DSPACE_PATHS... [LOCAL_TARGET]
 #
 # DSPACE_PATHS are relative to the home directory of the remote user.
 # LOCAL_TARGET if given must be "." or relative like "./dir" or "../dir".

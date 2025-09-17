@@ -27,8 +27,16 @@ module Dspace::Collection
   # @type [Array<Entry>]
   #
   HIDDEN_COLLECTIONS = [
-    Entry.new(name: 'Profiles', handle: '123456789/18373', uuid: 'e3ee5559-53a8-471b-9545-671a1c0e54d8'),
-    Entry.new(name: 'OrgUnits', handle: '123456789/18377', uuid: '4b834b84-1a1e-4d4a-bd5c-72d6bf56c8ba'),
+    if production?
+      Entry.new(name: 'Profiles', handle: '123456789/3', uuid: '002cb6bf-7b21-409c-bfcf-2c3b543a193e')
+    else
+      Entry.new(name: 'Profiles', handle: '123456789/3', uuid: '6cd1178e-94c6-4db5-8965-fd7ce443969b')
+    end,
+    if production?
+      Entry.new(name: 'OrgUnits', handle: '123456789/4', uuid: '3d9b25c0-2e83-4d27-b823-423825a2c653')
+    else
+      Entry.new(name: 'OrgUnits', handle: '123456789/4', uuid: 'eecf980e-19cd-46fe-9fc1-449d412d3f12')
+    end,
   ].freeze
 
   # ===========================================================================

@@ -2,7 +2,7 @@
 #
 # Copy to the DSpace host.
 #
-# Usage: dspace_cp_to [OPTIONS...] LOCAL_PATHS... [REMOTE_TARGET]
+# Usage: dspace_cp_to [DEPLOYMENT] [OPTIONS] LOCAL_PATHS... [REMOTE_TARGET]
 #
 # LOCAL_PATHS are relative to the home directory of the local user.
 # REMOTE_TARGET if given must begin with "scp:" or ":".

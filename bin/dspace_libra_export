@@ -2,7 +2,7 @@
 #
 # Extract exports from LibraOpen for use in importing to DSpace.
 #
-# Usage: dspace_libra_export [options...]
+# Usage: dspace_libra_export [OPTIONS]
 #
 # Options:
 #   --force         Overwrite existing destination subdirectory.

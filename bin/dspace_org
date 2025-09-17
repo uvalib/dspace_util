@@ -2,7 +2,7 @@
 #
 # Get information about DSpace OrgUnit entities.
 #
-# Usage: dspace_org [options] [name...]
+# Usage: dspace_org [DEPLOYMENT] [OPTIONS] [NAME...]
 # Usage: dspace_org --help
 #
 # Each `name` argument may be a department name or an OrgUnit handle.

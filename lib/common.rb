@@ -74,9 +74,27 @@ PERSON_PREFIX = 'person-'
 #
 ORG_PREFIX = 'org-'
 
+# Target DSpace deployment (either "staging" or "production").
+#
+# @return [String]
+#
+DEPLOYMENT = ENV['DSPACE_DEPLOYMENT'].freeze
+
 # =============================================================================
 # :section: Methods
 # =============================================================================
+
+# Indicate whether the execution is target is the staging DSpace instance.
+#
+def staging?
+  DEPLOYMENT == 'staging'
+end
+
+# Indicate whether the execution is target is the production DSpace instance.
+#
+def production?
+  DEPLOYMENT == 'production'
+end
 
 # Create a hash from a JSON file.
 #

@@ -1,6 +1,8 @@
 #! /bin/bash
 #
 # Run a src/*.rb Ruby program from this project.
+#
+# Usage: run_ruby PROGRAM [DEPLOYMENT] [OPTIONS]
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`

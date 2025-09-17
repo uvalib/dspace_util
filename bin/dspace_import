@@ -4,7 +4,7 @@
 #
 # Usage: @see remote/bin/dspace_import
 #
-# Usage: dspace_import [options] [dspace_import_zip_options] [remote_options]
+# Usage: dspace_import [DEPLOYMENT] [OPTS] [DSPACE_IMPORT_ZIP_OPT] [REMOTE_OPT]
 # Usage: dspace_import --help
 #
 # Script options:

@@ -2,7 +2,7 @@
 #
 # Get information about DSpace Person entities.
 #
-# Usage: dspace_person [options] name...
+# Usage: dspace_person [DEPLOYMENT] [OPTIONS] [NAME...]
 # Usage: dspace_person --help
 #
 # Each `name` argument may be a computing ID, a last name, a first and last

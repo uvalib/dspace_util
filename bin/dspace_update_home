@@ -3,9 +3,9 @@
 # Update the DSpace user's home directory /bin with the current contents of
 # $PRJ_DIR/remote/bin.
 #
-# Usage: dspace_update_home                         Copy remote/bin files
-# Usage: dspace_update_home --as-needed [--quiet]   Skip copy if up-to-date
-# Usage: dspace_update_home --check [--quiet]       Indicate whether up-to-date
+# Usage: dspace_update_home [DEPLOYMENT]                        Copy remote/bin files
+# Usage: dspace_update_home [DEPLOYMENT] --as-needed [--quiet]  Skip copy if up-to-date
+# Usage: dspace_update_home [DEPLOYMENT] --check [--quiet]      Indicate whether up-to-date
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`

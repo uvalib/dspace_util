@@ -2,7 +2,7 @@
 #
 # Conversion of LibraOpen exports to a zip file of DSpace imports.
 #
-# Usage: dspace_import_zip [options]
+# Usage: dspace_import_zip [DEPLOYMENT] [OPTIONS]
 # Usage: dspace_import_zip --help
 #
 # The program creates a single zip file "$IMPORT_DIR.zip" unless --batch-size

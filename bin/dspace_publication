@@ -2,7 +2,7 @@
 #
 # Get information about DSpace Publication entities.
 #
-# Usage: dspace_publication [options] name...
+# Usage: dspace_publication [DEPLOYMENT] [OPTIONS] NAME...
 # Usage: dspace_publication --help
 #
 # Each `name` argument may be a computing ID, a last name, a first and last

@@ -2,9 +2,9 @@
 #
 # Remove items from DSpace.
 #
-# Usage: dspace_delete handle...
-# Usage: dspace_delete --mapfile FILE
-# Usage: dspace_delete --collection COLLECTION_TO_EMPTY
+# Usage: dspace_delete [DEPLOYMENT] handle...
+# Usage: dspace_delete [DEPLOYMENT] --mapfile FILE
+# Usage: dspace_delete [DEPLOYMENT] --collection COLLECTION_TO_EMPTY
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`

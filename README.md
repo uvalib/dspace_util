@@ -179,13 +179,40 @@ workstation.
 Note that all scripts assume that AWS Command Line utilities have been
 installed and are available in the current \$PATH.
 
-### dspace_sh
+All of the scripts except `dspace_libra_export` accept a deployment option to
+specify the target DSpace host:
+
+* Staging host:    "--staging"    or "--deployment=staging"
+* Production host: "--production" or "--deployment=production"
+
+The default deployment is "production".
+
+### `.values`
+
+This is an optional script that can be created to provide local default values.
+In particular, the default deployment can be set there with the line
+
+```bash
+[[ "$DSPACE_DEPLOYMENT" ]] || export DSPACE_DEPLOYMENT='staging'
+```
+
+### `dspace_values`
+
+This provides common definitions for all of the scripts, including default
+values for environment variables.
+(It "sourced" by the scripts and is not intended to be executed directly.)
+
+All defaults can be overridden locally within an optional `bin/.values` script,
+particularly for sensitive information that should not be pushed to GitHub
+along with this project's source code.
+
+### `dspace_sh`
 
 Run a command on the DSpace host.
 
 With no command argument, this opens an interactive shell on the remote system.
 
-### dspace_cp
+### `dspace_cp`
 
 Copy files to or from the DSpace host.
 
@@ -205,14 +232,14 @@ For the variant `dspace_cp_from` all arguments are interpreted as remote source
 files and/or directories relative to the home directory of the remote account
 which will be copied to the local current working directory.
 
-### dspace_org
+### `dspace_org`
 
 Get information about DSpace OrgUnit entities in tabular form.
 
 Each argument may be a department name or an OrgUnit handle.
 With no arguments, all OrgUnits are listed.
 
-### dspace_person
+### `dspace_person`
 
 Get information about DSpace Person entities in tabular form.
 
@@ -220,7 +247,7 @@ Each name argument may be a computing ID, a last name, a first and last name
 surrounded by quotes, or a "last, first" name in bibliographic order.
 With no arguments, all Persons are listed.
 
-### dspace_publication
+### `dspace_publication`
 
 Get information about DSpace Publication entities in tabular form.
 
@@ -229,14 +256,14 @@ handle.
 (A string without a prefix is assumed to be TITLE_TEXT.)
 With no arguments, all Publications are listed.
 
-### dspace_collection
+### `dspace_collection`
 
 Get information about DSpace collections in tabular form.
 
 This does not currently take arguments.
 With no arguments, all collections are listed.
 
-### dspace_delete
+### `dspace_delete`
 
 Remove DSpace items by name or collection.
 
@@ -245,7 +272,7 @@ a "--mapfile", or specified by a "--collection".
 Note that the collection will have its constituent items removed but the
 collection itself will need to be removed through the DSpace UI.
 
-### dspace_lookup
+### `dspace_lookup`
 
 Get JSON details of a DSpace item.
 
@@ -253,23 +280,23 @@ The item may be a collection, however DSpace only returns metadata about the
 collection itself and does not provide a way to get the items associated with
 the collection.
 
-### dspace_solr
+### `dspace_solr`
 
 Open the DSpace Solr admin page on a local browser, creating an ssh tunnel if
 necessary.
 
 The tunnel will persist in the background after the command is done.
 
-### dspace_solr_export
+### `dspace_solr_export`
 
 Retrieve DSpace Solr search records.
 
-### dspace_update_home
+### `dspace_update_home`
 
 A convenience script for copying the files of "remote/bin" to the user's DSpace
 home ~/bin directory.
 
-### dspace_import
+### `dspace_import`
 
 This script performs
 `bin/dspace_libra_export` to acquire exports from LibraOpen,
@@ -325,7 +352,7 @@ Due to the way that the DSpace command line works, specifying a collection will
 mean that _all_ imported entities will be placed into that collection
 (which is probably not desirable for OrgUnit and Person entities).
 
-### dspace_import_zip
+### `dspace_import_zip`
 
 This is a program for generating a zip file containing a hierarchy import items
 adhering to ["DSpace Simple Archive Format"][SAF] from a local directory
@@ -345,7 +372,7 @@ dspace_import script to bulk submit the items to DSpace.
 The program assumes that the Ruby version indicated by ".ruby-version" is
 installed via `rvm` with a gemset named by ".ruby-gemset".
 
-### dspace_libra_export
+### `dspace_libra_export`
 
 This script generates "libra-open-export" in the current directory by 
 executing Ansible playbooks which run `rake libraoc:export:export_works`.
@@ -354,6 +381,9 @@ Note that the intermediate destination is a shared resource also used by the
 LibraOpen APTrust bagger.
 If that task is currently running this script should **not** be run at the same
 time.
+
+This script does not accept a deployment option since it does not directly
+involve any DSpace instance.
 
 #### Prerequisites
 
@@ -372,19 +402,19 @@ Scripts from the "remote/bin" directory are meant to be copied to the
 developer's account directory on the DSpace host in "\$HOME/bin"
 (which can be accomplished with `dspace_update_home`).
 
-### dspace
+### `dspace`
 
 Run a DSpace command as user "dspace".
 
-### dspace_export
+### `dspace_export`
 
 Export DSpace item records.
 
-### dspace_solr_export
+### `dspace_solr_export`
 
 Retrieve DSpace Solr search records.
 
-### dspace_import
+### `dspace_import`
 
 Takes a zip file (generated via `dspace_import_zip` on the local development
 machine) and submits the items to DSpace in bulk.

@@ -2,9 +2,8 @@
 #
 # Run a command on the DSpace host.
 #
-# Usage: dspace_sh [ssh_opts]                   Interactive shell.
-# Usage: dspace_sh [ssh_opts] command           Remote command.
-# Usage: dspace_sh [ssh_opts] -- command args   Remote command with arguments.
+# Usage: dspace_sh [DEPLOYMENT] [SSH_OPTS]                  Interactive shell.
+# Usage: dspace_sh [DEPLOYMENT] [SSH_OPTS] [--] cmd [args]  Remote command.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`

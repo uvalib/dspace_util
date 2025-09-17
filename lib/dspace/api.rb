@@ -59,6 +59,8 @@ module Dspace::Api
 
   # Send a DSpace API request.
   #
+  # The program is exited if there was an HTTP error.
+  #
   # @param [String] path
   # @param [Hash]   opt
   #
@@ -71,6 +73,9 @@ module Dspace::Api
     debug { "#{__method__}: GET #{url}" }
     text = URI.open(url).read || ''
     JSON.parse(text, symbolize_names: true)
+  rescue OpenURI::HTTPError => e
+    error { "#{__method__}: #{e}"}
+    exit(false)
   end
 
 end

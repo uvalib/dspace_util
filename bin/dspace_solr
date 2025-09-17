@@ -2,7 +2,7 @@
 #
 # View the DSpace Solr admin page.
 #
-# Usage: dspace_solr [-chrome|-firefox]
+# Usage: dspace_solr [DEPLOYMENT] [-chrome|-firefox]
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
