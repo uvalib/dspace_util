@@ -26,7 +26,7 @@ module Publication::Content
   #
   # @return [Boolean]                 Currently always true.
   #
-  def make_publication_content(item, output_file: 'contents', root: option.import_root)
+  def make_content(item, output_file: 'contents', root: option.import_root)
     file_map   = order_content(item.fileset, item.content).presence or return
     read_group = get_read_group(item)
     import_dir = File.expand_path(Publication.import_name(item), root)

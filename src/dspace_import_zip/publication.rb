@@ -102,7 +102,7 @@ class Publication < Entity
         'collections'         => collections(export),
         'relationships'       => relationships(export),
       }
-      write_import_files(subdir, files) and make_publication_content(export)
+      write_import_files(subdir, files) and make_content(export)
     end
 
     # =========================================================================
@@ -131,7 +131,7 @@ class Publication < Entity
     # @return [String]
     #
     def metadata_xml(export)
-      publication_metadata(export)
+      make_metadata(export)
     end
 
     # Content for the "collections" file of a Publication entity import.

@@ -89,9 +89,9 @@ module Publication::Metadata
 
   end
 
-# =============================================================================
-# :section: Methods
-# =============================================================================
+  # ===========================================================================
+  # :section: Methods
+  # ===========================================================================
 
   # Content for the "dublin_core.xml" of a Publication entity import.
   #
@@ -102,7 +102,7 @@ module Publication::Metadata
   #
   # @return [String]
   #
-  def publication_metadata(item)
+  def make_metadata(item)
     aut = map_persons(item, :author)
     con = map_persons(item, :contributor)
     MetadataXml.new(item) { |xml|
