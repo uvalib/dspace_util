@@ -10,8 +10,6 @@ require 'logging'
 
 require_relative 'options'
 require_relative 'export_item'
-require_relative 'content'
-require_relative 'metadata'
 require_relative 'org_unit'
 require_relative 'person'
 require_relative 'publication'

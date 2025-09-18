@@ -21,10 +21,15 @@ require_relative 'person'
 # Encapsulates creation of Publication entities.
 class Publication < Entity
 
+  require_relative 'publication/content'
+  require_relative 'publication/metadata'
+
   # Methods which derive Publication information from provided data.
   module Methods
 
     include Entity::Methods
+    include Publication::Content
+    include Publication::Metadata
 
     # =========================================================================
     # :section: Entity::Methods overrides
