@@ -403,7 +403,7 @@ class Entity
       elsif (val = value_for(data)).blank?
         debug { "#{__method__}: #{tag}: #{key}: no data" }
       else
-        self[key] = merged_value_for(key, val, tag: tag) || val
+        self[key] = merged_value_for(key, val, tag: tag)
       end
       key
     end
@@ -423,10 +423,10 @@ class Entity
     # @param [Import] val
     # @param [String] tag             Leader for diagnostic output.
     #
-    # @return [Import, nil]
+    # @return [Import]                Original *val* if not present in table.
     #
     def merged_value_for(key, val, tag:)
-      return if (current = self[key]).blank?
+      return val if (current = self[key]).blank?
       info { "#{tag}: #{key}: already in import_table" }
       val.each_pair do |k, v_new|
         next if (v_old = current[k]).blank? || (v_old == v_new)
@@ -461,7 +461,11 @@ class Entity
     # noinspection RubyUnusedLocalVariable
     #++
     def resolve_value(v_old, v_new, key: nil)
-      (v_old.size >= v_new.size) ? :preserve : :replace
+      if (old = v_old.try(:size)) && (new = v_new.try(:size)) && (old >= new)
+        :preserve
+      else
+        :replace
+      end
     end
 
   end

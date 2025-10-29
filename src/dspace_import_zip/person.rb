@@ -266,11 +266,11 @@ class Person < Entity
     #
     def relationships(data)
       data.orgs.map { |org|
-        key    = org.table_key
-        term   = OrgUnit.current_table.dig(key, :uuid)
-        term ||= "folderName:%s\n" % OrgUnit.import_name(key)
-        "relation.isOrgUnitOfPerson #{term}"
-      }.join("\n").presence
+        key   = org.table_key
+        val   = OrgUnit.current_table.dig(key, :uuid)
+        val ||= (subdir = OrgUnit.import_name(key)) && "folderName:#{subdir}\n"
+        "relation.isOrgUnitOfPerson #{val}" if val
+      }.compact.join("\n").presence
     end
 
   end
@@ -413,10 +413,10 @@ class Person < Entity
     # @param [Import] val
     # @param [String] tag
     #
-    # @return [Import, nil]
+    # @return [Import]                Original *val* if not present in table.
     #
     def merged_value_for(key, val, tag:)
-      return if (current = self[key]).blank?
+      return val if (current = self[key]).blank?
       val.add_org(current, prepend: true)
       # noinspection RubyMismatchedReturnType
       super

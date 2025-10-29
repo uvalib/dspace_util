@@ -21,60 +21,6 @@ require 'pp'
 #
 PROJECT_DIRECTORY = File.dirname(__FILE__, 2)
 
-# Maximum number of items to create at once.
-#
-# @type [Integer]
-#
-BATCH_SIZE = 1000
-
-# The value of `option.phase` when only creating OrgUnit entities.
-#
-# @type [Integer]
-#
-NO_PHASE = 0
-
-# The value of `option.phase` when only creating OrgUnit entities.
-#
-# @type [Integer]
-#
-ORG_UNIT_PHASE = 1
-
-# The value of `option.phase` when only creating Person entities.
-#
-# @type [Integer]
-#
-PERSON_PHASE = ORG_UNIT_PHASE.next
-
-# The value of `option.phase` when only creating Person entities.
-#
-# @type [Integer]
-#
-PUBLICATION_PHASE = PERSON_PHASE.next
-
-# Name prefix for LibraOpen export subdirectories under `export_root`.
-#
-# @type [String]
-#
-EXPORT_PREFIX = 'export-'
-
-# Name prefix for Publication import subdirectories under `import_root`.
-#
-# @type [String]
-#
-IMPORT_PREFIX = 'import-'
-
-# Name prefix for Person import subdirectories under `import_root`.
-#
-# @type [String]
-#
-PERSON_PREFIX = 'person-'
-
-# Name prefix for OrgUnit import subdirectories under `import_root`.
-#
-# @type [String]
-#
-ORG_PREFIX = 'org-'
-
 # Target DSpace deployment (either "staging" or "production").
 #
 # @return [String]

@@ -155,10 +155,10 @@ class Publication < Entity
     #
     def relationships(export)
       export.person.map { |key|
-        term = Person.current_table.dig(key, :uuid)
-        term ||= "folderName:%s\n" % Person.import_name(key)
-        "relation.isAuthorOfPublication #{term}"
-      }.join("\n").presence
+        val   = Person.current_table.dig(key, :uuid)
+        val ||= (subdir = Person.import_name(key)) && "folderName:#{subdir}\n"
+        "relation.isAuthorOfPublication #{val}" if val
+      }.compact.join("\n").presence
     end
 
   end

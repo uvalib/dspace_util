@@ -71,7 +71,7 @@ end
 def output_columns(column)
   max_col = column.size - 1
   max_row = column[0].size - 1
-  width   = column.map { _1.map(&:size).max }
+  width   = column.map { _1.compact.map(&:size).max }
   (0..max_row).each do |row|
     cols =
       (0..max_col).map do |col|

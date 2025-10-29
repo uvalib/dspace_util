@@ -42,7 +42,7 @@ class BaseOptions
     initialize_options
     @args = new_parser.parse!(@argv.dup)
     finalize_options
-    validate_options or exit
+    validate_options or exit(false)
     show_help if help_exit
   end
 
@@ -133,8 +133,11 @@ class BaseOptions
   #
   # @return [Boolean]
   #
+  # @yield Generate one or more error messages for problems.
+  # @yieldreturn [Array<String>, String, nil] Error message(s) to display.
+  #
   def validate_options
-    true
+    !block_given? || Array.wrap(yield).compact.each { error(_1) }.blank?
   end
 
   # Output program usage help and then exit.
