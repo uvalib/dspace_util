@@ -38,6 +38,8 @@ module Dspace::OrgUnit
     # :section: Dspace::Entity::Lookup overrides
     # =========================================================================
 
+    public
+
     # Fetch information about the given DSpace OrgUnit entities.
     #
     # @param [Array<String,Hash>] entity

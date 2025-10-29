@@ -36,6 +36,8 @@ module Dspace::Publication
     # :section: Dspace::Entity::Lookup overrides
     # =========================================================================
 
+    public
+
     # Fetch information about the given DSpace Publication entities.
     #
     # @param [Array<String,Hash>] entity

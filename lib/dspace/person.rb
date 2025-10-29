@@ -39,6 +39,8 @@ module Dspace::Person
     # :section: Dspace::Entity::Lookup overrides
     # =========================================================================
 
+    public
+
     # Fetch information about the given DSpace Person entities.
     #
     # @param [Array<String,Hash>] entity

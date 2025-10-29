@@ -30,6 +30,8 @@ module Dspace::Item
     # :section: Dspace::Entity::Lookup overrides
     # =========================================================================
 
+    public
+
     # Fetch information about the given DSpace items.
     #
     # @param [Array<String,Hash>] entity

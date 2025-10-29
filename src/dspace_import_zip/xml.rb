@@ -17,6 +17,8 @@ class Xml < Nokogiri::XML::Builder
   # :section:
   # ===========================================================================
 
+  public
+
   # Create a new Xml instance from occurrences of #single and/or #multi from
   # within the supplied block.
   #

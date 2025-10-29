@@ -51,6 +51,8 @@ module Dspace::Entity
     # :section: Methods
     # =========================================================================
 
+    public
+
     # Fetch information about the given DSpace entities.
     #
     # @param [Array<String,Hash>] entity
@@ -143,6 +145,8 @@ module Dspace::Entity
     # =========================================================================
     # :section: Internal methods
     # =========================================================================
+
+    protected
 
     # Return the UUID associated with the given collection identity.
     #

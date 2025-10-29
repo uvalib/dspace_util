@@ -18,43 +18,43 @@ class ExportItem < Hash
 
   # File for exported item metadata.
   # @return [String]
-  def work = self[:work]
+  def work = self[__method__]
 
   # File for exported item rights.
   # @return [String]
-  def rights = self[:rights]
+  def rights = self[__method__]
 
   # File for exported item embargo status.
   # @return [String, nil]
-  def embargo = self[:embargo]
+  def embargo = self[__method__]
 
   # File for exported item visibility.
   # @return [String]
-  def visibility = self[:visibility]
+  def visibility = self[__method__]
 
   # File(s) for exported item author(s).
   # @return [Array<String>]
-  def author = self[:author]
+  def author = self[__method__]
 
   # File(s) for exported item non-author contributor(s).
   # @return [Array<String>]
-  def contributor = self[:contributor]
+  def contributor = self[__method__]
 
   # File(s) for exported item content file description(s).
   # @return [Array<String>]
-  def fileset = self[:fileset]
+  def fileset = self[__method__]
 
   # Exported item content file(s).
   # @return [Array<String>]
-  def content = self[:content]
+  def content = self[__method__]
 
   # Keys for `Person.import_table` of authors associated with this import.
   # @return [Array<String>]
-  def person = self[:person]
+  def person = self[__method__]
 
   # Depositor ORCID association.
   # @return [Hash{String=>String}]
-  def orcid = self[:orcid]
+  def orcid = self[__method__]
 
   # Create a new ExportItem instance.
   #

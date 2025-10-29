@@ -317,6 +317,8 @@ class Person < Entity
     # :section: Entity::Import overrides
     # =========================================================================
 
+    public
+
     # The key for this instance in Person::ImportTable.
     #
     # @return [String]
@@ -348,6 +350,8 @@ class Person < Entity
     # =========================================================================
     # :section:
     # =========================================================================
+
+    public
 
     # All of the OrgUnits associated with this Person.
     #

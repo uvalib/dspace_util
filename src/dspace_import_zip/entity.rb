@@ -135,9 +135,9 @@ class Entity
     def add_import(data, force: false)
       tag = "#{key_label}.#{__method__}"
       if (key = key_for(data)).nil?
-        debug { "#{tag}: no key derivable from #{data.inspect}" }
+        debug { "#{__method__}: #{tag}: no key from #{data.inspect}" }
       elsif !force && current_table.key?(key)
-        info { "#{tag}: #{key}: already in current_table" }
+        info { "#{__method__}: #{tag}: #{key}: already in current_table" }
       else
         import_table.add(data, key: key)
       end
@@ -399,9 +399,9 @@ class Entity
       tag = "#{key_label}.import_table.#{__method__}"
       # noinspection RubyMismatchedArgumentType
       if (key ||= key_for(data)).nil?
-        debug { "#{tag}: no key derivable from #{data.inspect}" }
+        debug { "#{__method__}: #{tag}: no key from #{data.inspect}" }
       elsif (val = value_for(data)).blank?
-        debug { "#{tag}: #{key}: no data" }
+        debug { "#{__method__}: #{tag}: #{key}: no data" }
       else
         self[key] = merged_value_for(key, val, tag: tag) || val
       end

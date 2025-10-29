@@ -8,23 +8,33 @@
 require 'common'
 
 # =============================================================================
+# :section: Methods
+# =============================================================================
+
+def show?    = !option.quiet
+def debug?   = option.debug
+def info?    = option.verbose || debug?
+def warning? = show?
+def error?   = true
+
+# =============================================================================
 # :section: Methods - $stderr
 # =============================================================================
 
 def debug(msg = nil, &blk)
-  log_line(msg, tag: __method__, &blk) if option.debug
+  log_line(msg, tag: __method__, &blk) if debug?
 end
 
 def info(msg = nil, &blk)
-  log_line(msg, tag: __method__, &blk) if option.debug || option.verbose
+  log_line(msg, tag: __method__, &blk) if info?
 end
 
 def warning(msg = nil, &blk)
-  log_line(msg, tag: __method__, &blk) unless option.quiet
+  log_line(msg, tag: __method__, &blk) if warning?
 end
 
 def error(msg = nil, &blk)
-  log_line(msg, tag: __method__, &blk)
+  log_line(msg, tag: __method__, &blk) if error?
 end
 
 def log_line(msg = nil, tag: nil)
@@ -37,11 +47,11 @@ end
 # =============================================================================
 
 def show(msg = nil, &blk)
-  output_line(msg, &blk) unless option.quiet
+  output_line(msg, &blk) if show?
 end
 
 def show_char(msg = nil, &blk)
-  output_char(msg, &blk) unless option.quiet
+  output_char(msg, &blk) if show?
 end
 
 def output_line(msg = nil)

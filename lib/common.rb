@@ -9,6 +9,7 @@ require 'active_support'
 require 'active_support/core_ext'
 require 'fileutils'
 require 'json'
+require 'pp'
 
 # =============================================================================
 # :section: Constants

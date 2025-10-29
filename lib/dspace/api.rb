@@ -59,6 +59,8 @@ module Dspace::Api
   # :section: Methods
   # ===========================================================================
 
+  public
+
   # Send a DSpace API request.
   #
   # The program is exited if there was an HTTP error.

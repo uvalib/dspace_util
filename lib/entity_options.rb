@@ -35,6 +35,8 @@ class EntityOptions < TableOptions
   # :section: BaseOptions overrides
   # ===========================================================================
 
+  protected
+
   # Create an option parser for the option attributes of this class.
   #
   # @return [OptionParser]
