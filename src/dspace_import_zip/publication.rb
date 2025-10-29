@@ -16,6 +16,19 @@ require_relative 'export_item'
 require_relative 'entity'
 
 # =============================================================================
+# :section: Constants
+# =============================================================================
+
+# Whether Publications are to be imported into multiple collections.  If not,
+# all are imported into the collection named by ENV['PUB_COLLECTION'].
+#
+# @type [Boolean]
+#
+# @see Collection#collection_dept_table
+#
+MULTIPLE_COLLECTIONS = (ENV['MULTIPLE_COLLECTIONS'] != 'false')
+
+# =============================================================================
 # :section: Classes
 # =============================================================================
 
@@ -71,6 +84,17 @@ class Publication
       orc = Person.normalize_orcid(dat, field: :author_orcid_url) or return
       cid = Person.normalize_cid(dat, field: :depositor)
       item.orcid.merge!(cid => orc)
+    end
+
+    # Collection(s) to which this item should be added based on its authors'
+    # organizations.
+    #
+    # @param [ExportItem] item
+    #
+    # @return [Array<String>]
+    #
+    def collection_handles(item)
+      item.orgs.map { Collection.for(_1) }.compact.uniq
     end
 
   end
@@ -163,13 +187,15 @@ class Publication
 
     # Content for the "collections" file of a Publication entity import.
     #
-    # @param [ExportItem] _export
+    # @param [ExportItem] export
     #
     # @return [String, nil]
     #
-    def collections(_export)
-      handle = collection_handle('PUB_COLLECTION')
-      "#{handle}\n" if handle.present?
+    def collections(export)
+      handles = nil
+      handles ||= collection_handles(export).presence if MULTIPLE_COLLECTIONS
+      handles ||= Array.wrap(Collection.handle('PUB_COLLECTION'))
+      handles.join("\n") << "\n" if handles.present?
     end
 
     # Content for the "relationships" file of a Publication entity import.

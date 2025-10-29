@@ -16,6 +16,10 @@ require 'common'
 #
 class ExportItem < Hash
 
+  # The LibraOpen identifier for the item.
+  # @return [String]
+  def import_name = self[__method__]
+
   # File for exported item metadata.
   # @return [String]
   def work = self[__method__]
@@ -56,6 +60,10 @@ class ExportItem < Hash
   # @return [Hash{String=>String}]
   def orcid = self[__method__]
 
+  # Orgs with which the imported item should be associated.
+  # @return [Array<Dspace::OrgUnit::Entry,OrgUnit::Import>]
+  def orgs = self[__method__]
+
   # Create a new ExportItem instance.
   #
   # @param [Hash] values              Initial values.
@@ -70,7 +78,9 @@ class ExportItem < Hash
       self[multi_field] = Array.wrap(self[multi_field])
     end
     self[:orcid] = {}
+    self[:orgs]  = []
     yield self if block_given?
+    debug { "No import_name for #{self.inspect}" unless self[:import_name] }
   end
 
   # The values read from the `work` file.

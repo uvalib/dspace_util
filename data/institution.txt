@@ -1,0 +1,22 @@
+# data/institution.txt
+#
+# A mapping of replacement institution names which normalizes format and which
+# corrects spelling mistakes.
+
+# ORIGINAL INSTITUTION NAME                         # REPLACEMENT INSTITUTION NAME
+Albermarle County                                   | Albemarle County
+FGV                                                 | Fundação Getulio Vargas
+Indiana University Bloomington                      | Indiana University, Bloomington
+Lyola University Chicago                            | Loyola University, Chicago
+NASA LaRC                                           | NASA Langley Research Center
+NSF                                                 | National Science Foundation
+The Ohio State University                           | Ohio State University
+The University of Texas at Arlington                | University of Texas, Arlington
+UNC Charlotte                                       | University of North Carolina, Charlotte
+US Dept of Housing Urban Development                | US Housing and Urban Development
+Univ. of Arizona                                    | University of Arizona
+University of Alabama at Birmingham                 | University of Alabama, Birmingham
+University of Illinois at Chicago                   | University of Illinois, Chicago
+University of Massachusetts Amherst                 | University of Massachusetts, Amherst
+University of North Carolina at Greensboro          | University of North Carolina, Greensboro
+Washington Elementary School; Alameda, California   | Washington Elementary School, Alameda, CA

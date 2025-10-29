@@ -95,7 +95,7 @@ class Options < BaseOptions
 
   attr_accessor :phase, :export_root, :import_root, :common_root
   attr_accessor :batch_count, :batch_size, :max_records
-  attr_accessor :select, :reject, :fast
+  attr_accessor :select, :reject, :fast, :fetch
 
   # ===========================================================================
   # :section: BaseOptions overrides
@@ -131,8 +131,9 @@ class Options < BaseOptions
       p.on('-m', '--max-records N', Integer, 'Only process N exports')                                  { @max_records  = _1 }
       p.on('-b', '--batch-count N', Integer, 'Split output into N zip files')                           { @batch_count  = _1 }
       p.on('-z', '--batch-size N',  Integer, 'Make zip files of size N')                                { @batch_size   = _1 }
-      p.on('-p', '--phase N',       Integer, 'Execution phase')                                         { @phase        = _1 }
-      p.on('-f', '--[no-]fast',              'Use saved org and person data')                           { @fast         = _1 }
+      p.on('-p', '--phase N',       Integer, 'Import phase to perform')                                 { @phase        = _1 }
+      p.on(      '--[no-]fast',              'Use saved org and person data where possible')            { @fast         = _1 }
+      p.on(      '--[no-]fetch',             'Fetch org and person data if needed')                     { @fetch        = _1 }
       blk&.call(p)
     end
   end
@@ -151,6 +152,8 @@ class Options < BaseOptions
     @max_records = @max_records.to_i
     @export_root = set_subdir(@export_root, @common_root)
     @import_root = set_subdir(@import_root, File.dirname(@export_root))
+    @fetch       = true    if @fetch.nil?
+    @fast        = !@fetch if @fast.nil?
   end
 
   # Indicate whether provided options are acceptable.
@@ -182,6 +185,7 @@ class Options < BaseOptions
     output_line "HELP: batch_size    = #{batch_size.inspect}"
     output_line "HELP: max           = #{max_records.inspect}"
     output_line "HELP: fast          = #{fast.inspect}"
+    output_line "HELP: fetch         = #{fetch.inspect}"
     output_line "HELP: phase         = #{phase.inspect}"
   end
 

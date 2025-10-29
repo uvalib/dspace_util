@@ -1,0 +1,112 @@
+# data/department.txt
+#
+# A mapping of normalized department name to its replacement.
+
+# ORIGINAL NORMALIZED DEPARTMENT NAME                                                           # REPLACEMENT DEPARTMENT NAME                           # NOTES
+APMA                                                                                            | Applied Mathematics
+APTrust                                                                                         | Academic Preservation Trust
+Arch                                                                                            | Architecture
+Arch History                                                                                    | Architectural History
+Architecture and Urban Planning                                                                 | Urban and Environmental Planning
+BII NSSAC                                                                                       | Network Systems Science and Advanced Computing
+BII SDAD                                                                                        | Social and Decision Analytics
+BII-Biocomplexity Initiative                                                                    | Biocomplexity Institute
+Batten School                                                                                   | Leadership and Public Policy
+Biochem-Mole Genetics                                                                           | Biochemistry and Molecular Genetics
+Biocomplexity Initiative                                                                        | Biocomplexity Institute
+Biomed Engr                                                                                     | Biomedical Engineering
+Biomedical Eng                                                                                  | Biomedical Engineering
+CCR Project & Const Mgt Svcs LB-Univ Librarian-General Architecture                             | Project & Construction Management
+CEE                                                                                             | Civil and Environmental Engineering                   | versus School of Medicine "Center for Excellence in Education"
+Chem Engr                                                                                       | Chemical Engineering
+Civil Engineering                                                                               | Civil and Environmental Engineering
+Claude Moore Health Sciences Library                                                            | Health Sciences Library
+Claude More Health Sciences Library                                                             | Health Sciences Library
+Comp Science                                                                                    | Computer Science
+Corcoran Department of History                                                                  | History
+Ctr for Diabetes Tech                                                                           | Center for Diabetes Technology
+Ctr for Membrane & Cell Ph                                                                      | Center for Membrane and Cell Physiology
+Ctr for Public Health Genomics                                                                  | Center for Public Health Genomics
+Ctr-Beirne Carter                                                                               | Beirne B. Carter Center for Immunology Research
+Curry School of Education                                                                       | Education
+DERM                                                                                            | Dermatology
+Dean's Office, Arts and Sciences                                                                | Dean's Office, College of Arts & Sciences
+Democracy Initiative Architecture                                                               | Democracy Initiative
+Department: UVA Library; UVA Law Library                                                        | Law Library
+Drama Operations                                                                                | Drama
+E0:LB-Univ Librarian-General                                                                    | Univ Librarian-General
+ECE                                                                                             | Electrical and Computer Engineering
+EDLF                                                                                            | Education Leadership, Foundations & Policy
+Education and Human Development                                                                 | Education
+Elec & Comp Engr                                                                                | Electrical and Computer Engineering
+Elec/Computer Engr                                                                              | Electrical and Computer Engineering
+Eng Sys and Environment                                                                         | Engineering Systems and Environment
+English-Eng Lit Ops                                                                             | English
+Environ Negotiation                                                                             | Institute for Engagement and Negotiation
+Environ Negotiation Ldsh & Public Policy                                                        | Institute for Engagement and Negotiation
+Environmental Resilience Institute                                                              | Environmental Institute
+Frank Batten School                                                                             | Leadership and Public Policy
+Frank Batten School BA-Frank Batten School Ldsh & Public Policy                                 | Leadership and Public Policy
+Frank Batten School of Public Policy                                                            | Leadership and Public Policy
+French Language and Literatures                                                                 | French
+GSVS                                                                                            | Global Environments + Sustainability
+German Lit                                                                                      | German
+Global Environments and Sustainability Program                                                  | Global Environments + Sustainability
+Grad Pgrms Office                                                                               | Graduate Programs Office
+Hem-Onc                                                                                         | Hematology-Oncology
+Infectious Dis                                                                                  | Infectious Diseases
+Info Technology                                                                                 | Library IT
+KI Academic Initiatives                                                                         | Academic Initiatives
+KI-Democracy Labs                                                                               | Democracy Labs
+KI-Equity Center                                                                                | Equity Center
+Landscape                                                                                       | Landscape Architecture
+Landscape Dept AR-Arch Dept AR-Arch Dept Architecture                                           | Landscape Architecture
+Law School Central PV-Vice Prov-Global Affairs                                                  | Law School Central
+Ldsh & Public Policy                                                                            | Leadership and Public Policy
+Ldsh & Public Policy Grad Architecture                                                          | Leadership and Public Policy
+Leadshp, Fndns & Pol Studies                                                                    | Education Leadership, Foundations & Policy
+Library                                                                                         | UVA Library
+Library IT General                                                                              | Library IT
+Mat Sci & Engr                                                                                  | Materials Science and Engineering
+McIntire School of Commerce                                                                     | Commerce
+Mech & Aero Engr                                                                                | Mechanical and Aerospace Engineering
+Mechanical and Aerospace Engineering Institution                                                | Mechanical and Aerospace Engineering
+Medicine, Cardiovascular Medicine                                                               | Cardiovascular Medicine
+Medicine, Curriculum                                                                            | Curriculum
+Medicine, Diversity Programs                                                                    | Diversity Programs
+MidEast & SAsia Lang & Cult                                                                     | Middle Eastern and South Asian Languages and Cultures
+Middle East and South Asian Studies                                                             | Middle Eastern and South Asian Languages and Cultures
+Mole Phys & Biophysics                                                                          | Molecular Physiology and Biological Physics
+Mole Phys & Biophysics, MD-CMCP Ctr for Membrane & Cell Ph                                      | Molecular Physiology and Biological Physics
+Mole Phys & Biophysics, MD-CMCP Ctr for Membrane & Cell Ph; Department of Pharmacology          | Molecular Physiology and Biological Physics
+Mole Phys & Biophysics, SCPS Graduate Non-Degree                                                | Molecular Physiology and Biological Physics
+Molecular Phys and Biological Physics                                                           | Molecular Physiology and Biological Physics
+NSSAC                                                                                           | Network Systems Science and Advanced Computing
+PBHS Public Health Sciences Admin                                                               | Public Health Sciences
+Planning                                                                                        | Urban and Environmental Planning
+Planning Dept AR-Planning Dept PV-Summer & Spec Acad Progs AR-Planning Dept AS-Equity Center    | Urban and Environmental Planning
+Planning Dept BU-Parking Operations Architecture                                                | Urban and Environmental Planning
+Planning Dept, EN-Eng Sys and Environment                                                       | Urban and Environmental Planning
+Psychiatry and NB Sciences                                                                      | Psychiatry and Neurobehavioral Sciences
+Public Health Sciences Admin                                                                    | Public Health Sciences
+Public Policy and Leadership                                                                    | Leadership and Public Policy
+Research & Learning Services General                                                            | Research & Learning Services
+Research CAVS                                                                                   | Center for Advanced Vision Science
+SDAD                                                                                            | Social and Decision Analytics
+SE Initiative                                                                                   | Social Entrepreneurship Initiative
+SH Student Disab Access Ctr                                                                     | Student Disability Access Center
+SIE                                                                                             | Systems and Information Engineering
+Spanish Italian Portuguese                                                                      | Spanish, Italian & Portuguese
+Spanish, Italian, and Portuguese                                                                | Spanish, Italian & Portuguese
+Student Financial Services Operating                                                            | Student Financial Services
+Summer & Spec Acad Progs Engineering Grad Non-Degree                                            | Summer and Special Academic Programs
+Trans Hlth Res Inst Va                                                                          | iTHRIV
+UVA Career Center                                                                               | Career Center
+UVA Health Analytics                                                                            | Health Analytics
+UVa Library                                                                                     | Academic Preservation Trust                           | Special case from LibraOpen data.
+UVa Library / Academic Preservation Trust                                                       | Academic Preservation Trust
+University Library                                                                              | UVA Library
+University of Virginia Library                                                                  | UVA Library
+Urban & Environmental Planning                                                                  | Urban and Environmental Planning
+Urban/Environmental Planning                                                                    | Urban and Environmental Planning
+YTNX                                                                                            | Youth-Nex

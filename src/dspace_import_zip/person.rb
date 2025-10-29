@@ -146,7 +146,7 @@ class Person
     # @return [String, nil]
     #
     def collections(_data)
-      handle = collection_handle('USR_COLLECTION')
+      handle = Collection.handle('USR_COLLECTION')
       "#{handle}\n" if handle.present?
     end
 

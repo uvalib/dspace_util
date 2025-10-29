@@ -20,37 +20,54 @@ require_relative 'publication'
 
 # Create the DSpace import directory from LibraOpen export directory.
 #
-# @param [Integer] max                Maximum entries if positive.
+# @param [Integer, nil] phase         Execution phase.
+# @param [Integer, nil] max           Maximum entries if positive.
 # @param [String]  src                Source export directory.
 #
 # @return [Boolean]
 #
-def make_import_dir(max: option.max_records, src: option.export_root)
-  max = nil unless max.positive?
+def make_import_dir(phase: nil, max: nil, src: option.export_root)
+  phase = option.phase       if phase.nil?
+  max   = option.max_records if max.nil?
+  max   = nil unless max.positive?
   info { max ? "#{__method__}(max: #{max.inspect})" : __method__ }
-  org_unit_phase = (option.phase == ORG_UNIT_PHASE)
 
-  # Organize LibraOpen exports.
+  # Organize LibraOpen exports, quitting early if there are none.
   exports = Dir.entries(src).map { export_item(_1, src: src) }.compact
   if exports.empty?
     show { "\nNO EXPORT ITEMS SELECTED" }
     return false
   end
+  # noinspection RubyMismatchedArgumentType
   exports = exports.take(max) if max && (exports.size > max)
 
-  # Pre-fetch organizations since this may be result in a noticeable delay when
-  # running from the command line.
+  # The execution phase determines preliminary actions to take or avoid.
+  only_adding_org_units = (phase == ORG_UNIT_PHASE)
+  only_adding_persons   = (phase == PERSON_PHASE)
+  adding_publications   = (phase == PUBLICATION_PHASE) || (phase == NO_PHASE)
+
+  # Pre-fetch needed DSpace items to ensure that command-line options affecting
+  # data acquisition can be applied.  Also, since these operations may result
+  # in noticeable delays when running from the command line, this clarifies how
+  # the program is spending its time during the run.
   if true
-    show { "\nGETTING CURRENT DSPACE ORGANIZATIONS" }
-    count = OrgUnit.current_table.size
+    show { "\nGETTING CURRENT DSPACE COLLECTIONS" }
+    t_opt = {}
+    count = Collection.current_table(**t_opt).size
     show { "#{count} entries" }
   end
-
-  # Pre-fetch persons since this may be result in a noticeable delay when
-  # running from the command line.
-  unless org_unit_phase
+  if true
+    show { "\nGETTING CURRENT DSPACE ORGANIZATIONS" }
+    t_opt = { fast: option.fast }
+    t_opt.merge!(fetch: option.fetch) if only_adding_org_units
+    count = OrgUnit.current_table(**t_opt).size
+    show { "#{count} entries" }
+  end
+  unless only_adding_org_units
     show { "\nGETTING CURRENT DSPACE PERSONS" }
-    count = Person.current_table.size
+    t_opt = { fast: option.fast }
+    t_opt.merge!(fetch: option.fetch) if only_adding_persons
+    count = Person.current_table(**t_opt).size
     show { "#{count} entries" }
   end
 
@@ -58,18 +75,25 @@ def make_import_dir(max: option.max_records, src: option.export_root)
   # extract depositor-to-ORCID mappings.
   show { "\nSCANNING #{exports.size} EXPORTS FROM #{src.inspect}" }
   exports.each do |e|
-    Publication.set_orcid!(e) unless org_unit_phase
+    Publication.set_orcid!(e) unless only_adding_org_units
     (e.author_metadata.values + e.contributor_metadata.values).each do |data|
       OrgUnit.add_import(data)
-      Person.add_import(data.merge(export: e)) unless org_unit_phase
+      Person.add_import(data.merge(export: e)) unless only_adding_org_units
+      if adding_publications
+        key = OrgUnit.key_for(data)
+        org = OrgUnit.import_table[key] || OrgUnit.current_table[key]
+        # noinspection RubyMismatchedArgumentType
+        e.orgs << org if org
+      end
     end
+    e.orgs.uniq! if adding_publications
   end
 
   org_count = OrgUnit.import_table.size.nonzero?
   per_count = Person.import_table.size.nonzero?
   pub_count = exports.size.nonzero?
 
-  if option.phase == NO_PHASE
+  if phase == NO_PHASE
     # Prevent a non-phased approach if there are too many entities to import in
     # a single zip file within practical limits.
     count = [org_count, per_count, pub_count].compact.sum
@@ -87,7 +111,7 @@ def make_import_dir(max: option.max_records, src: option.export_root)
     # If there are no entities to create in this phase then there is nothing
     # left to do.
     exit_note =
-      case option.phase
+      case phase
         when ORG_UNIT_PHASE    then 'ORG UNIT'    unless org_count
         when PERSON_PHASE      then 'PERSON'      unless per_count
         when PUBLICATION_PHASE then 'PUBLICATION' unless pub_count
@@ -95,20 +119,18 @@ def make_import_dir(max: option.max_records, src: option.export_root)
     exit_note &&= "\nNO #{exit_note} ENTITIES TO CREATE"
   end
 
+  # Quit now if there are blockers or if previous phases have not completed.
   if exit_note.present?
     show(exit_note)
     return false
-  end
-
-  # Ensure that previous phases have completed.
-  if org_count && (option.phase > ORG_UNIT_PHASE)
+  elsif org_count && (phase > ORG_UNIT_PHASE)
     error { "STILL #{org_count} ORG UNIT ENTITIES UNCREATED" }
     OrgUnit.import_table.each_pair do |k, v|
       show { "#{k.inspect} => #{v.inspect}" }
     end
     return false
-  elsif per_count && (option.phase > PERSON_PHASE)
-    error { "STILL #{per_count} PERSON UNIT ENTITIES UNCREATED" }
+  elsif per_count && (phase > PERSON_PHASE)
+    error { "STILL #{per_count} PERSON ENTITIES UNCREATED" }
     Person.import_table.each_pair do |k, v|
       show { "#{k.inspect} => #{v.inspect}" }
     end
@@ -116,7 +138,7 @@ def make_import_dir(max: option.max_records, src: option.export_root)
   end
 
   # Ensure that the proper sections below are skipped depending on the phase.
-  case option.phase
+  case phase
     when ORG_UNIT_PHASE    then per_count = pub_count = nil
     when PERSON_PHASE      then org_count = pub_count = nil
     when PUBLICATION_PHASE then org_count = per_count = nil

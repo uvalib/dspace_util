@@ -1,0 +1,25 @@
+# data/school.txt
+#
+# A mapping of school/division codes found at the start of some LibraOpen
+# departments which are actually personnel designations.
+
+# CODE  # SCHOOL OR DIVISION                                    # NOTES
+AR      | School of Architecture
+AS      | College of Arts & Sciences
+BA      | Frank Batten School of Leadership and Public Policy
+CU      | School of Education                                   | Old code for Curry School
+DA      | Darden School of Business
+DS      | School of Data Science
+ED      | School of Education
+EN      | School of Engineering
+FM      | Facilities Management
+HS      | Health Sciences
+IT      | Information Technology
+LB      | University Library
+LW      | School of Law
+MC      | Medical Center
+MD      | School of Medicine
+NR      | School of Nursing
+PV      | Office of the Provost
+RS      | Research Computing
+SA      | Student Affairs

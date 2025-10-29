@@ -121,3 +121,26 @@ end
 def mark_steps_disabled
   option.debug || option.verbose
 end
+
+# Read a data file from the "data" project subdirectory.
+#
+# Each line has one or more '|' separated columns.  Blank lines and comment
+# lines beginning with '#' are ignored.
+#
+# @param [String] file                Project-relative path to the data file.
+#
+# @return [Hash]                      Keys and values added by caller.
+#
+# @yield [result, cols]               Operate on columns from each data line.
+# @yieldparam [Hash]          result  Result accumulator.
+# @yieldparam [Array<String>] cols    Data columns.
+#
+def read_data(file)
+  result = {}
+  file = File.expand_path(file, PROJECT_DIRECTORY)
+  File.foreach(file) do |line|
+    next if (line = line.squish).blank? || line.start_with?('#')
+    yield result, line.split('|').map(&:strip)
+  end
+  result
+end

@@ -129,7 +129,7 @@ class OrgUnit
     # @return [String, nil]
     #
     def collections(_data)
-      handle = collection_handle('ORG_COLLECTION')
+      handle = Collection.handle('ORG_COLLECTION')
       "#{handle}\n" if handle.present?
     end
 
