@@ -20,6 +20,8 @@ def option      = @option || get_options
 # :section: Class
 # =============================================================================
 
+# Options applicable to the dspace_import_zip application.
+#
 class Options < BaseOptions
 
   DEBUG = false
@@ -163,7 +165,7 @@ class Options < BaseOptions
   # @param [String] base
   #
   # @return [String]
-  # @return [nil]                     If `subdir` is blank.
+  # @return [nil]                     If `subdir` is nil or empty.
   #
   def set_subdir(subdir, base)
     subdir = subdir&.strip&.presence or return

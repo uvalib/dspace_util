@@ -7,6 +7,8 @@
 
 require_relative 'entity'
 
+# Information about current DSpace Publication entities.
+#
 module Dspace::Publication
 
   include Dspace::Entity
@@ -15,6 +17,8 @@ module Dspace::Publication
   # :section: Classes
   # ===========================================================================
 
+  # Information for a Publication entity acquired from the DSpace API.
+  #
   class Entry < Dspace::Entity::Entry
 
     def title  = self[__method__]
@@ -24,6 +28,8 @@ module Dspace::Publication
 
   end
 
+  # Acquire Publication entities from DSpace.
+  #
   class Lookup < Dspace::Entity::Lookup
 
     # =========================================================================

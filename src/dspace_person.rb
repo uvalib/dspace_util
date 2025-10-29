@@ -15,10 +15,14 @@ require 'entity_listing'
 # :section: Classes
 # =============================================================================
 
+# Display of Person entities in tabular form.
+#
 class PersonListing < EntityListing
+
   def self.template
     { 'UUID' => :uuid, 'Handle' => :handle, 'Name' => :name}
   end
+
 end
 
 # =============================================================================

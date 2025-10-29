@@ -14,13 +14,13 @@ SRC_DIR="$PRJ_DIR/remote/bin"
 
 source "$BIN_DIR/dspace_values"
 
-NEEDED=''
-CHECK=''
-QUIET=''
-
 # =============================================================================
 # Process command line arguments.
 # =============================================================================
+
+NEEDED=''
+CHECK=''
+QUIET=''
 
 while [[ $# -gt 0 ]] ; do
     case "$1" in

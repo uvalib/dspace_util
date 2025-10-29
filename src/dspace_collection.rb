@@ -15,10 +15,14 @@ require 'table_listing'
 # :section: Classes
 # =============================================================================
 
+# Display of collections in tabular form.
+#
 class CollectionListing < TableListing
+
   def self.template
     { 'UUID' => :uuid, 'Handle' => :handle, 'Collection' => :name}
   end
+
 end
 
 # =============================================================================

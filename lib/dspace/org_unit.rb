@@ -7,6 +7,8 @@
 
 require_relative 'entity'
 
+# Information about current DSpace OrgUnit entities.
+#
 module Dspace::OrgUnit
 
   include Dspace::Entity
@@ -15,6 +17,8 @@ module Dspace::OrgUnit
   # :section: Classes
   # ===========================================================================
 
+  # Information for an OrgUnit entity acquired from the DSpace API.
+  #
   class Entry < Dspace::Entity::Entry
 
     def parent      = self[__method__] # UUID of parent organization
@@ -26,6 +30,8 @@ module Dspace::OrgUnit
 
   end
 
+  # Acquire OrgUnit entities from DSpace.
+  #
   class Lookup < Dspace::Entity::Lookup
 
     # =========================================================================

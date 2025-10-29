@@ -109,7 +109,7 @@ class Entity
     include Methods
 
     # =========================================================================
-    # :section: Class methods
+    # :section:
     # =========================================================================
 
     # Existing entities acquired from DSpace.
@@ -268,7 +268,7 @@ class Entity
     end
 
     # =========================================================================
-    # :section: Import files
+    # :section: Internal methods
     # =========================================================================
 
     protected
@@ -371,6 +371,7 @@ class Entity
 
   # Base class for objects which maintaining mappings to data to be used to
   # create import subdirectories for entities.
+  #
   class ImportTable < Hash
 
     include Methods
@@ -450,12 +451,15 @@ class Entity
 
     # Indicate whether the old field value should be retained.
     #
-    # @param [*]           v_old
-    # @param [*]           v_new
-    # @param [Symbol, nil] key
+    # @param [any, nil]    v_old
+    # @param [any, nil]    v_new
+    # @param [Symbol, nil] key        Currently unused.
     #
     # @return [Symbol]                An element of #RESOLUTION.
     #
+    #--
+    # noinspection RubyUnusedLocalVariable
+    #++
     def resolve_value(v_old, v_new, key: nil)
       (v_old.size >= v_new.size) ? :preserve : :replace
     end

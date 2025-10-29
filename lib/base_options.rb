@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Command line options for dspace_import_zip.
+# Common command line options.
 
 require 'common'
 require 'logging'
@@ -21,6 +21,8 @@ def option      = @option || get_options
 # :section: Class
 # =============================================================================
 
+# Generic options applicable to any application.
+#
 class BaseOptions
 
   DEBUG = false

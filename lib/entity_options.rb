@@ -20,6 +20,9 @@ def option      = @option || get_options
 # :section: Class
 # =============================================================================
 
+# Options applicable to applications which output information about DSpace
+# entities in tabular form.
+#
 class EntityOptions < TableOptions
 
   # ===========================================================================

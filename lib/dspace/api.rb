@@ -9,6 +9,8 @@ require 'open-uri'
 require 'common'
 require 'logging'
 
+# Methods supporting interaction with the DSpace API.
+#
 module Dspace::Api
 
   # ===========================================================================
@@ -61,8 +63,8 @@ module Dspace::Api
   #
   # The program is exited if there was an HTTP error.
   #
-  # @param [String] path
-  # @param [Hash]   opt
+  # @param [String] path              Relative or absolute path.
+  # @param [Hash]   opt               Additional URL options.
   #
   # @return [Hash{Symbol=>*}]
   #

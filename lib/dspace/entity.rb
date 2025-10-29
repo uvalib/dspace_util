@@ -7,6 +7,8 @@
 
 require_relative 'api'
 
+# Information about current DSpace entity items.
+#
 module Dspace::Entity
 
   include Dspace::Api
@@ -15,6 +17,8 @@ module Dspace::Entity
   # :section: Classes
   # ===========================================================================
 
+  # Information for an entity acquired from the DSpace API.
+  #
   class Entry < Hash
 
     def name    = self[__method__] # May be non-unique
@@ -37,6 +41,8 @@ module Dspace::Entity
 
   end
 
+  # Acquire entities from DSpace.
+  #
   class Lookup
 
     include Dspace::Api
@@ -133,6 +139,10 @@ module Dspace::Entity
     def transform_entity_object(item)
       Entry.new(item)
     end
+
+    # =========================================================================
+    # :section: Internal methods
+    # =========================================================================
 
     # Return the UUID associated with the given collection identity.
     #

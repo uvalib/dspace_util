@@ -15,10 +15,14 @@ require 'entity_listing'
 # :section: Classes
 # =============================================================================
 
+# Display of Publication entities in tabular form.
+#
 class PublicationListing < EntityListing
+
   def self.template
     { 'UUID' => :uuid, 'Handle' => :handle, 'Title' => :name}
   end
+
 end
 
 # =============================================================================

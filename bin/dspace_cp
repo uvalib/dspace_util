@@ -39,9 +39,9 @@ function remote() # path_name
 # Process command-line ssh flags
 # =============================================================================
 
-DIRECTION=''
-KEY_GIVEN=''
-SSH_OPT=()
+DIRECTION=''    # $SEND if copying to; $RECV if copying from.
+KEY_GIVEN=''    # Whether $PRIVATE_KEY was overridden on the command line.
+SSH_OPT=()      # Options passed to scp.
 
 while [[ $# -gt 0 ]] ; do
     case "$1" in

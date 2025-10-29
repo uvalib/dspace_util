@@ -11,5 +11,7 @@ require 'table_listing'
 # :section: Class
 # =============================================================================
 
+# Display of entities in tabular form.
+#
 class EntityListing < TableListing
 end

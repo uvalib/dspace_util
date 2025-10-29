@@ -7,6 +7,8 @@
 
 require_relative 'entity'
 
+# Information about current DSpace Person entities.
+#
 module Dspace::Person
 
   include Dspace::Entity
@@ -15,6 +17,8 @@ module Dspace::Person
   # :section: Classes
   # ===========================================================================
 
+  # Information for a Person entity acquired from the DSpace API.
+  #
   class Entry < Dspace::Entity::Entry
 
     def org          = self[__method__] # Probably non-unique.
@@ -27,6 +31,8 @@ module Dspace::Person
 
   end
 
+  # Acquire Person entities from DSpace.
+  #
   class Lookup < Dspace::Entity::Lookup
 
     # =========================================================================

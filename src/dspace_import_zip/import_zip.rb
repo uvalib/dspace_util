@@ -18,9 +18,9 @@ require 'zip'
 
 # Create a new zip archive from the contents of `root`.
 #
-# @param [Integer] parts              Break into N files.
-# @param [Integer] size               Break into files with N items.
-# @param [String]  root               Top-level import directory.
+# @param [Integer, nil] parts         Break into N files (batch_count).
+# @param [Integer, nil] size          Break into files of N items (batch_size).
+# @param [String]       root          Top-level import directory.
 #
 def make_import_zip(parts: option.batch_count, size: option.batch_size, root: option.import_root)
   parts = nil if parts && (parts <= 1)
@@ -127,8 +127,8 @@ end
 # Use `unzip` to validate the indicated zip file(s).
 #
 # @param [Array<String>, String, nil] zips
-# @param [Integer, nil]               parts   If `zips` is not given.
-# @param [Integer, nil]               size    If `zips` is not given.
+# @param [Integer, nil]               parts   If `zips` not given (batch_count)
+# @param [Integer, nil]               size    If `zips` not given (batch_size)
 # @param [String]                     root    Top-level import directory.
 #
 def verify_zip(zips = nil, parts: option.batch_count, size: option.batch_size, root: option.import_root)

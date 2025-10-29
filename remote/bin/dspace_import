@@ -6,7 +6,7 @@
 # "dspace import" command line arguments although certain combinations are
 # untested.
 #
-# For reference, "dspace import" command line arguments are:
+# For reference, `dspace import` command line arguments are:
 #
 # Argument              Description                                 Notes
 # Short Long
@@ -102,7 +102,10 @@ while [[ $# -gt 0 ]] ; do
     shift
 done
 
-# Special case for --help.
+# =============================================================================
+# Early exit for "--help".
+# =============================================================================
+
 if [[ "$HELP" ]] ; then
     PROGRAM=`basename "$0"`
     echo "Usage: $PROGRAM zip_file [flags]"
@@ -110,6 +113,10 @@ if [[ "$HELP" ]] ; then
     dspace import --help | sed '/^usage.*$/d'
     exit 0
 fi
+
+# =============================================================================
+# Verify pre-conditions.
+# =============================================================================
 
 # The zip file should be first argument to script; other flags like '-v' may
 # come after it.
@@ -131,10 +138,6 @@ case "$EPERSON" in
     *)      EPERSON="$EPERSON@virginia.edu" ;;
 esac
 
-# =============================================================================
-# Run the import command.
-# =============================================================================
-
 # Move into the zip directory, which should be writable by user "dspace".
 [[ "$SRC_DIR" = "$PWD" ]] || cd "$SRC_DIR" || exit $?
 
@@ -144,8 +147,11 @@ if [[ -z "$KEEP_MAP" && -e "$MAP_FILE" ]] ; then
     mv "$MAP_FILE" "$MAP_FILE".`date +'%T.%N'` || exit $?
 fi
 
+# =============================================================================
 # Run import command which will generate $MAP_FILE with item subdirectories
 # mapped to the handles of the DSpace items generated from them.
+# =============================================================================
+
 [[ "$COLLECTION" ]] && ARGS+=(-c "$COLLECTION")
 [[ "$EPERSON"    ]] && ARGS+=(-e "$EPERSON")
 [[ "$MAP_FILE"   ]] && ARGS+=(-m "$MAP_FILE")

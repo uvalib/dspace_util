@@ -203,7 +203,7 @@ class Person < Entity
     def saved_table_path = 'tmp/saved/persons'
 
     # =========================================================================
-    # :section: Import files - Entity::ClassMethods overrides
+    # :section: Entity::ClassMethods overrides
     # =========================================================================
 
     protected
@@ -374,6 +374,7 @@ class Person < Entity
   end
 
   # All Person entity imports.
+  #
   class ImportTable < Entity::ImportTable
 
     include Methods
@@ -384,7 +385,7 @@ class Person < Entity
 
     # Generate the value entry derived from the given data.
     #
-    # @param [Hash{Symbol=>*}] data     Person properties.
+    # @param [Hash{Symbol=>*}] data   Person properties.
     #
     # @return [Import]
     #

@@ -15,10 +15,14 @@ require 'entity_listing'
 # :section: Classes
 # =============================================================================
 
+# Display of OrgUnit entities in tabular form.
+#
 class OrgUnitListing < EntityListing
+
   def self.template
     { 'UUID' => :uuid, 'Handle' => :handle, 'OrgUnit' => :name}
   end
+
 end
 
 # =============================================================================

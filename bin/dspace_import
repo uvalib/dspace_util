@@ -21,7 +21,8 @@
 # script will exit unless --retry or --force is used.
 #
 # Since --start deals with acquiring LibraOpen exports, it is only meaningful
-# if $EXPORT_DIR is blank or if --force is used to re-create it.
+# if --force is used to re-create $EXPORT_DIR, or if it is already missing or
+# empty.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`

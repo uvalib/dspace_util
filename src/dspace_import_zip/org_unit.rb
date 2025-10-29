@@ -159,7 +159,7 @@ class OrgUnit < Entity
     def saved_table_path = 'tmp/saved/orgs'
 
     # =========================================================================
-    # :section: Import files - Entity::ClassMethods overrides
+    # :section: Entity::ClassMethods overrides
     # =========================================================================
 
     protected
@@ -368,6 +368,7 @@ class OrgUnit < Entity
   end
 
   # All OrgUnit entity imports.
+  #
   class ImportTable < Entity::ImportTable
 
     include Methods
@@ -378,7 +379,7 @@ class OrgUnit < Entity
 
     # Generate the value entry derived from the given data.
     #
-    # @param [Hash{Symbol=>*}] data     Entry properties.
+    # @param [Hash{Symbol=>*}] data   Entry properties.
     #
     # @return [Import]
     #

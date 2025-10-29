@@ -66,13 +66,15 @@ class Publication < Entity
 
   end
 
+  # Methods associated with the Publication class.
+  #
   module ClassMethods
 
     include Entity::ClassMethods
     include Methods
 
     # =========================================================================
-    # :section: Class methods
+    # :section: Entity::ClassMethods overrides
     # =========================================================================
 
     # Add import subdirectories for each export.
@@ -106,7 +108,7 @@ class Publication < Entity
     end
 
     # =========================================================================
-    # :section: Internal methods - import files
+    # :section: Entity::ClassMethods overrides
     # =========================================================================
 
     protected

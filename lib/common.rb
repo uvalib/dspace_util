@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Common definitions for dspace_import_zip.
+# Common definitions.
 
 require 'active_support'
 require 'active_support/core_ext'
@@ -125,10 +125,10 @@ end
 # @param [String]       marker        Marks completion of an iteration.
 # @param [Boolean, nil] no_show       If false then show page progress.
 #
-# @return [Integer]               Number of successful iterations.
+# @return [Integer]                   Number of successful iterations.
 #
-# @yield [key, value]             Operate on the current iteration Hash pair.
-# @yield [value]                  Operate on the current iteration value.
+# @yield [key, value] Operate on the current iteration Hash pair.
+# @yield [value]      Operate on the current iteration value.
 #
 def show_steps(enumerable, start: Time.now, marker: '#', no_show: nil, **)
   success = 0

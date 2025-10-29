@@ -10,13 +10,15 @@ require 'common'
 require 'nokogiri'
 
 # Build a <dublin_core> element.
+#
 class Xml < Nokogiri::XML::Builder
 
   # ===========================================================================
   # :section:
   # ===========================================================================
 
-  # Create a new Xml instance.
+  # Create a new Xml instance from occurrences of #single and/or #multi from
+  # within the supplied block.
   #
   # @param [String, nil] schema       For the outer <dublin_core> element.
   # @param [Hash]        opt          Passed to super.
@@ -31,7 +33,7 @@ class Xml < Nokogiri::XML::Builder
 
   # Emit one <dcvalue> element for a single-value field.
   #
-  # @param [*]           value        Element value.
+  # @param [String, nil] value        Element value.
   # @param [String]      e            Element name attribute.
   # @param [String, nil] q            Qualifier attribute.
   #
@@ -43,7 +45,7 @@ class Xml < Nokogiri::XML::Builder
 
   # Emit one <dcvalue> element for a single-value field.
   #
-  # @param [*]           value        Element value.
+  # @param [Array,String,nil] value   Element value.
   # @param [String]      e            Element name attribute.
   # @param [String, nil] q            Qualifier attribute.
   #

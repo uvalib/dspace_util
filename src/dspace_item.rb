@@ -15,6 +15,8 @@ require 'entity_listing'
 # :section: Classes
 # =============================================================================
 
+# Display of generic DSpace items in tabular form.
+#
 class ItemListing < EntityListing
 end
 

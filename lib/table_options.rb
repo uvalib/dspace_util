@@ -20,6 +20,8 @@ def option      = @option || get_options
 # :section: Class
 # =============================================================================
 
+# Options applicable to applications which output information in tabular form.
+#
 class TableOptions < BaseOptions
 
   # ===========================================================================

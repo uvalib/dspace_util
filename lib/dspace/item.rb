@@ -7,6 +7,8 @@
 
 require_relative 'entity'
 
+# Information about current DSpace generic items.
+#
 module Dspace::Item
 
   include Dspace::Entity
@@ -15,9 +17,13 @@ module Dspace::Item
   # :section: Classes
   # ===========================================================================
 
+  # Information for an item acquired from the DSpace API.
+  #
   class Entry < Dspace::Entity::Entry
   end
 
+  # Acquire items from DSpace.
+  #
   class Lookup < Dspace::Entity::Lookup
 
     # =========================================================================
@@ -42,7 +48,7 @@ module Dspace::Item
 
     protected
 
-    # Transform DSpace API search result objects into Publication entries.
+    # Transform DSpace API search result objects into entries.
     #
     # @param [Array<Hash>] list
     # @param [Hash]        opt        Passed to super.
@@ -54,7 +60,7 @@ module Dspace::Item
       super(list, result_key: Entry.default_key, **opt)
     end
 
-    # Transform a DSpace API search result list object into Publication entry.
+    # Transform a DSpace API search result list object into an entry.
     #
     # @param [Hash] item
     #
@@ -64,7 +70,7 @@ module Dspace::Item
       Entry.new(item)
     end
 
-    # Generate a query for finding Publication entities.
+    # Generate a query for finding items.
     #
     # @param [Array<String,Hash>] arg
     # @param [Hash]               opt   Passed to super.

@@ -65,7 +65,10 @@ while [[ $# -gt 0 ]] ; do
     shift
 done
 
-# Special case for --help.
+# =============================================================================
+# Early exit for "--help".
+# =============================================================================
+
 if [[ "$HELP" ]] ; then
     PROGRAM=`basename "$0"`
     echo "Usage: $PROGRAM map_file [flags]"

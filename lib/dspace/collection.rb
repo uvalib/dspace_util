@@ -7,6 +7,8 @@
 
 require_relative 'entity'
 
+# Information about current DSpace collections.
+#
 module Dspace::Collection
 
   include Dspace::Api

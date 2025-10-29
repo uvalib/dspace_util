@@ -9,6 +9,8 @@
 # :section: Class
 # =============================================================================
 
+# Generation of output in tabular form.
+#
 class TableListing
 
   # ===========================================================================
@@ -39,9 +41,9 @@ class TableListing
 
   # Create a new TableListing instance.
   #
-  # @param [Hash{String=>Symbol}] template      Default: TEMPLATE.
-  # @param [Symbol]               only          Generate only this column.
-  # @param [Boolean]              head          Default: true.
+  # @param [Hash{String=>Symbol}]  template   Default: subclass #template.
+  # @param [Array<Symbol>, Symbol] only       Generate only these columns.
+  # @param [Boolean]               head       Default: true.
   #
   def initialize(template = self.class.template, only: nil, head: nil, **)
     @value_key = template.values.map(&:to_sym)
