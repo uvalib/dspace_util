@@ -5,13 +5,11 @@
 #
 # DSpace API Publication methods.
 
-require_relative 'entity'
+require 'dspace/entity'
 
 # Information about current DSpace Publication entities.
 #
 module Dspace::Publication
-
-  include Dspace::Entity
 
   # ===========================================================================
   # :section: Classes
@@ -33,25 +31,25 @@ module Dspace::Publication
   class Lookup < Dspace::Entity::Lookup
 
     # =========================================================================
-    # :section: Dspace::Entity::Lookup overrides
+    # :section: Dspace::Api::Lookup overrides
     # =========================================================================
 
     public
 
     # Fetch information about the given DSpace Publication entities.
     #
-    # @param [Array<String,Hash>] entity
-    # @param [Hash]               opt       Passed to super.
+    # @param [Array<String,Hash>] item  Specific Publications to find.
+    # @param [Hash]               opt   Passed to super.
     #
     # @return [Hash{String=>Entry}]
     #
-    def execute(*entity, **opt)
+    def execute(*item, **opt)
       # noinspection RubyMismatchedReturnType
       super
     end
 
     # =========================================================================
-    # :section: Dspace::Entity::Lookup overrides - internal methods
+    # :section: Dspace::Api::Lookup overrides
     # =========================================================================
 
     protected
@@ -59,28 +57,36 @@ module Dspace::Publication
     # Transform DSpace API search result objects into Publication entries.
     #
     # @param [Array<Hash>] list
-    # @param [Hash]        opt        Passed to super.
+    # @param [Symbol]      result_key   One of `Entry#keys`.
+    # @param [Hash]        opt          Passed to #transform_item.
     #
     # @return [Hash{String=>Entry}]
     #
-    def transform_entity_objects(list, **opt)
+    def transform_items(list, result_key: Entry.default_key, **opt)
       # noinspection RubyMismatchedReturnType
-      super(list, result_key: Entry.default_key, **opt)
+      super
     end
 
     # Transform a DSpace API search result list object into Publication entry.
     #
     # @param [Hash] item
+    # @param [Hash] opt               Passed to Entry#initialize.
     #
     # @return [Entry]
     #
-    def transform_entity_object(item)
+    def transform_item(item, **opt)
       field = ->(f) { Array.wrap(item.dig(:metadata, f)).first&.dig(:value) }
-      entry = Entry.new(item)
-      entry[:title]  ||= field.(:'dc.title') || entry[:name]
-      entry[:author] ||= field.(:'dc.contributor.author')
+      entry = Entry.new(item, **opt)
+      entry[:title]  = field.(:'dc.title')              || entry[:title]
+      entry[:author] = field.(:'dc.contributor.author') || entry[:author]
       entry
     end
+
+    # =========================================================================
+    # :section: Dspace::Entity::Lookup overrides
+    # =========================================================================
+
+    protected
 
     # Generate a query for finding Publication entities.
     #
@@ -131,27 +137,16 @@ module Dspace::Publication
   # :section: Methods
   # ===========================================================================
 
-  # Fetch all DSpace Publications.
+  # Get information about DSpace Publication entities.
   #
-  # @param [Hash] opt                 Passed to #lookup_publications.
-  #
-  # @return [Hash{String=>Entry}]
-  #
-  def publications(**opt)
-    # noinspection RubyMismatchedReturnType
-    lookup_publications(**opt)
-  end
-
-  # Fetch information about the given DSpace Publication entities.
-  #
-  # @param [Array<String,Hash>] publication   All Publications if empty.
-  # @param [Hash]               opt           Passed to super.
+  # @param [Array<String,Hash>] item  All Publications if empty.
+  # @param [Hash]               opt   Passed to Lookup#execute.
   #
   # @return [Hash{String=>Entry}]
   #
-  def lookup_publications(*publication, **opt)
+  def publications(*item, **opt)
     # noinspection RubyMismatchedReturnType
-    Lookup.new.execute(*publication, **opt)
+    Lookup.new.execute(*item, **opt)
   end
 
 end

@@ -3,10 +3,9 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Methods for translating LibraOpen export to an import "metadata_dspace.xml".
+# Abstract base class extensions for importing DSpace entities.
 
-require 'common'
-require 'logging'
+require 'entity'
 
 require_relative 'options'
 require_relative 'xml'
@@ -15,31 +14,13 @@ require_relative 'xml'
 # :section: Classes
 # =============================================================================
 
-# Abstract base class for DSpace entity types.
+# Abstract base class extensions for importing DSpace entities.
+#
 class Entity
 
-  # Methods which derive entity information from provided data.
+  # Extensions for importing DSpace entities.
+  #
   module Methods
-
-    # Prefix for describing a key in diagnostic output.
-    #
-    # @return [String]
-    #
-    def key_label = 'Entity'
-
-    # Generate an ImportTable key derived from the given data.
-    #
-    # @param [Hash] data
-    #
-    # @return [String, nil]           Import table key.
-    #
-    def key_for(data) = to_be_overridden
-
-    # Fields to use from LibraOpen export data.
-    #
-    # @return [Array<Symbol>]
-    #
-    def export_fields = to_be_overridden
 
     # The name of the import subdirectory for an entity import.
     #
@@ -49,61 +30,10 @@ class Entity
     #
     def import_name(data) = to_be_overridden
 
-    # Name of the entity for use in titles.
-    #
-    # @param [Hash] data
-    #
-    # @return [String, nil]
-    #
-    def title_name(data) = to_be_overridden
-
-    # Description line(s).
-    #
-    # @param [Hash] data
-    #
-    # @return [Array<String>]
-    #
-    def description(data) = []
-
-    # Email address associated with the entity.
-    #
-    # @param [Hash] data
-    #
-    # @return [String, nil]
-    #
-    def entity_email(data) = to_be_overridden
-
-    # For strings, strip leading and trailing whitespace, reduce internal
-    # whitespace to a single space.  If the result is blank or nil, return nil.
-    #
-    # @param [*] v
-    #
-    # @return [*, nil]
-    #
-    def normalize(v)
-      v = v.squish.gsub(/\\u0026/, '&').sub(/[.,;:]+$/, '') if v.is_a?(String)
-      v.presence
-    end
-
-    # Form a key from individual part(s).
-    #
-    # Because the key is used as the basis of a subdirectory name, this method
-    # ensures that the result does not end with '.' because that could be a
-    # problem for `mkdir`.
-    #
-    # @param [Array<String>] parts
-    # @param [String]        connector
-    #
-    # @return [String, nil]
-    #
-    def key_from(*parts, connector: '+')
-      parts.compact_blank!
-      parts.map! { CGI.escapeURIComponent(_1.downcase) }
-      parts.join(connector).delete_suffix('.') unless parts.blank?
-    end
-
   end
 
+  # Extensions for importing DSpace entities.
+  #
   module ClassMethods
 
     include Methods
@@ -111,12 +41,6 @@ class Entity
     # =========================================================================
     # :section:
     # =========================================================================
-
-    # Existing entities acquired from DSpace.
-    #
-    # @return [Hash{String=>Dspace::Entity::Entry}]
-    #
-    def current_table = to_be_overridden
 
     # All entity imports.
     #
@@ -133,7 +57,7 @@ class Entity
     # @return [String, nil]           ID added.
     #
     def add_import(data, force: false)
-      tag = "#{key_label}.#{__method__}"
+      tag = "#{type_label}.#{__method__}"
       if (key = key_for(data)).nil?
         debug { "#{__method__}: #{tag}: no key from #{data.inspect}" }
       elsif !force && current_table.key?(key)
@@ -145,12 +69,12 @@ class Entity
 
     # Add import subdirectories for each entity referenced by the subclass.
     #
-    # @param [Hash] opt               Passed to #show_steps.
+    # @param [Hash] opt               Passed to #mark_steps.
     #
     # @return [Integer]               Number of subdirectories created.
     #
     def make_imports(**opt)
-      show_steps(import_table, **opt) do |key, data|
+      mark_steps(import_table, **opt) do |key, data|
         make_import(key, data)
       end
     end
@@ -203,68 +127,6 @@ class Entity
       dir_path
     rescue => err
       raise "Could not create import subdir for #{dir}: #{err}"
-    end
-
-    # =========================================================================
-    # :section: DSpace data
-    # =========================================================================
-
-    protected
-
-    # Acquire current entity data from DSpace.
-    #
-    # @return [Hash{String=>Dspace::Entity::Entry}]
-    #
-    def get_current_data = to_be_overridden
-
-    # Generate `current_table` contents from `saved_table_path` contents for
-    # the "--fast" option or from existing data acquired from DSpace.
-    #
-    # @return [Hash{String=>Dspace::Entity::Entry}]
-    #
-    def get_current_table
-      option.fast and (saved_table = get_saved_table) and return saved_table
-      get_current_data.map { |_, entry|
-        key = key_for(entry)
-        [key, entry]
-      }.to_h.tap { set_saved_table(_1) }
-    end
-
-    # The relative path to the `current_table` data storage file.
-    #
-    # @return [String]
-    #
-    def saved_table_path = to_be_overridden
-
-    # Get the value of `current_table` from the previous run.
-    #
-    # @param [String] table_file
-    #
-    # @return [Hash{String=>Dspace::Entity::Entry}]
-    # @return [nil] If the saved_table_path file is not found or empty.
-    #
-    def get_saved_table(table_file: saved_table_path)
-      debug { "#{__method__} #{table_file}" }
-      JSON.load_file(table_file).presence
-    rescue Errno::ENOENT
-      nil
-    end
-
-    # Store the value of `current_table` for future "--fast" runs.
-    #
-    # @param [Hash{String=>Dspace::Entity::Entry}] entries
-    # @param [String]                              table_file
-    #
-    def set_saved_table(entries, table_file: saved_table_path)
-      debug { "#{__method__} #{table_file}" }
-      table_file = File.expand_path(table_file, PROJECT_DIRECTORY)
-      unless Dir.exist?((dir = File.dirname(table_file)))
-        debug { "#{__method__}: creating #{dir.inspect}" }
-        Dir.mkdir(dir)
-      end
-      File.open(table_file, 'w') do |file|
-        JSON.dump(entries, file)
-      end
     end
 
     # =========================================================================
@@ -322,51 +184,9 @@ class Entity
 
   extend ClassMethods
 
-  # Base class for holding the data for a single entity import.
-  class Import < Hash
-
-    include Methods
-
-    # =========================================================================
-    # :section:
-    # =========================================================================
-
-    # Create a new Entity::Import instance.
-    #
-    # @param [Hash] data
-    #
-    def initialize(data)
-      data = extract_fields(data) unless data.is_a?(Import)
-      update(data)
-    end
-
-    # Return a hash with clean values.
-    #
-    # @param [Hash] data
-    #
-    # @return [Hash]
-    #
-    def extract_fields(data)
-      data.slice(*export_fields).transform_values { normalize(_1) }.compact
-    end
-
-    # The key for this instance in ImportTable.
-    #
-    # @return [String]
-    #
-    def table_key = to_be_overridden
-
-    # Create a new instance if necessary.
-    #
-    # @param [Import, Hash] data
-    #
-    # @return [Import]
-    #
-    def self.wrap(data)
-      # noinspection RubyMismatchedReturnType
-      data.is_a?(self) ? data : new(data)
-    end
-
+  # Extensions for importing DSpace entities.
+  #
+  class Import
   end
 
   # Base class for objects which maintaining mappings to data to be used to
@@ -396,7 +216,7 @@ class Entity
     # @return [String, nil]           ID added.
     #
     def add(data, key: nil)
-      tag = "#{key_label}.import_table.#{__method__}"
+      tag = "#{type_label}.import_table.#{__method__}"
       # noinspection RubyMismatchedArgumentType
       if (key ||= key_for(data)).nil?
         debug { "#{__method__}: #{tag}: no key from #{data.inspect}" }

@@ -28,7 +28,7 @@ class TableOptions < BaseOptions
   # :section: Properties
   # ===========================================================================
 
-  attr_accessor :uuid, :handle, :name
+  attr_accessor :uuid, :handle, :name, :full, :fast
 
   # ===========================================================================
   # :section: BaseOptions overrides
@@ -36,15 +36,27 @@ class TableOptions < BaseOptions
 
   protected
 
+  # Set initial option attributes before parsing.
+  #
+  # @return [void]
+  #
+  def initialize_options
+    super
+    @full = false
+    @fast = false
+  end
+
   # Create an option parser for the option attributes of this class.
   #
   # @return [OptionParser]
   #
   def new_parser(&blk)
     super do |p|
-      p.on('--uuid',   'Output only UUIDs')   { @uuid   = true }
-      p.on('--handle', 'Output only handles') { @handle = true }
-      p.on('--name',   'Output only names')   { @name   = true }
+      p.on('--uuid',      'Output only UUIDs')        { @uuid   = true }
+      p.on('--handle',    'Output only handles')      { @handle = true }
+      p.on('--name',      'Output only names')        { @name   = true }
+      p.on('--[no-]full', 'Show full community path') { @full   = _1 }
+      p.on('--[no-]fast', 'Skip fetch if possible')   { @fast   = _1 }
       blk&.call(p)
     end
   end
@@ -58,6 +70,8 @@ class TableOptions < BaseOptions
     output_line "HELP: uuid          = #{uuid.inspect}"
     output_line "HELP: handle        = #{handle.inspect}"
     output_line "HELP: name          = #{name.inspect}"
+    output_line "HELP: full          = #{full.inspect}"
+    output_line "HELP: fast          = #{fast.inspect}"
   end
 
 end

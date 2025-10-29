@@ -5,13 +5,12 @@
 #
 # DSpace API Person methods.
 
-require_relative 'entity'
+require 'dspace/entity'
+require 'person'
 
 # Information about current DSpace Person entities.
 #
 module Dspace::Person
-
-  include Dspace::Entity
 
   # ===========================================================================
   # :section: Classes
@@ -36,32 +35,31 @@ module Dspace::Person
   class Lookup < Dspace::Entity::Lookup
 
     # =========================================================================
-    # :section: Dspace::Entity::Lookup overrides
+    # :section: Dspace::Api::Lookup overrides
     # =========================================================================
 
     public
 
     # Fetch information about the given DSpace Person entities.
     #
-    # @param [Array<String,Hash>] entity
-    # @param [Hash]               opt       Passed to super.
+    # @param [Array<String,Hash>] item  Specific Persons to find.
+    # @param [Hash]               opt   Passed to super.
     #
     # @return [Hash{String=>Entry}]
     #
-    def execute(*entity, **opt)
+    def execute(*item, **opt)
       # noinspection RubyMismatchedReturnType
       super do |result, entry|
-        if (parent = entry[:parent])
-          entry[:department]  = entry[:name]
-          entry[:institution] = result[parent]&.name || parent
-        else
-          entry[:institution] = entry[:name]
+        unless entry[:institution].present? || (parent = entry[:parent]).blank?
+          inst = result[parent]&.name
+          inst = nil if ::OrgUnit.uva_org_name?(inst)
+          entry[:institution] = inst || parent
         end
       end
     end
 
     # =========================================================================
-    # :section: Dspace::Entity::Lookup overrides - internal methods
+    # :section: Dspace::Api::Lookup overrides
     # =========================================================================
 
     protected
@@ -69,36 +67,44 @@ module Dspace::Person
     # Transform DSpace API search result objects into Person entries.
     #
     # @param [Array<Hash>] list
-    # @param [Hash]        opt        Passed to super.
+    # @param [Symbol]      result_key   One of `Entry#keys`.
+    # @param [Hash]        opt          Passed to #transform_item.
     #
     # @return [Hash{String=>Entry}]
     #
-    def transform_entity_objects(list, **opt)
+    def transform_items(list, result_key: Entry.default_key, **opt)
       # noinspection RubyMismatchedReturnType
-      super(list, result_key: Entry.default_key, **opt)
+      super
     end
 
     # Transform a DSpace API search result list object into a Person entry.
     #
     # @param [Hash] item
+    # @param [Hash] opt               Passed to Entry#initialize.
     #
     # @return [Entry]
     #
-    def transform_entity_object(item)
+    def transform_item(item, **opt)
       field = ->(f) { Array.wrap(item.dig(:metadata, f)).first&.dig(:value) }
-      entry = Entry.new(item)
+      entry = Entry.new(item, **opt)
       entry[:name]         ||= field.(:'dc.title')
       entry[:org]          ||= field.(:'relation.isOrgUnitOfPerson')
       entry[:first_name]   ||= field.(:'person.givenName')
       entry[:last_name]    ||= field.(:'person.familyName')
       entry[:computing_id] ||= field.(:'person.identifier')
       unless entry[:first_name] && entry[:last_name]
-        values = entity_specifier(entry[:name])
+        values = entity_specifier(entry[:name], fatal: false)
         entry[:first_name] ||= values[:first_name] if values[:first_name]
         entry[:last_name]  ||= values[:last_name]  if values[:last_name]
       end
       entry
     end
+
+    # =========================================================================
+    # :section: Dspace::Entity::Lookup overrides
+    # =========================================================================
+
+    protected
 
     # Generate a query for finding Person entities.
     #
@@ -129,13 +135,17 @@ module Dspace::Person
 
     # Transform the String argument into properties for #person_term.
     #
-    # @param [String] arg
+    # @param [String]  arg
+    # @param [Boolean] fatal          If *false*, return empty hash.
     #
     # @return [Hash{Symbol=>String}]
     #
-    def entity_specifier(arg)
-      arg = arg.to_s.squish.presence or raise 'empty string'
-      if arg.include?(',')
+    def entity_specifier(arg, fatal: true)
+      arg = arg.to_s.squish
+      if arg.blank?
+        raise 'empty string' if fatal
+        {}
+      elsif arg.include?(',')
         last, first = arg.split(',', 2).map(&:strip)
         { last_name: last, first_name: first }.compact
       elsif arg != arg.downcase
@@ -145,33 +155,63 @@ module Dspace::Person
       end
     end
 
+    # =========================================================================
+    # :section: StorageTable overrides
+    # =========================================================================
+
+    public
+
+    # Existing Persons acquired from DSpace.
+    #
+    # @param [Hash] opt               To #get_current_table on first run.
+    #
+    # @return [Hash{String=>Entry}]
+    #
+    def current_table(**opt)
+      # noinspection RubyMismatchedReturnType
+      @current_table ||= super
+    end
+
+    # Generate a table key derived from the given data.
+    #
+    # @param [Hash{Symbol=>*}] data   Person properties.
+    #
+    # @return [String, nil]           Hash key.
+    #
+    def key_for(data)
+      ::Person.key_for(data)
+    end
+
+    # =========================================================================
+    # :section: StorageTable overrides
+    # =========================================================================
+
+    protected
+
+    # The absolute path to the `current_table` data storage file.
+    #
+    # @return [String]
+    #
+    def storage_path
+      @storage_path ||= super(file: "tmp/saved/#{DEPLOYMENT}/persons.json")
+    end
+
   end
 
   # ===========================================================================
   # :section: Methods
   # ===========================================================================
 
-  # Fetch all DSpace Persons.
+  # Get information about DSpace Person entities.
   #
-  # @param [Hash] opt                 Passed to #lookup_persons.
-  #
-  # @return [Hash{String=>Entry}]
-  #
-  def persons(**opt)
-    # noinspection RubyMismatchedReturnType
-    lookup_persons(**opt)
-  end
-
-  # Fetch information about the given DSpace Person entities.
-  #
-  # @param [Array<String,Hash>] person    All Persons if empty.
-  # @param [Hash]               opt       Passed to super.
+  # @param [Array<String,Hash>] item  All Persons if empty.
+  # @param [Hash]               opt   Passed to Lookup#find_or_fetch.
   #
   # @return [Hash{String=>Entry}]
   #
-  def lookup_persons(*person, **opt)
+  def persons(*item, **opt)
     # noinspection RubyMismatchedReturnType
-    Lookup.new.execute(*person, **opt)
+    Lookup.new.find_or_fetch(*item, **opt)
   end
 
 end

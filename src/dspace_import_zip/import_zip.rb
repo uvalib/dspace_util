@@ -22,7 +22,12 @@ require 'zip'
 # @param [Integer, nil] size          Break into files of N items (batch_size).
 # @param [String]       root          Top-level import directory.
 #
-def make_import_zip(parts: option.batch_count, size: option.batch_size, root: option.import_root)
+#--
+# noinspection RubyMismatchedArgumentType
+#++
+def make_import_zip(parts: nil, size: nil, root: option.import_root)
+  parts = option.batch_count if parts.nil?
+  size  = option.batch_size  if size.nil?
   parts = nil if parts && (parts <= 1)
   size  = nil if size  && (size  <= 0)
   info do
@@ -131,14 +136,14 @@ end
 # @param [Integer, nil]               size    If `zips` not given (batch_size)
 # @param [String]                     root    Top-level import directory.
 #
-def verify_zip(zips = nil, parts: option.batch_count, size: option.batch_size, root: option.import_root)
+def verify_zip(zips = nil, parts: nil, size: nil, root: option.import_root)
   info __method__
-  zips ||=
-    if parts.positive? || size.positive?
-      Dir.glob("#{root}-[0-9]*.zip")
-    else
-      zip_name(root: root)
-    end
+  if zips.nil?
+    parts = option.batch_count if parts.nil?
+    size  = option.batch_size  if size.nil?
+    batch = parts.positive? || size.positive?
+    zips  = batch ? Dir.glob("#{root}-[0-9]*.zip") : zip_name(root: root)
+  end
   Array.wrap(zips).each do |zip|
     show { "\nCHECKING #{zip.inspect}" }
     output_line `unzip -tq "#{zip}"`

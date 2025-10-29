@@ -353,6 +353,23 @@ Get information about DSpace collections in tabular form.
 This does not currently take arguments.
 With no arguments, all collections are listed.
 
+#### Options
+
+##### --production | --staging
+
+Indicate the target DSpace host.
+(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
+
+##### --full
+
+Display the full community path to the collection.
+
+##### --fast
+
+Used saved data if possible.
+
+<!---------------------------------------------------------------------------->
+
 ### `dspace_delete`
 
 Remove DSpace items by name or collection.

@@ -5,13 +5,11 @@
 #
 # DSpace API generic item methods.
 
-require_relative 'entity'
+require 'dspace/entity'
 
 # Information about current DSpace generic items.
 #
 module Dspace::Item
-
-  include Dspace::Entity
 
   # ===========================================================================
   # :section: Classes
@@ -27,25 +25,25 @@ module Dspace::Item
   class Lookup < Dspace::Entity::Lookup
 
     # =========================================================================
-    # :section: Dspace::Entity::Lookup overrides
+    # :section: Dspace::Api::Lookup overrides
     # =========================================================================
 
     public
 
     # Fetch information about the given DSpace items.
     #
-    # @param [Array<String,Hash>] entity
-    # @param [Hash]               opt       Passed to super.
+    # @param [Array<String,Hash>] item  Specific items to find.
+    # @param [Hash]               opt   Passed to super.
     #
     # @return [Hash{String=>Entry}]
     #
-    def execute(*entity, **opt)
+    def execute(*item, **opt)
       # noinspection RubyMismatchedReturnType
       super
     end
 
     # =========================================================================
-    # :section: Dspace::Entity::Lookup overrides - internal methods
+    # :section: Dspace::Api::Lookup overrides
     # =========================================================================
 
     protected
@@ -53,24 +51,32 @@ module Dspace::Item
     # Transform DSpace API search result objects into entries.
     #
     # @param [Array<Hash>] list
-    # @param [Hash]        opt        Passed to super.
+    # @param [Symbol]      result_key   One of `Entry#keys`.
+    # @param [Hash]        opt          Passed to #transform_item.
     #
     # @return [Hash{String=>Entry}]
     #
-    def transform_entity_objects(list, **opt)
+    def transform_items(list, result_key: Entry.default_key, **opt)
       # noinspection RubyMismatchedReturnType
-      super(list, result_key: Entry.default_key, **opt)
+      super
     end
 
     # Transform a DSpace API search result list object into an entry.
     #
     # @param [Hash] item
+    # @param [Hash] opt               Passed to Entry#initialize.
     #
     # @return [Entry]
     #
-    def transform_entity_object(item)
-      Entry.new(item)
+    def transform_item(item, **opt)
+      Entry.new(item, **opt)
     end
+
+    # =========================================================================
+    # :section: Dspace::Entity::Lookup overrides
+    # =========================================================================
+
+    protected
 
     # Generate a query for finding items.
     #
@@ -89,27 +95,16 @@ module Dspace::Item
   # :section: Methods
   # ===========================================================================
 
-  # Fetch all DSpace items.
+  # Get information about DSpace items.
   #
-  # @param [Hash] opt                 Passed to #lookup_items.
-  #
-  # @return [Hash{String=>Entry}]
-  #
-  def items(**opt)
-    # noinspection RubyMismatchedReturnType
-    lookup_items(**opt)
-  end
-
-  # Fetch information about the given DSpace Publication entities.
-  #
-  # @param [Array<String,Hash>] name  All items if empty.
-  # @param [Hash]               opt   Passed to super.
+  # @param [Array<String,Hash>] item  All items if empty.
+  # @param [Hash]               opt   Passed to Lookup#execute.
   #
   # @return [Hash{String=>Entry}]
   #
-  def lookup_items(*name, **opt)
+  def items(*item, **opt)
     # noinspection RubyMismatchedReturnType
-    Lookup.new.execute(*name, **opt)
+    Lookup.new.execute(*item, **opt)
   end
 
 end

@@ -27,16 +27,18 @@ end
 # Generate an output table of DSpace items.
 #
 # @param [Array<String>] name         All items if empty.
-# @param [String, nil]   scope        Limit to the given collection.
-# @param [Boolean]       no_show      If false show page progress.
+# @param [String, nil]   scope        Limit to given collection (option.scope)
+# @param [Boolean, nil]  fast         Used saved data if possible (option.fast)
 # @param [Hash]          opt          Passed to ItemListing.
 #
-def lookup_items(*name, scope: option.scope, no_show: true, **opt)
-  results = Dspace.lookup_items(*name, scope: scope, no_show: no_show)
+def lookup_items(*name, scope: nil, fast: nil, **opt)
+  scope   = option.scope if scope.nil?
+  fast    = option.fast  if fast.nil?
+  results = Dspace.items(*name, scope: scope, fast: fast, no_mark: true)
   columns = []
   columns << :uuid   if option.uuid
   columns << :handle if option.handle
-  columns << :name   if option.name
+  columns << :title  if option.name
   opt[:only] = [*opt[:only], *columns].uniq if columns.present?
   ItemListing.new(**opt).output(results)
 end

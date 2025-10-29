@@ -3,62 +3,29 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Accumulate department identities.
+# Extensions for importing DSpace OrgUnit entities.
 
 require 'common'
 require 'logging'
-require 'dspace'
+require 'org_unit'
 
 require_relative 'collection'
 require_relative 'entity'
 require_relative 'xml'
 
 # =============================================================================
-# :section: Constants
-# =============================================================================
-
-UVA_ORG_NAME = 'University of Virginia'
-
-# =============================================================================
 # :section: Classes
 # =============================================================================
 
-# An object which maintains data for OrgUnit entities to be created.
-class OrgUnit < Entity
+# Extensions for importing DSpace OrgUnit entities.
+#
+class OrgUnit
 
-  # Methods which derive OrgUnit information from provided data.
+  # Extensions for importing DSpace OrgUnit entities.
+  #
   module Methods
 
     include Entity::Methods
-
-    # =========================================================================
-    # :section: Entity::Methods overrides
-    # =========================================================================
-
-    # Prefix for describing a key in diagnostic output.
-    #
-    # @return [String]
-    #
-    def key_label = 'Org'
-
-    # Fields to use from LibraOpen export data.
-    #
-    # @return [Array<Symbol>]
-    #
-    def export_fields
-      %i[department institution]
-    end
-
-    # Generate an ImportTable key derived from the given data.
-    #
-    # @param [Hash{Symbol=>*}] data     Department properties.
-    #
-    # @return [String, nil]             Hash key.
-    #
-    def key_for(data)
-      return data[:table_key] if data[:table_key]
-      key_from(*Import.wrap(data).values_at(:institution, :department))
-    end
 
     # The name of the import subdirectory for an OrgUnit entity import.
     #
@@ -71,29 +38,10 @@ class OrgUnit < Entity
       "#{ORG_PREFIX}#{key}" if key.present?
     end
 
-    # Name of the department for a UVA department; otherwise, the institution
-    # and department, or nil.
-    #
-    # @param [Hash] data
-    #
-    # @return [String, nil]
-    #
-    def title_name(data)
-      Import.wrap(data)[:title_name]
-    end
-
-    # Description line(s).
-    #
-    # @param [Hash] data
-    #
-    # @return [Array<String>]
-    #
-    def description(data)
-      Import.wrap(data)[:description]
-    end
-
   end
 
+  # Extensions for importing DSpace OrgUnit entities.
+  #
   module ClassMethods
 
     include Entity::ClassMethods
@@ -102,15 +50,6 @@ class OrgUnit < Entity
     # =========================================================================
     # :section: Entity::ClassMethods overrides
     # =========================================================================
-
-    # Existing OrgUnits acquired from DSpace.
-    #
-    # @return [Hash{String=>Dspace::OrgUnit::Entry}]
-    #
-    def current_table
-      # noinspection RubyMismatchedReturnType
-      @current_table ||= get_current_table
-    end
 
     # All OrgUnit entity imports.
     #
@@ -139,24 +78,6 @@ class OrgUnit < Entity
       }
       write_import_files(subdir, files)
     end
-
-    # =========================================================================
-    # :section: DSpace data - Entity::ClassMethods overrides
-    # =========================================================================
-
-    protected
-
-    # Acquire current OrgUnit entity data from DSpace.
-    #
-    # @return [Hash{String=>Dspace::Entity::Entry}]
-    #
-    def get_current_data = Dspace.orgs
-
-    # The project-relative path to the `current_table` data storage file.
-    #
-    # @return [String]
-    #
-    def saved_table_path = 'tmp/saved/orgs'
 
     # =========================================================================
     # :section: Entity::ClassMethods overrides
@@ -215,155 +136,13 @@ class OrgUnit < Entity
 
   extend ClassMethods
 
-  # Data for a single OrgUnit entity import.
+  # Extensions for importing DSpace OrgUnit entities.
+  #
   class Import < Entity::Import
 
     include Methods
 
-    def key_for     (data = nil) = super(data || self)
     def import_name (data = nil) = super(data || self)
-    def title_name  (data = nil) = super(data || self)
-    def description (data = nil) = super(data || self)
-
-    # The top-level organization prefix for a UVA department name.
-    #
-    # @type [Hash{String=>String}]
-    #
-    SCHOOL = {
-      'AR'  => 'Architecture',
-      'AS'  => 'Arts & Sciences',
-      'BA'  => 'School of Business Administration',
-      #'CU' => '???',
-      #'DA' => '???',
-      #'DS' => '???',
-      'ED'  => 'School of Education',
-      'EN'  => 'School of Engineering',
-      'FM'  => 'Facilities Management',
-      'HS'  => 'Health Sciences',
-      'IT'  => 'Information Technology',
-      'LB'  => 'University Library',
-      'LW'  => 'School of Law',
-      'MC'  => 'Medical Center',
-      'MD'  => 'School of Medicine',
-      'NR'  => 'School of Nursing',
-      #'PV' => '???',
-      #'RS' => 'Research', # ?
-      #'SA' => 'Student Affairs', # ?
-    }
-
-    # Normalizations for abbreviated UVA department names.
-    #
-    # @type [Hash{String=>String}]
-    #
-    #--
-    # noinspection SpellCheckingInspection
-    #++
-    DEPARTMENT = {
-      'APMA'                            => 'Applied Mathematics',
-      'Arch Dept'                       => 'Architecture',
-      'Arch History Dept'               => 'Architectural History',
-      'Biomed Engr Dept'                => 'Biomedical Engineering',
-      'Biomedical Eng'                  => 'Biomedical Engineering',
-      'Chem Engr Dept'                  => 'Chemical Engineering',
-      'Comp Science Dept'               => 'Computer Science',
-      'Elec & Comp Engr Dept'           => 'Electrical and Computer Engineering',
-      'Elec/Computer Engr Dept'         => 'Electrical and Computer Engineering',
-      'Landscape Dept'                  => 'Landscape Architecture',
-      'Mat Sci & Engr Dept'             => 'Materials Science and Engineering',
-      'Mech & Aero Engr Dept'           => 'Mechanical and Aerospace Engineering',
-      'Mole Phys & Biophysics'          => 'Molecular Phys and Biological Physics',
-      'Planning Dept'                   => 'Urban and Environmental Planning',
-      'Urban & Environmental Planning'  => 'Urban and Environmental Planning',
-      'Urban/Environmental Planning'    => 'Urban and Environmental Planning',
-      'Spanish Italian Portuguese'      => 'Spanish, Italian, and Portuguese',
-      'Spanish, Italian & Portuguese'   => 'Spanish, Italian, and Portuguese',
-    }
-
-    # Create a new OrgUnit::Import instance with department and institution
-    # normalized to account for observed variations in the source data.
-    #
-    # @param [Hash] data
-    #
-    def initialize(data)
-      super
-
-      orig = dept = self[:department]
-      inst = self[:institution].presence
-      inst = self[:institution] = UVA_ORG_NAME if inst.nil? || (inst == dept)
-
-      if dept.blank?
-        self[:title_name]  = inst
-        self[:description] = []
-
-      elsif inst != UVA_ORG_NAME
-        self[:department]  = dept = normalize_department(dept)
-        self[:title_name]  = [inst, dept].compact_blank.join(' - ')
-        self[:description] = [inst, orig].compact_blank
-
-      else
-        if (sch = SCHOOL[dept])
-          dept = sch.dup
-          sch  = nil
-        elsif dept.match(/^(UPG-)?(MD)-[A-Z]{4} *(.*)$/)
-          dept = $3.dup
-          sch  = SCHOOL[$2]
-        elsif dept.match(/^([A-Z][A-Z])- *(.*)$/i)
-          dept = $2.dup
-          sch  = SCHOOL[$1] || $1
-        else
-          dept = dept.dup
-          sch  = nil
-        end
-        dept.sub!(/, *UPG-MD-[A-Z]{4}$/, '') # Redundant department reference.
-        dept.sub!(/ +\([A-Z]{3,4}\)$/, '')   # Redundant department code.
-        dept.sub!(/-[a-z]{3,4} *$/, '')      # School class section number.
-        dept.sub!(/^Masters? of */, '')
-        self[:department]  = dept = normalize_department(dept)
-        self[:title_name]  = dept
-        self[:description] = [inst, sch, orig].compact_blank
-      end
-    end
-
-    # =========================================================================
-    # :section: Entity::Import overrides
-    # =========================================================================
-
-    # The key for this instance in OrgUnit::ImportTable.
-    #
-    # @return [String]
-    #
-    def table_key
-      # noinspection RubyMismatchedReturnType
-      @table_key ||= key_for(self)
-    end
-
-    # Create a new instance if necessary.
-    #
-    # @param [Import, Hash] data
-    #
-    # @return [Import]
-    #
-    def self.wrap(data)
-      # noinspection RubyMismatchedReturnType
-      super
-    end
-
-    # =========================================================================
-    # :section:
-    # =========================================================================
-
-    # Transform to a standardized department name.
-    #
-    # @param [String, nil] name
-    #
-    # @return [String]                Blank if name is nil or blank.
-    #
-    def normalize_department(name)
-      name = name&.squish&.presence or return ''
-      name.sub!(/^(Department|Dept\.|Dept) (of|for) /, '')
-      name.sub!(/[ .,;:]+$/, '')
-      DEPARTMENT[name]&.dup || name
-    end
 
   end
 

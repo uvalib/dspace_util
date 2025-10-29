@@ -3,28 +3,30 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Create the DSpace import directory from LibraOpen export directory.
+# Extensions for importing DSpace Publication entities.
 
 require 'common'
 require 'logging'
+require 'publication'
 
 require_relative 'options'
 require_relative 'collection'
 require_relative 'export_item'
 require_relative 'entity'
-require_relative 'person'
 
 # =============================================================================
 # :section: Classes
 # =============================================================================
 
-# Encapsulates creation of Publication entities.
-class Publication < Entity
+# Extensions for importing DSpace Publication entities.
+#
+class Publication
 
   require_relative 'publication/content'
   require_relative 'publication/metadata'
 
-  # Methods which derive Publication information from provided data.
+  # Extensions for importing DSpace Publication entities.
+  #
   module Methods
 
     include Entity::Methods
@@ -80,12 +82,12 @@ class Publication < Entity
     # Add import subdirectories for each export.
     #
     # @param [Array<ExportItem>] exports
-    # @param [Hash] opt                   Passed to #show_steps.
+    # @param [Hash] opt                   Passed to #mark_steps.
     #
     # @return [Integer]                   Number of subdirectories created.
     #
     def make_imports(exports, **opt)
-      show_steps(exports, **opt) do |export|
+      mark_steps(exports, **opt) do |export|
         make_import(export)
       end
     end

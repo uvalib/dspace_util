@@ -20,7 +20,7 @@ require 'entity_listing'
 class PublicationListing < EntityListing
 
   def self.template
-    { 'UUID' => :uuid, 'Handle' => :handle, 'Title' => :name}
+    { 'UUID' => :uuid, 'Handle' => :handle, 'Title' => :title }
   end
 
 end
@@ -32,16 +32,18 @@ end
 # Generate an output table of DSpace Publications.
 #
 # @param [Array<String>] item         All Publications if empty.
-# @param [String, nil]   scope        Limit to the given collection.
-# @param [Boolean]       no_show      If false show page progress.
+# @param [String, nil]   scope        Limit to given collection (option.scope)
+# @param [Boolean, nil]  fast         Used saved data if possible (option.fast)
 # @param [Hash]          opt          Passed to PublicationListing.
 #
-def lookup_publications(*item, scope: option.scope, no_show: true, **opt)
-  results = Dspace.lookup_publications(*item, scope: scope, no_show: no_show)
+def lookup_publications(*item, scope: nil, fast: nil, **opt)
+  scope   = option.scope if scope.nil?
+  fast    = option.fast  if fast.nil?
+  results = Dspace.publications(*item, scope: scope, fast: fast, no_mark: true)
   columns = []
   columns << :uuid   if option.uuid
   columns << :handle if option.handle
-  columns << :name   if option.name
+  columns << :title  if option.name
   opt[:only] = [*opt[:only], *columns].uniq if columns.present?
   PublicationListing.new(**opt).output(results)
 end

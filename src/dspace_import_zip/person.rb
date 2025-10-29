@@ -3,65 +3,30 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Accumulate author/contributor identities.
+# Extensions for importing DSpace Person entities.
 
 require 'common'
 require 'logging'
-require 'dspace'
+require 'person'
 
 require_relative 'collection'
+require_relative 'export_item'
 require_relative 'entity'
 require_relative 'xml'
-
-# =============================================================================
-# :section: Constants
-# =============================================================================
-
-UVA_DOMAIN = 'virginia.edu'
 
 # =============================================================================
 # :section: Classes
 # =============================================================================
 
-# An object which maintains data for Person entities to be created.
-class Person < Entity
+# Extensions for importing DSpace Person entities.
+#
+class Person
 
-  # Methods which derive Person information from provided data.
+  # Extensions for importing DSpace Person entities.
+  #
   module Methods
 
     include Entity::Methods
-
-    # =========================================================================
-    # :section: Entity::Methods overrides
-    # =========================================================================
-
-    # Prefix for describing a key in diagnostic output.
-    #
-    # @return [String]
-    #
-    def key_label = 'Person'
-
-    # Fields to use from LibraOpen export data.
-    #
-    # @return [Array<Symbol>]
-    #
-    def export_fields
-      %i[first_name last_name computing_id department institution]
-    end
-
-    # Generate an ImportTable key derived from the given data.
-    #
-    # @param [Hash{Symbol=>*}] data     Person properties.
-    #
-    # @return [String, nil]             Hash key.
-    #
-    def key_for(data)
-      return data[:table_key] if data[:table_key]
-      data    = Import.wrap(data)
-      parts   = Array.wrap(data[:computing_id]).presence
-      parts ||= data.values_at(:last_name, :first_name)
-      key_from(*parts)
-    end
 
     # The name of the import subdirectory for a Person entity import.
     #
@@ -72,43 +37,6 @@ class Person < Entity
     def import_name(data)
       key = data.is_a?(Hash) ? key_for(data) : normalize(data)
       "#{PERSON_PREFIX}#{key}" if key.present?
-    end
-
-    # Name of the person in bibliographic order for use in titles.
-    #
-    # @param [Hash] data
-    #
-    # @return [String, nil]
-    #
-    def title_name(data)
-      Import.wrap(data).values_at(:last_name, :first_name).compact.join(', ')
-    end
-
-    # Email address associated with the Person.
-    #
-    # @param [Hash] data
-    #
-    # @return [String, nil]
-    #
-    def entity_email(data)
-      cid = Import.wrap(data)[:computing_id]
-      cid.include?('@') ? cid : "#{cid}@#{UVA_DOMAIN}" if cid.present?
-    end
-
-    # =========================================================================
-    # :section:
-    # =========================================================================
-
-    # Return a normalized UVA computing ID value.
-    #
-    # @param [String, Hash] value
-    # @param [Symbol]       field
-    #
-    # @return [String, nil]
-    #
-    def normalize_cid(value, field: :computing_id)
-      value = value[field] if value.is_a?(Hash)
-      value.to_s.strip.downcase.sub(/@(\w+\.)*virginia\.edu$/, '').presence
     end
 
     # Return a normalized ORCID value.
@@ -123,20 +51,10 @@ class Person < Entity
       value.to_s.strip.sub(%r{^https?://(\w+\.)*orcid\.org/}i, '').presence
     end
 
-    # Return a normalized given name.
-    #
-    # @param [String, Hash] value
-    # @param [Symbol]       field
-    #
-    # @return [String, nil]
-    #
-    def normalize_first_name(value, field: :first_name)
-      value = value[field] if value.is_a?(Hash)
-      value.to_s.squish.delete_prefix('Dr. ').presence
-    end
-
   end
 
+  # Extensions for importing DSpace Person entities.
+  #
   module ClassMethods
 
     include Entity::ClassMethods
@@ -145,15 +63,6 @@ class Person < Entity
     # =========================================================================
     # :section: Entity::ClassMethods overrides
     # =========================================================================
-
-    # Existing Persons acquired from DSpace.
-    #
-    # @return [Hash{String=>Dspace::Person::Entry}]
-    #
-    def current_table
-      # noinspection RubyMismatchedReturnType
-      @current_table ||= get_current_table
-    end
 
     # All Person entity imports.
     #
@@ -183,24 +92,6 @@ class Person < Entity
       }
       write_import_files(subdir, files)
     end
-
-    # =========================================================================
-    # :section: DSpace data - Entity::ClassMethods overrides
-    # =========================================================================
-
-    protected
-
-    # Acquire current Person entity data from DSpace.
-    #
-    # @return [Hash{String=>Dspace::Entity::Entry}]
-    #
-    def get_current_data = Dspace.persons
-
-    # The project-relative path to the `current_table` data storage file.
-    #
-    # @return [String]
-    #
-    def saved_table_path = 'tmp/saved/persons'
 
     # =========================================================================
     # :section: Entity::ClassMethods overrides
@@ -277,39 +168,36 @@ class Person < Entity
 
   extend ClassMethods
 
-  # Data for a single Person entity import.
+  # Extensions for importing DSpace Person entities.
+  #
   class Import < Entity::Import
 
     include Methods
 
-    def key_for     (data = nil) = super(data || self)
     def import_name (data = nil) = super(data || self)
-    def title_name  (data = nil) = super(data || self)
-    def entity_email(data = nil) = super(data || self)
 
-    # Create a new Person::Import instance with computing_id and names
-    # normalized.
+    # =========================================================================
+    # :section: Internal methods
+    # =========================================================================
+
+    protected
+
+    # Complete instance initialization for import.
     #
     # If `data[:export]` is present, `data[:export].orcid` is used to set
     # :orcid if :computing_id is found there.
     #
     # @param [Hash] data
     #
-    def initialize(data)
-      export = data[:export]
-      super
-      each_pair do |k, v|
-        case k
-          when :computing_id then self[k] = normalize_cid(v)
-          when :first_name   then self[k] = normalize_first_name(v)
-        end
+    # @return [void]
+    #
+    def finish_initialize(data)
+      if (e = data[:export]).is_a?(ExportItem)
+        orcid = e.orcid[self[:computing_id]]
+      else
+        orcid = normalize_orcid(data)
       end
-      if export.is_a?(ExportItem)
-        self[:orcid] = export.orcid[self[:computing_id]]
-      elsif (orc = self[:orcid])
-        self[:orcid] = normalize_orcid(orc)
-      end
-      compact_blank!
+      self[:orcid] = orcid if orcid
       add_org(to_h)
     end
 
@@ -318,26 +206,6 @@ class Person < Entity
     # =========================================================================
 
     public
-
-    # The key for this instance in Person::ImportTable.
-    #
-    # @return [String]
-    #
-    def table_key
-      # noinspection RubyMismatchedReturnType
-      @table_key ||= key_for(self)
-    end
-
-    # Create a new instance if necessary.
-    #
-    # @param [Import, Hash] data
-    #
-    # @return [Import]
-    #
-    def self.wrap(data)
-      # noinspection RubyMismatchedReturnType
-      super
-    end
 
     # Return a duplicate of the current instance.
     #

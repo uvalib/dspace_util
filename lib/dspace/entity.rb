@@ -5,13 +5,11 @@
 #
 # DSpace entity.
 
-require_relative 'api'
+require 'dspace/api'
 
 # Information about current DSpace entity items.
 #
 module Dspace::Entity
-
-  include Dspace::Api
 
   # ===========================================================================
   # :section: Classes
@@ -32,11 +30,37 @@ module Dspace::Entity
 
     # Initialize the entry with the provided hash value.
     #
-    # @param [Hash, nil] obj          Provided directly or:
-    # @param [Hash]      opt          Provided as keyword arguments.
+    # @param [Hash, nil]    obj       Provided directly or:
+    # @param [Hash]         opt       Provided via keyword arguments.
+    # @param [Boolean, nil] full      Ignored in the base class.
     #
-    def initialize(obj = nil, **opt)
-      update((obj || opt).slice(*self.class.keys).compact)
+    def initialize(obj = nil, full: nil, **opt)
+      raise "Has both obj and opt=#{opt}" if obj.present? && opt.present?
+      update((obj || opt).slice(*self.class.keys).compact_blank)
+    end
+
+    # =========================================================================
+    # :section: Hash overrides
+    # =========================================================================
+
+    public
+
+    def inspect
+      "#{self.class.name}=#{super}"
+    end
+
+    # =========================================================================
+    # :section: Methods
+    # =========================================================================
+
+    public
+
+    # The display for this entry.
+    #
+    # @return [String]
+    #
+    def title
+      self[:name] || '???'
     end
 
   end
@@ -45,56 +69,30 @@ module Dspace::Entity
   #
   class Lookup
 
-    include Dspace::Api
+    include Dspace::Api::Lookup
 
     # =========================================================================
-    # :section: Methods
+    # :section: Dspace::Api::Lookup overrides
     # =========================================================================
 
     public
 
     # Fetch information about the given DSpace entities.
     #
-    # @param [Array<String,Hash>] entity
-    # @param [String, nil]        scope     Limit to the given collection.
-    # @param [Boolean, nil]       no_show   If false then show page progress.
-    # @param [Symbol, nil]        sort_key  One of `Entry#keys`.
-    # @param [Hash]               opt       Passed to #get_objects.
+    # @param [Array<String,Hash>] item    Specific entities to find.
+    # @param [String, nil]        scope   Limit to the given collection.
+    # @param [Hash]               opt     Passed to super.
     #
     # @return [Hash{String=>Entry}]
     #
-    def execute(*entity, scope: nil, no_show: nil, sort_key: :name, **opt)
-      opt[:query] = entity_query(*entity) unless opt.key?(:query)
-      opt[:scope] = entity_scope(scope)   unless scope.nil?
-
-      # Get the initial page of results.
-      start       = Time.now
-      list, pages = get_entity_objects(**opt)
-      result = transform_entity_objects(list, **opt)
-
-      # If more pages are available, get each of them in sequence.
-      if pages > 1
-        no_show = show_steps_off if no_show.nil?
-        ss_opt  = { start: start, marker: '.', no_show: no_show }
-        show_char ss_opt[:marker] unless no_show # For completion of page 0.
-        show_steps(1...pages, **ss_opt) do |page|
-          list, _ = get_entity_objects(**opt, page: page)
-          result.merge!(transform_entity_objects(list, **opt))
-        end
-      end
-
-      # Allow the subclass to adjust the results.
-      if block_given?
-        result.each_pair do |_, entry|
-          yield(result, entry)
-        end
-      end
-
-      sort_key ? result.sort_by { |_, entry| entry[sort_key] }.to_h : result
+    def execute(*item, scope: nil, **opt, &blk)
+      opt[:query] = entity_query(*item) unless opt.key?(:query)
+      opt[:scope] = entity_scope(scope) unless scope.nil?
+      super(**opt, &blk)
     end
 
     # =========================================================================
-    # :section: Internal methods
+    # :section: Dspace::Api::Lookup overrides
     # =========================================================================
 
     protected
@@ -106,8 +104,7 @@ module Dspace::Entity
     #
     # @return [Array<(Array<Hash>,Integer)>] Objects and total number of pages.
     #
-    def get_entity_objects(query:, **opt)
-      opt.delete(:result_key) # Not appropriate in this context.
+    def get_items(query:, **opt)
       opt.reverse_merge!(query: query).compact_blank!
       data  = dspace_api('discover/search/objects', dsoType: 'item', **opt)
       data  = data.dig(:_embedded, :searchResult) || {}
@@ -120,13 +117,14 @@ module Dspace::Entity
     #
     # @param [Array<Hash>] list
     # @param [Symbol]      result_key   One of `Entry#keys`.
+    # @param [Hash]        opt          Passed to #transform_item.
     #
     # @return [Hash{String=>Entry}]
     #
-    def transform_entity_objects(list, result_key: Entry.default_key, **)
+    def transform_items(list, result_key: Entry.default_key, **opt)
       list.map { |item|
         item  = item.dig(:_embedded, :indexableObject)
-        entry = transform_entity_object(item)
+        entry = transform_item(item, **opt)
         key   = entry[result_key]
         [key, entry]
       }.to_h
@@ -135,11 +133,12 @@ module Dspace::Entity
     # Transform a DSpace API search result list object into an entry.
     #
     # @param [Hash] item
+    # @param [Hash] opt               Passed to Entry#initialize.
     #
     # @return [Entry]
     #
-    def transform_entity_object(item)
-      Entry.new(item)
+    def transform_item(item, **opt)
+      Entry.new(item, **opt)
     end
 
     # =========================================================================

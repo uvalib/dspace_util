@@ -20,7 +20,7 @@ require 'entity_listing'
 class OrgUnitListing < EntityListing
 
   def self.template
-    { 'UUID' => :uuid, 'Handle' => :handle, 'OrgUnit' => :name}
+    { 'UUID' => :uuid, 'Handle' => :handle, 'OrgUnit' => :title }
   end
 
 end
@@ -32,16 +32,18 @@ end
 # Generate an output table of DSpace OrgUnits.
 #
 # @param [Array<String>] org          All OrgUnits if empty.
-# @param [String, nil]   scope        Limit to the given collection.
-# @param [Boolean]       no_show      If false show page progress.
+# @param [String, nil]   scope        Limit to given collection (option.scope)
+# @param [Boolean, nil]  fast         Used saved data if possible (option.fast)
 # @param [Hash]          opt          Passed to OrgUnitListing.
 #
-def lookup_orgs(*org, scope: option.scope, no_show: true, **opt)
-  results = Dspace.lookup_orgs(*org, scope: scope, no_show: no_show)
+def lookup_orgs(*org, scope: nil, fast: nil, **opt)
+  scope   = option.scope if scope.nil?
+  fast    = option.fast  if fast.nil?
+  results = Dspace.orgs(*org, scope: scope, fast: fast, no_mark: true)
   columns = []
   columns << :uuid   if option.uuid
   columns << :handle if option.handle
-  columns << :name   if option.name
+  columns << :title  if option.name
   opt[:only] = [*opt[:only], *columns].uniq if columns.present?
   OrgUnitListing.new(**opt).output(results)
 end

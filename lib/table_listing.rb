@@ -65,7 +65,7 @@ class TableListing
   # @return [Hash{String=>Symbol}]
   #
   def self.template
-    { 'UUID' => :uuid, 'Handle' => :handle, 'Name' => :name}
+    { 'UUID' => :uuid, 'Handle' => :handle, 'Name' => :title }
   end
 
   # ===========================================================================
@@ -89,7 +89,9 @@ class TableListing
     source = source.values if source.is_a?(Hash)
     source.each do |entry|
       (0...col_count).each do |col|
-        column[col] << entry[value_key[col]]
+        key = value_key[col]
+        val = entry.respond_to?(key) ? entry.send(key) : entry[key]
+        column[col] << val
       end
     end
     output_columns(column)

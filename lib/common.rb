@@ -55,6 +55,23 @@ def parse_json(file)
   JSON.load_file(file, symbolize_names: true)
 end
 
+# Form a table key from individual part(s).
+#
+# Because the key maybe used as the basis of a subdirectory name, this method
+# ensures that the result does not end with '.' because that could be a
+# problem for `mkdir`.
+#
+# @param [Array<String>] parts
+# @param [String]        connector
+#
+# @return [String, nil]
+#
+def key_from(*parts, connector: '+')
+  parts.compact_blank!
+  parts.map! { CGI.escapeURIComponent(_1.downcase) }
+  parts.join(connector).delete_suffix('.') unless parts.blank?
+end
+
 # Used within a base class function definition to indicate that it must be
 # defined by the subclass.
 #
@@ -70,37 +87,37 @@ end
 # @param [Enumerable]   enumerable
 # @param [Time]         start
 # @param [String]       marker        Marks completion of an iteration.
-# @param [Boolean, nil] no_show       If false then show page progress.
+# @param [Boolean, nil] no_mark       If not *true*, mark page progress.
 #
 # @return [Integer]                   Number of successful iterations.
 #
 # @yield [key, value] Operate on the current iteration Hash pair.
 # @yield [value]      Operate on the current iteration value.
 #
-def show_steps(enumerable, start: Time.now, marker: '#', no_show: nil, **)
+def mark_steps(enumerable, start: Time.now, marker: '#', no_mark: nil, **)
   success = 0
-  no_show = show_steps_off if no_show.nil?
+  no_mark = mark_steps_disabled if no_mark.nil?
   if enumerable.respond_to?(:each_pair)
     enumerable.each_pair do |key, value|
       yield(key, value) and success += 1
-      show_char marker unless no_show
+      show_char marker unless no_mark
     end
   elsif enumerable.respond_to?(:each)
     enumerable.each do |value|
       yield(value) and success += 1
-      show_char marker unless no_show
+      show_char marker unless no_mark
     end
   else
     raise "#{enumerable.class} is not acceptable"
   end
-  show { ' (%0.1f seconds)' % (Time.now - start) } unless no_show
+  show { ' (%0.1f seconds)' % (Time.now - start) } unless no_mark
   success
 end
 
-# Indicate whether #show_steps will actually show a marker for each step.
+# Indicate whether #mark_steps will actually show a marker for each step.
 #
 # @return [Boolean]
 #
-def show_steps_off
+def mark_steps_disabled
   option.debug || option.verbose
 end
