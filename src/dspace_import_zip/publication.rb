@@ -11,12 +11,19 @@ require 'publication'
 
 require_relative 'options'
 require_relative 'collection'
+require_relative 'embargo'
 require_relative 'export_item'
 require_relative 'entity'
 
 # =============================================================================
 # :section: Classes
 # =============================================================================
+
+# Whether embargo metadata should be included.
+#
+# @type [Boolean]
+#
+EMBARGO = (ENV['EMBARGO'] != 'false')
 
 # Extensions for importing DSpace Publication entities.
 #
@@ -102,6 +109,7 @@ class Publication
       subdir = import_name(export) or return
       files  = {
         'metadata_dspace.xml' => entity_xml(export),
+        'metadata_local.xml'  => schema_xml(export),
         'dublin_core.xml'     => metadata_xml(export),
         'collections'         => collections(export),
         'relationships'       => relationships(export),
@@ -123,6 +131,21 @@ class Publication
     #
     def entity_xml(_export)
       super(entity_type: 'Publication')
+    end
+
+    # Content for the "metadata_local.xml" file of a Publication entity import.
+    #
+    # @param [ExportItem] export
+    # @param [String]     schema
+    #
+    # @return [String, nil]
+    #
+    def schema_xml(export, schema: 'local')
+      return unless EMBARGO && (embargo = Embargo.new(export)).active?
+      Xml.new(schema: schema) { |xml|
+        xml.single(embargo.terms, 'embargo', 'terms')
+        xml.single(embargo.lift,  'embargo', 'lift')
+      }.to_xml
     end
 
     # Content for the "dublin_core.xml" of a Publication entity import.

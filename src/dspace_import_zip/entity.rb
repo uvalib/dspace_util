@@ -151,10 +151,11 @@ class Entity
     # Content for the "metadata_XXX.xml" of an entity import.
     #
     # @param [Import] data
+    # @param [String] schema
     #
     # @return [String, nil]
     #
-    def schema_xml(data) = nil
+    def schema_xml(data, schema:) = nil
 
     # Content for the "dublin_core.xml" file of an entity import.
     #

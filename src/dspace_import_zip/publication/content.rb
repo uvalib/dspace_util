@@ -8,6 +8,8 @@
 require 'common'
 require 'logging'
 
+require_relative '../visibility'
+
 # Methods for adding exported LibraOpen content to a DSpace Publication import.
 #
 module Publication::Content
@@ -28,7 +30,7 @@ module Publication::Content
   #
   def make_content(item, output_file: 'contents', root: option.import_root)
     file_map   = order_content(item.fileset, item.content).presence or return
-    read_group = get_read_group(item)
+    read_group = get_access_group(item)
     import_dir = File.expand_path(Publication.import_name(item), root)
     File.open("#{import_dir}/#{output_file}", 'w') do |contents|
       file_map.each_key do |name|
@@ -47,20 +49,6 @@ module Publication::Content
   # ===========================================================================
 
   protected
-
-  # If there are constraints on the visibility of content for the item, this
-  # method returns with the DSpace group allowed to read the content.
-  #
-  # @param [ExportItem] item
-  #
-  # @return [String, nil]
-  #
-  def get_read_group(item)
-    case parse_json(item.visibility)[:visibility]
-      when 'authenticated' then 'Authenticated Users'
-      when 'restricted'    then 'Submitter Only'
-    end
-  end
 
   # Ensure that `content_paths` are returned in the order defined by
   # `fileset_files`.  In the returned hash, each filename is paired with the

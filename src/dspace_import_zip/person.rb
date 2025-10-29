@@ -112,11 +112,12 @@ class Person
     # Content for the "metadata_organization.xml" of a Person entity import.
     #
     # @param [Import] data
+    # @param [String] schema
     #
     # @return [String]
     #
-    def schema_xml(data)
-      Xml.new(schema: 'person') { |xml|
+    def schema_xml(data, schema: 'person')
+      Xml.new(schema: schema) { |xml|
         xml.single(data[:computing_id], 'identifier')
         xml.single(data[:orcid],        'identifier', 'orcid')
         xml.single(data[:first_name],   'givenName')

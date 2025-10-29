@@ -98,11 +98,12 @@ class OrgUnit
     # Content for the "metadata_organization.xml" of an OrgUnit entity import.
     #
     # @param [Import] data
+    # @param [String] schema
     #
     # @return [String]
     #
-    def schema_xml(data)
-      Xml.new(schema: 'organization') { |xml|
+    def schema_xml(data, schema: 'organization')
+      Xml.new(schema: schema) { |xml|
         xml.single(data.title_name, 'legalName')
         xml.single(data.key_for,    'identifier')
       }.to_xml
