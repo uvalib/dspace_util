@@ -5,7 +5,8 @@
 #
 # DSpace API collection methods.
 
-require_relative 'entity'
+require 'dspace/entity'
+require 'dspace/community'
 
 # Information about current DSpace collections.
 #
@@ -15,7 +16,71 @@ module Dspace::Collection
   # :section: Classes
   # ===========================================================================
 
-  class Entry < Dspace::Entity::Entry
+  # Information for a collection acquired from the DSpace API.
+  #
+  # Note that there is no functional relationship between communities and
+  # collections in DSpace; the superclass relationship is used here only to
+  # inherit common aspects of community path definition.
+  #
+  class Entry < Dspace::Community::Entry
+
+    def entity_type = self[__method__] # Type of collection items
+
+    KEYS = (superclass::KEYS + instance_methods(false)).freeze
+
+    # =========================================================================
+    # :section: Dspace::Entity::Entry overrides
+    # =========================================================================
+
+    public
+
+    # Initialize the entry with the provided hash value.
+    #
+    # @param [Hash, nil] obj          Provided directly or:
+    # @param [Hash]      opt          Provided via keyword arguments.
+    # @param [Boolean]   full         If *true*, add community path to name.
+    #
+    def initialize(obj = nil, full: nil, **opt)
+      super
+      self[:entity_type] ||= extract_type(obj)
+    end
+
+    # =========================================================================
+    # :section: Dspace::Entity::Entry overrides
+    # =========================================================================
+
+    protected
+
+    # The DSpace API URL for the parent community.
+    #
+    # @param [String, nil] uuid
+    # @param [String]      endpoint   Format string for the URL endpoint.
+    #
+    # @return [String]
+    # @return [nil]                   If *uuid* is nil.
+    #
+    def parent_url(uuid, endpoint: 'core/collections/%s/parentCommunity')
+      super
+    end
+
+    # =========================================================================
+    # :section: Internal methods
+    # =========================================================================
+
+    protected
+
+    # Get the collection type from the DSpace data value.
+    #
+    # @param [Hash, nil] obj
+    # @param [String]    missing      Default result.
+    #
+    # @return [String]
+    #
+    def extract_type(obj, missing: 'nil')
+      type = obj&.dig(:metadata, :'dspace.entity.type')
+      type.is_a?(Array) && type[0]&.dig(:value) || missing
+    end
+
   end
 
   # Acquire collections from DSpace.

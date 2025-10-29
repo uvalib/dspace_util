@@ -106,7 +106,7 @@ module Dspace::OrgUnit
     # @return [String]
     #
     def entity_query(*arg, **opt)
-      super(*arg, **opt, type: 'OrgUnit')
+      super(*arg, **opt, entity_type: 'OrgUnit')
     end
 
     # Transform the argument into an OrgUnit query term.

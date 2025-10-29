@@ -137,14 +137,14 @@ class Entity
 
     # Content for the "metadata_dspace.xml" file of an entity import.
     #
-    # @param [String] type            The entity type.
+    # @param [String] entity_type
     # @param [String] schema
     #
     # @return [String]                XML format.
     #
-    def entity_xml(type:, schema: 'dspace', **)
+    def entity_xml(entity_type:, schema: 'dspace', **)
       Xml.new(schema: schema) { |xml|
-        xml.single(type, 'entity', 'type')
+        xml.single(entity_type, 'entity', 'type')
       }.to_xml
     end
 

@@ -96,7 +96,7 @@ module Dspace::Publication
     # @return [String]
     #
     def entity_query(*arg, **opt)
-      super(*arg, **opt, type: 'Publication')
+      super(*arg, **opt, entity_type: 'Publication')
     end
 
     # Transform the argument into a Publication query term.

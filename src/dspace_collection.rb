@@ -20,7 +20,7 @@ require 'table_listing'
 class CollectionListing < TableListing
 
   def self.template
-    { 'UUID' => :uuid, 'Handle' => :handle, 'Collection' => :name}
+    { 'UUID' => :uuid, 'Handle' => :handle, 'Type' => :entity_type, 'Collection' => :title }
   end
 
 end

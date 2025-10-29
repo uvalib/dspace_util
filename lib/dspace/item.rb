@@ -86,7 +86,7 @@ module Dspace::Item
     # @return [String]
     #
     def entity_query(*arg, **opt)
-      super(*arg, **opt, type: nil)
+      super(*arg, **opt, entity_type: nil)
     end
 
   end

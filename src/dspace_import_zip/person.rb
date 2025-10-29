@@ -106,7 +106,7 @@ class Person
     # @return [String]
     #
     def entity_xml(data)
-      super(**data, type: 'Person')
+      super(**data, entity_type: 'Person')
     end
 
     # Content for the "metadata_organization.xml" of a Person entity import.

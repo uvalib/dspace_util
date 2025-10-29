@@ -189,15 +189,15 @@ module Dspace::Entity
     # Generate a query for finding entities.
     #
     # @param [Array<String,Hash>] arg
-    # @param [String, nil]        type
+    # @param [String, nil]        entity_type
     #
     # @return [String]
     #
-    def entity_query(*arg, type: nil, **)
+    def entity_query(*arg, entity_type: nil, **)
       arg.map! { '(%s)' % entity_terms(_1) }
       res = []
-      res << "dspace.entity.type:#{type}" if type.present?
-      res << '(%s)' % arg.join('+OR+')    if arg.present?
+      res << "dspace.entity.type:#{entity_type}" if entity_type.present?
+      res << '(%s)' % arg.join('+OR+')           if arg.present?
       res.join('+AND+')
     end
 

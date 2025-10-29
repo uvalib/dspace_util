@@ -92,7 +92,7 @@ class OrgUnit
     # @return [String]
     #
     def entity_xml(data)
-      super(**data, type: 'OrgUnit')
+      super(**data, entity_type: 'OrgUnit')
     end
 
     # Content for the "metadata_organization.xml" of an OrgUnit entity import.

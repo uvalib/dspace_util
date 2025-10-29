@@ -122,7 +122,7 @@ class Publication
     # @return [String]
     #
     def entity_xml(_export)
-      super(type: 'Publication')
+      super(entity_type: 'Publication')
     end
 
     # Content for the "dublin_core.xml" of a Publication entity import.

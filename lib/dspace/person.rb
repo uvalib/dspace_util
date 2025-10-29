@@ -114,7 +114,7 @@ module Dspace::Person
     # @return [String]
     #
     def entity_query(*arg, **opt)
-      super(*arg, **opt, type: 'Person')
+      super(*arg, **opt, entity_type: 'Person')
     end
 
     # Transform the argument into a Person query term.
