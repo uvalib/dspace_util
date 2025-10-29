@@ -1,0 +1,12 @@
+#! /bin/bash
+#
+# Get information about DSpace communities and sub-communities.
+#
+# Usage: dspace_community [DEPLOYMENT] [OPTIONS] [NAME...]
+# Usage: dspace_community --help
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+PROGNAME=`basename "$PROGRAM"`
+
+exec "$BIN_DIR/run_ruby" "$PROGNAME" "$@"

@@ -7,12 +7,14 @@
 
 module Dspace
 
+  require 'dspace/community'
   require 'dspace/collection'
   require 'dspace/item'
   require 'dspace/person'
   require 'dspace/org_unit'
   require 'dspace/publication'
 
+  extend Dspace::Community
   extend Dspace::Collection
   extend Dspace::Item
   extend Dspace::Person

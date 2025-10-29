@@ -19,6 +19,8 @@ module Dspace::Entity
   #
   class Entry < Hash
 
+    include Dspace::Api
+
     def name    = self[__method__] # May be non-unique
     def uuid    = self[__method__]
     def handle  = self[__method__]
@@ -61,6 +63,20 @@ module Dspace::Entity
     #
     def title
       self[:name] || '???'
+    end
+
+    # Indicate whether the target string matches an aspect of this entry.
+    #
+    # @param [String]  target
+    # @param [Boolean] any_field      If *true*, consider all fields.
+    #
+    def match?(target, any_field = false)
+      case
+        when target.blank?                then false
+        when any_field && uuid?(target)   then target == self[:uuid]
+        when any_field && handle?(target) then target == self[:handle]
+        else                                   target == self[:name]
+      end
     end
 
   end
@@ -161,7 +177,7 @@ module Dspace::Entity
       if (hdl = handle?(arg))
         Dspace.collections.find { |_, c| return c.uuid if arg == c.handle }
       else
-        Dspace.collections.find { |_, c| return c.uuid if arg == c.name }
+        Dspace.collections.find { |_, c| return c.uuid if c.match?(arg) }
       end
       if fatal
         identifier = hdl ? 'handle' : 'name'

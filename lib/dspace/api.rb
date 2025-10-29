@@ -88,15 +88,29 @@ module Dspace::Api
   # @return [Hash{Symbol=>*}]
   #
   def dspace_api(path, **opt)
-    path = File.join("https://#{PUBLIC_HOST}/server/api", path)
-    opt  = opt.reverse_merge(size: PAGE_SIZE).map { "#{_1}=#{_2}" }.join('&')
-    url  = [path, opt].compact.join('?')
+    opt.reverse_merge!(size: PAGE_SIZE)
+    url  = dspace_api_url(path, **opt)
     debug { "#{__method__}: GET #{url}" }
-    text = URI.open(url).read || ''
-    JSON.parse(text, symbolize_names: true)
+    text = URI.open(url).read.presence
+    text ? JSON.parse(text, symbolize_names: true) : {}
   rescue OpenURI::HTTPError => e
     error { "#{__method__}: #{e}"}
     exit(false)
+  end
+
+  # Generate an absolute URL to the DSpace API.
+  #
+  # @param [String] path              Relative or absolute path.
+  # @param [Hash]   opt               Additional URL options.
+  #
+  def dspace_api_url(path, **opt)
+    root = "https://#{PUBLIC_HOST}/server/api"
+    path = path.start_with?('http') ? path.dup : File.join(root, path)
+    if opt.present?
+      path << (path.include?('?') ? '&' : '?')
+      path << opt.map { "#{_1}=#{_2}" }.join('&')
+    end
+    path
   end
 
   # ===========================================================================
