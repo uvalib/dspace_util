@@ -115,12 +115,13 @@ module Dspace::Publication
     # @return [Hash{Symbol=>String}]
     #
     def entity_specifier(arg)
-      arg = arg.to_s.squish.presence or raise 'empty string'
-      case arg
-        when /^#{HANDLE_PREFIX}/ then { handle: arg }
-        when /^author:/i         then { author: arg.sub(/^author:/i, '') }
-        when /^title:/i          then { title:  arg.sub(/^title:/i, '') }
-        else                          { title:  arg }
+      arg = arg&.squish
+      case
+        when arg.blank?                then raise 'empty string'
+        when handle?(arg)              then { handle: arg }
+        when arg.sub!(/^author:/i, '') then { author: arg }
+        when arg.sub!(/^title:/i, '')  then { title:  arg }
+        else                                { title:  arg }
       end
     end
 

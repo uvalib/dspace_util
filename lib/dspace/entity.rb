@@ -150,18 +150,24 @@ module Dspace::Entity
 
     # Return the UUID associated with the given collection identity.
     #
-    # @param [String, nil] arg
+    # @param [String, nil] arg        Collection name, handle or UUID.
+    # @param [Boolean]     fatal      If *false*, allow failed scope lookup.
     #
-    # @return [String, nil]
+    # @return [String]                Scope UUID.
+    # @return [nil]                   Not *fatal* and *arg* scope not found.
     #
-    def entity_scope(arg)
-      return unless (arg = arg&.squish&.presence)
-      return arg if arg.match?(/^\h{8}-\h{4}-\h{4}-\h{4}-\h{12}$/)
-      # noinspection RubyMismatchedReturnType
-      if arg.start_with?(HANDLE_PREFIX)
+    def entity_scope(arg, fatal: true)
+      return if arg.nil? || (arg = arg.squish).blank?
+      return arg if uuid?(arg)
+      if (hdl = handle?(arg))
         Dspace.collections.find { |_, c| return c.uuid if arg == c.handle }
       else
         Dspace.collections.find { |_, c| return c.uuid if arg == c.name }
+      end
+      if fatal
+        identifier = hdl ? 'handle' : 'name'
+        error { "#{arg.inspect} is not a valid collection #{identifier}" }
+        exit(false)
       end
     end
 
@@ -239,11 +245,11 @@ module Dspace::Entity
     # @return [Hash{Symbol=>String}]
     #
     def entity_specifier(arg)
-      arg = arg.to_s.squish.presence or raise 'empty string'
-      if arg.start_with?(HANDLE_PREFIX)
-        { handle: arg }
-      else
-        { name: arg }
+      arg = arg&.squish
+      case
+        when arg.blank?   then raise 'empty string'
+        when handle?(arg) then { handle: arg }
+        else                   { name:   arg }
       end
     end
 

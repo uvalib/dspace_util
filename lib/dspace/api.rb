@@ -61,6 +61,22 @@ module Dspace::Api
 
   public
 
+  # Indicate whether *arg* appears to be a UUID.
+  #
+  # @param [any, nil] arg
+  #
+  def uuid?(arg)
+    arg.to_s.match?(/^\h{8}-\h{4}-\h{4}-\h{4}-\h{12}$/i)
+  end
+
+  # Indicate whether *arg* appears to be a DSpace handle identifier.
+  #
+  # @param [any, nil] arg
+  #
+  def handle?(arg)
+    arg.to_s.match?(%r{^(#{HANDLE_PREFIX}|123456789)/\d+$})
+  end
+
   # Send a DSpace API request.
   #
   # The program is exited if there was an HTTP error.

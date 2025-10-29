@@ -30,7 +30,7 @@ set -- "${SCRIPT_ARGS[@]}"
 [[ "$DSPACE_DEPLOYMENT" ]] || export DSPACE_DEPLOYMENT='production'
 [[ "$DSPACE_PRIVATE"    ]] || export DSPACE_PRIVATE="dspace-$DSPACE_DEPLOYMENT-private.internal.lib.virginia.edu"
 [[ "$DSPACE_PUBLIC"     ]] || export DSPACE_PUBLIC="dspace-$DSPACE_DEPLOYMENT.library.virginia.edu"
-[[ "$DSPACE_PREFIX"     ]] || export DSPACE_PREFIX='123456789'
+[[ "$DSPACE_PREFIX"     ]] || export DSPACE_PREFIX='item'
 
 # Names of "UVA Open Community" destination collections.
 [[ "$PUB_COLLECTION"  ]] || export PUB_COLLECTION='General'
