@@ -4,13 +4,15 @@
 #
 # Usage: @see remote/bin/dspace_import
 #
-# Usage: dspace_import [DEPLOYMENT] [OPTS] [DSPACE_IMPORT_ZIP_OPT] [REMOTE_OPT]
+# Usage: dspace_import [DEPLOYMENT] [OPTIONS] [GENERATE_OPT] [REMOTE_OPT]
 # Usage: dspace_import --help
 #
 # Script options:
 #   --retry         Regenerate imports and submit the new zips.
 #   --force         Re-acquire LibraOpen exports, generate imports, and submit.
-#   --start date    Acquire LibraOpen exports starting with `date`.
+#   --start DATE    Acquire LibraOpen exports starting with DATE.
+#   --remote        Assume zip files have already been copied to remote system.
+#   --foreground    Do not run in the background with "nohup".
 #
 # The program passes its arguments to dspace_import_zip except for a limited
 # set of options accepted by the remote dspace_import script (and then only
@@ -29,11 +31,17 @@ BIN_DIR=`dirname "$PROGRAM"`
 
 source "$BIN_DIR/dspace_values"
 
-EXPORT_ARGS=()  # Arguments passed to "bin/dspace_libra_export".
-IMPORT_ARGS=()  # Arguments passed to "bin/dspace_import_zip".
-REMOTE_ARGS=()  # Arguments passed to "remote/bin/dspace_import".
+NOHUP='true'    # Pass --nohup to the remote `dspace_import`.
+WAIT='true'     # Wait for background import process to finish.
+HELP=''         # Display help only.
 RETRY=''        # Regenerate imports and submit the new zips.
 FORCE=''        # Re-acquire LibraOpen exports, generate imports, and submit.
+REMOTE_ONLY=''  # Assume zip files have already been copied to remote system.
+EXPORT_ARGS=()  # Arguments passed to "bin/dspace_libra_export".
+IMPORT_ARGS=()  # Arguments passed to "bin/dspace_import_zip".
+REMOTE_ARGS=()  # Arguments passed to the remote `dspace_import`.
+
+readonly REMOTE_IMPORT_DIR='import'
 
 # =============================================================================
 # Process command line arguments.
@@ -43,83 +51,134 @@ while [[ $# -gt 0 ]] ; do
     case "$1" in
         --retry)        RETRY=true ;;
         --force)        FORCE=true ;;
+        --remote)       REMOTE_ONLY=true ;;
+        --foreground)   NOHUP='' ;;
         --start)        EXPORT_ARGS+=("$1" "$2"); shift ;;
         --collection=*) REMOTE_ARGS+=("'$1'") ;;
         --collection)   REMOTE_ARGS+=("'$1=$2'"); shift ;;
         --eperson=*)    REMOTE_ARGS+=("'$1'") ;;
         --eperson)      REMOTE_ARGS+=("'$1=$2'"); shift ;;
         -p|--phase)     IMPORT_ARGS+=("$1"); RETRY=true ;;
+        -h|--help)      IMPORT_ARGS+=("$1"); HELP=true ;;
         *)              IMPORT_ARGS+=("$1") ;;
     esac
     shift
 done
 
 # =============================================================================
+# Early exit for "--help".
+# =============================================================================
+
+if [[ "$HELP" ]] ; then
+    echo "Usage: $PROGNAME [DEPLOYMENT] [OPTIONS] [GENERATE_OPT] [REMOTE_OPT]"
+    cat <<'EOF'
+    DEPLOYMENT:
+    --production  Import to the production DSpace service.
+    --staging     Import to the staging DSpace service.
+
+    OPTIONS:
+    --retry       Regenerate imports and submit the new zips.
+    --force       Re-acquire LibraOpen exports, generate imports, and submit.
+    --start DATE  Acquire LibraOpen exports starting with DATE.
+    --remote      Assume zip files have already been copied to remote system.
+    --foreground  Do not pass --nohup to the remote `dspace_import`.
+
+    GENERATE_OPT:
+EOF
+    dspace_import_zip "${IMPORT_ARGS[@]}" | sed 1d
+    exit 0
+fi
+
+# =============================================================================
 # Verify pre-conditions.
 # =============================================================================
 
 # Move to the common import/export directory.
+[[ "$COMMON_ROOT" ]] || abort '$COMMON_ROOT not set'
 cd "$COMMON_ROOT" || exit $?
 
 # Avoid overwriting an existing import subdirectory or zip files.
-if [[ "$FORCE" || "$RETRY" ]] ; then
-    rm -rf "$IMPORT_DIR" *.zip
-else
-    if [[ -e "$IMPORT_DIR" ]] ; then
-        abort "$COMMON_ROOT already contains an import subdirectory ($IMPORT_DIR)"
-    fi
-    ZIP_FILES=`ls *.zip 2>/dev/null`
-    if [[ "$ZIP_FILES" ]] ; then
+if [[ ! "$REMOTE_ONLY" ]] ; then
+    [[ "$IMPORT_DIR" ]] || abort '$IMPORT_DIR not set'
+    if [[ "$FORCE" || "$RETRY" ]] ; then
+        announce "Removing existing '$IMPORT_DIR' and zip files"
+        rm -rf "$IMPORT_DIR" *.zip
+    elif [[ -e "$IMPORT_DIR" ]] ; then
+        abort "$COMMON_ROOT already has an import subdirectory ($IMPORT_DIR)"
+    elif ZIP_FILES=`ls *.zip 2>/dev/null` ; then
         abort "$COMMON_ROOT already contains zip files: $ZIP_FILES"
     fi
 fi
 
 # Make sure the bin directory of the user account on the DSpace host includes a
 # copy of remote/bin/dspace_import.
-dspace_update_home --as-needed --quiet || abort 'DSpace account bin failed'
+dspace_update_home --check --quiet || (
+    announce 'Updating scripts on remote system'
+    dspace_update_home || abort
+)
 
 # Make sure the DSpace account import subdirectory is created and prepared.
-REMOTE_SUBDIR='import'
 dspace_sh "
     chmod +x $HOME &&
-    mkdir -p '$REMOTE_SUBDIR' &&
-    sudo chown dspace '$REMOTE_SUBDIR' &&
-    sudo chmod 775 '$REMOTE_SUBDIR'
-" || abort "DSpace account ${REMOTE_SUBDIR} subdirectory failed"
+    mkdir -p '$REMOTE_IMPORT_DIR' &&
+    sudo chown dspace '$REMOTE_IMPORT_DIR' &&
+    sudo chmod 775 '$REMOTE_IMPORT_DIR'
+" || abort "DSpace account ${REMOTE_IMPORT_DIR} subdirectory failed"
 
 # =============================================================================
 # Acquire LibraOpen exports.
 # =============================================================================
 
-EXPORT_ITEMS=`ls "$EXPORT_DIR" 2>/dev/null | wc -l`
-if [[ "$FORCE" || $EXPORT_ITEMS -eq 0 || ${#EXPORT_ARGS[@]} -gt 0 ]] ; then
-    echo "Getting LibraOpen exports ${EXPORT_ARGS[@]} ..."
-    [[ "$FORCE" ]] && EXPORT_ARGS+=('--force')
-    dspace_libra_export "${EXPORT_ARGS[@]}" || exit $?
+if [[ ! "$REMOTE_ONLY" ]] ; then
+    EXPORT_ITEMS=`ls "$EXPORT_DIR" 2>/dev/null | wc -l`
+    if [[ "$FORCE" || $EXPORT_ITEMS -eq 0 || ${#EXPORT_ARGS[@]} -gt 0 ]] ; then
+        announce "Getting LibraOpen exports ${EXPORT_ARGS[@]}"
+        [[ "$FORCE" ]] && EXPORT_ARGS+=('--force')
+        dspace_libra_export "${EXPORT_ARGS[@]}" || exit $?
+    fi
 fi
 
 # =============================================================================
 # Generate the import zip file(s).
 # =============================================================================
 
-echo 'Generating zip file(s) ...'
-dspace_import_zip "${IMPORT_ARGS[@]}" || exit $?
+if [[ ! "$REMOTE_ONLY" ]] ; then
+    announce 'Generating zip file(s)'
+    dspace_import_zip "${IMPORT_ARGS[@]}" || exit $?
+fi
 
 # =============================================================================
-# Copy zip files(s) to DSpace and import them.
+# Copy zip files(s) to the remote system.
 # =============================================================================
 
-ZIP_FILES=`ls *.zip 2>/dev/null` || exit $?
-for ZIP_FILE in $ZIP_FILES ; do
-    echo
-    echo "Copying $ZIP_FILE ..."
-    dspace_cp "$ZIP_FILE" :"$REMOTE_SUBDIR" &&
-    dspace_sh "
-        cd '$REMOTE_SUBDIR' &&
-        sudo chmod g+w '$ZIP_FILE' &&
-        sudo chown dspace '$ZIP_FILE' &&
-        echo &&
-        echo 'Importing $ZIP_FILE ...' &&
-        \$HOME/bin/dspace_import '$ZIP_FILE' ${REMOTE_ARGS[@]}
-    "
-done
+ZIP_FILES=`ls *.zip 2>/dev/null | tr "\n" ' '` || exit $?
+if [[ ! "$REMOTE_ONLY" ]] ; then
+    announce "Copying $ZIP_FILES"
+    dspace_cp $ZIP_FILES :"$REMOTE_IMPORT_DIR" || exit $?
+fi
+
+# =============================================================================
+# Invoke DSpace import on the remote system.
+# =============================================================================
+
+COMMAND="bin/dspace_import_bg $ZIP_FILES ${REMOTE_ARGS[@]}"
+
+if [[ "$NOHUP" ]] ; then
+    DATE=`date -I`
+    IMPORT_LOG="$DATE-$PROGNAME.txt"
+    nohup dspace_sh "$COMMAND" > "$IMPORT_LOG" 2>&1 &
+    IMPORT_PID=$!
+    announce "Running dspace_import_bg on $DSPACE_PUBLIC"
+    echo "PID: $IMPORT_PID"
+    echo "LOG: $IMPORT_LOG"
+    if [[ "$WAIT" ]] ; then
+        echo
+        tail -f "$IMPORT_LOG" &
+        TAIL_PID=$!
+        wait $IMPORT_PID
+        kill $TAIL_PID
+    fi
+    exit 0
+else
+    dspace_sh "$COMMAND --foreground"
+fi

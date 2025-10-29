@@ -1,0 +1,76 @@
+#! /bin/bash
+#
+# Run dspace_import on multiple zip files in the background.
+#
+# This is primarily for use by dspace_import on the developer machine to have a
+# single process which can be run in the background.
+#
+# Usage: dspace_import_bg ZIP_FILES... [--foreground] [DSPACE_IMPORT_OPTS]
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
+NOHUP='true'    # Background the import process.
+WAIT='true'     # Wait for background import process to finish.
+ZIP_FILES=()    # Zip import files.
+ARGS=()         # Other arguments passed to dspace_import.
+IN_ARGS=''      # When true remaining options are for dspace_import.
+
+readonly IMPORT_SUBDIR="$HOME/import"
+
+# =============================================================================
+# Process command line arguments.
+# =============================================================================
+
+while [[ $# -gt 0 ]] ; do
+    case "$1" in
+        --foreground) NOHUP='' ;;
+        -*)           ARGS+=("$1"); IN_ARGS=true ;;
+        *)            [[ "$IN_ARGS" ]] && ARGS+=("$1") || ZIP_FILES+=("$1") ;;
+    esac
+    shift
+done
+
+# =============================================================================
+# Prepared previously-copied zip files.
+# =============================================================================
+
+# Make sure the DSpace account import subdirectory is created and prepared.
+mkdir -p "$IMPORT_SUBDIR"   || exit $?
+cd "$IMPORT_SUBDIR"         || exit $?
+sudo chmod g+w *.zip        || exit $?
+sudo chown dspace *.zip     || exit $?
+
+# =============================================================================
+# Run dspace_import for each zip file.
+# =============================================================================
+
+IMPORT_ZIP_FILES="
+    for ZIP in ${ZIP_FILES[@]}; do
+        echo
+        echo REMOTE $PROGNAME importing \"\$ZIP\"
+        dspace_import \"\$ZIP\" ${ARGS[@]}
+    done
+"
+
+if [[ "$NOHUP" ]] ; then
+    DATE=`date -I`
+    IMPORT_LOG="$DATE-$PROGNAME.txt"
+    nohup bash -c "$IMPORT_ZIP_FILES" > "$IMPORT_LOG" 2>&1 &
+    IMPORT_PID=$!
+    echo "REMOTE $PROGNAME running dspace_import for ${ZIP_FILES[@]}"
+    echo "REMOTE $PROGNAME PID: $IMPORT_PID"
+    echo "REMOTE $PROGNAME LOG: $IMPORT_LOG"
+    if [[ "$WAIT" ]] ; then
+        echo
+        tail -f "$IMPORT_LOG" &
+        TAIL_PID=$!
+        wait $IMPORT_PID
+        kill $TAIL_PID
+    fi
+    exit 0
+else
+    eval "$IMPORT_ZIP_FILES"
+fi

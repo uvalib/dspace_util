@@ -2,9 +2,16 @@
 #
 # Import items into DSpace within a DSpace login shell.
 #
-# The first argument to the script is the zip file, the remainder are
-# "dspace import" command line arguments although certain combinations are
-# untested.
+# Usage: dspace_import ZIP_FILE [OPTIONS] [DSPACE_OPTIONS]
+# Usage: dspace_import --help
+#
+# The first argument to the script is the zip file, then local script options,
+# then the remainder are `dspace import` command line arguments although
+# certain combinations are untested.
+#
+# Local script options:
+#   --nohup             Background the import process.
+#   --wait              Wait for background import process to finish.
 #
 # For reference, `dspace import` command line arguments are:
 #
@@ -38,16 +45,18 @@ BIN_DIR=`dirname "$PROGRAM"`
 
 source "$BIN_DIR/dspace_values"
 
-MAP_FILE=''                     # Name of output mapfile.
-ZIP_FILE=''                     # Name of input zip file.
-ZIP_PATH=''                     # Path to input zip file.
-SRC_DIR=''                      # Directory of input zip file.
-COLLECTION=''                   # Expect items to have a "collections" file.
-EPERSON='libra@virginia.edu'    # DSpace account of submitter.
+NOHUP=''        # Background the import process.
+WAIT=''         # Wait for background import process to finish.
+HELP=''         # Display help only.
+KEEP_MAP=''     # Do not backup existing mapfile.
+MAP_FILE=''     # Name of output mapfile.
+ZIP_FILE=''     # Name of input zip file.
+ZIP_PATH=''     # Path to input zip file.
+SRC_DIR=''      # Directory of input zip file.
+COLLECTION=''   # Expect items to have a "collections" file.
+ARGS=()         # Other arguments passed to `dspace import`.
 
-KEEP_MAP=''                     # Do not backup existing mapfile.
-HELP=''                         # Detected -h or --help flag.
-ARGS=()                         # Other arguments passed to "dspace export".
+EPERSON='libra@virginia.edu' # DSpace account of submitter.
 
 # =============================================================================
 # Functions
@@ -68,6 +77,8 @@ function set_zip() # path_name
 
 while [[ $# -gt 0 ]] ; do
     case "$1" in
+        --nohup)            NOHUP=true ;;
+        --wait)             WAIT=true ;;
         --add|-a)           ;; # No-op: this script only handles "add".
         --delete|-d)        abort "this script does not implement 'delete'" ;;
         --replace|-r)       abort "this script does not implement 'replace'" ;;
@@ -98,9 +109,14 @@ done
 # =============================================================================
 
 if [[ "$HELP" ]] ; then
-    PROGRAM=`basename "$0"`
-    echo "Usage: $PROGRAM zip_file [flags]"
-    echo 'DSpace import flags:'
+    echo "Usage: $PROGNAME ZIP_FILE [OPTIONS] [DSPACE_OPTIONS]"
+    cat <<'EOF'
+    OPTIONS:
+    --nohup     Background the import process.
+    --wait      Wait for background import process to finish.
+
+    DSPACE IMPORT OPTIONS:
+EOF
     dspace import --help | sed '/^usage.*$/d'
     exit 0
 fi
@@ -148,4 +164,26 @@ fi
 [[ "$MAP_FILE"   ]] && ARGS+=(-m "$MAP_FILE")
 [[ "$SRC_DIR"    ]] && ARGS+=(-s "$SRC_DIR")
 [[ "$ZIP_FILE"   ]] && ARGS+=(-z "$ZIP_FILE")
-exec dspace import --add "${ARGS[@]}"
+
+COMMAND="dspace import --add ${ARGS[@]}"
+
+if [[ "$NOHUP" ]] ; then
+    DATE=`date -I`
+    NAME=`basename "$ZIP_FILE"`
+    IMPORT_LOG="$DATE-$NAME.txt"
+    nohup bash -c "$COMMAND" > "$IMPORT_LOG" 2>&1 &
+    IMPORT_PID=$!
+    echo "REMOTE $PROGNAME running $COMMAND"
+    echo "REMOTE $PROGNAME PID: $IMPORT_PID"
+    echo "REMOTE $PROGNAME LOG: $IMPORT_LOG"
+    if [[ "$WAIT" ]] ; then
+        echo
+        tail -f "$IMPORT_LOG" &
+        TAIL_PID=$!
+        wait $IMPORT_PID
+        kill $TAIL_PID
+    fi
+    exit 0
+else
+    eval "$COMMAND"
+fi

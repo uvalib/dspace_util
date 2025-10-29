@@ -464,6 +464,9 @@ copies the zip file(s) to the remote system,
 and then runs a copy of `remote/bin/dspace_import` on the remote system to
 import items into DSpace.
 
+To ensure that network disconnection does not cause long-running imports to
+fail, the remote shell is run in the background with "nohup" by default.
+
 Note that, because this script requires support on the DSpace host side,
 it will run `dspace_update_home` for you in order to ensure that the remote
 side is up-to-date.
@@ -521,6 +524,14 @@ nature of the entity (Publication, Person, or OrgUnit).
 Due to the way that the DSpace command line works, specifying a collection will
 mean that _all_ imported entities will be placed into that collection
 (which is probably not desirable for OrgUnit and Person entities).
+
+##### --remote
+
+Assume zip files have already been copied to remote system.
+
+##### --foreground
+
+Do not run in the background with "nohup".
 
 <!---------------------------------------------------------------------------->
 
