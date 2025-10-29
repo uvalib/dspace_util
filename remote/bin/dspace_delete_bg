@@ -1,0 +1,89 @@
+#! /bin/bash
+#
+# Run `dspace import --delete` in the background.
+#
+# This is primarily for use by dspace_delete on the developer machine to have a
+# single process which can be run in the background.
+#
+# Usage: dspace_delete_bg MAPFILE [--foreground] [DSPACE_IMPORT_OPTS]
+# Usage: dspace_delete_bg --mapfile MAPFILE [--foreground] [DSPACE_IMPORT_OPTS]
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
+NOHUP='true'    # Background the delete process.
+WAIT='true'     # Wait for background delete process to finish.
+MAP_FILE=''     # The single mapfile provided.
+ARGS=()         # Other arguments passed to `dspace import --delete`.
+IN_ARGS=''      # When true remaining options are for `dspace import --delete`.
+
+EPERSON='libra@virginia.edu' # DSpace account of submitter.
+
+readonly IMPORT_SUBDIR="$HOME/import"
+
+# =============================================================================
+# Process command line arguments.
+# =============================================================================
+
+while [[ $# -gt 0 ]] ; do
+    case "$1" in
+        --foreground)   NOHUP='' ;;
+        --eperson=*)    EPERSON=`flag_arg "$1"` ;;
+        --eperson|-e)   EPERSON=`flag_arg "$1" "$2"`; shift ;;
+        --mapfile=*)    MAP_FILE=`flag_arg "$1"` ;;
+        --mapfile|-m)   MAP_FILE=`flag_arg "$1" "$2"`; shift ;;
+        -*)             ARGS+=("$1"); IN_ARGS=true ;;
+        *)              [[ "$IN_ARGS" ]] && ARGS+=("$1") || MAP_FILE="$1" ;;
+    esac
+    shift
+done
+
+# =============================================================================
+# Verify pre-conditions.
+# =============================================================================
+
+# Make sure the DSpace account import subdirectory is created and prepared.
+mkdir -p "$IMPORT_SUBDIR"   || exit $?
+cd "$IMPORT_SUBDIR"         || exit $?
+sudo chmod g+w *.map        || exit $?
+sudo chown dspace *.map     || exit $?
+
+# Make sure the submitter is in the form of a DSpace user name.
+case "$EPERSON" in
+    *@*)    ;; # OK
+    '')     EPERSON="$USER@virginia.edu" ;;
+    *)      EPERSON="$EPERSON@virginia.edu" ;;
+esac
+ARGS+=(-e "'$EPERSON'")
+
+# Include mapfile.
+[[ "$MAP_FILE" ]] || abort 'no mapfile given'
+ARGS+=(-m "'$MAP_FILE'")
+
+# =============================================================================
+# Run dspace_delete for each item in the temporary mapfile.
+# =============================================================================
+
+COMMAND="dspace import --delete ${ARGS[@]}"
+
+if [[ "$NOHUP" ]] ; then
+    DATE=`date -I`
+    IMPORT_LOG="$DATE-$PROGNAME.txt"
+    nohup bash -c "$COMMAND" > "$IMPORT_LOG" 2>&1 &
+    IMPORT_PID=$!
+    echo "REMOTE $PROGNAME running $COMMAND"
+    echo "REMOTE $PROGNAME PID: $IMPORT_PID"
+    echo "REMOTE $PROGNAME LOG: $IMPORT_LOG"
+    if [[ "$WAIT" ]] ; then
+        echo
+        tail -f "$IMPORT_LOG" &
+        TAIL_PID=$!
+        wait $IMPORT_PID
+        kill $TAIL_PID
+    fi
+    exit 0
+else
+    eval "$COMMAND"
+fi

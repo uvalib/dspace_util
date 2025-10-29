@@ -2,9 +2,31 @@
 #
 # Remove items from DSpace.
 #
-# Usage: dspace_delete [DEPLOYMENT] handle...
-# Usage: dspace_delete [DEPLOYMENT] --mapfile FILE
-# Usage: dspace_delete [DEPLOYMENT] --collection COLLECTION_TO_EMPTY
+# Usage: dspace_delete [DEPLOYMENT] [OPTIONS] ITEMS...
+# Usage: dspace_delete [DEPLOYMENT] --all
+#
+# Script options:
+#   --all           All items from collections listed in data/collection_*.txt.
+#   --handle        Next is a handle or list of handles.
+#   --mapfile       Next is a mapfile or newline-delimited list of mapfiles.
+#   --collection    Next is a collection or list of collections.
+#   --foreground    Do not run in the background with "nohup".
+#
+# ITEMS may be:
+#
+# * Item handles or lists of item handles.
+#   Item handles may be either be in the two column format expected by DSpace
+#   where the second column is a handle, or simple lists of handles one per
+#   line.
+#
+# * Mapfiles or newline-delimited lists of mapfiles.
+#   Mapfiles may be either be in the two column format expected by DSpace where
+#   the second column is a handle, or simple lists of handles one per line.
+#
+# * Collection names or lists of collection names.
+#   Collections can be specified by handle (or as a file containing handles)
+#   but only after a --collection flag; plain arguments which are handles will
+#   always be interpreted as items.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
@@ -12,14 +34,19 @@ PRJ_DIR=`dirname "$BIN_DIR"`
 
 source "$BIN_DIR/dspace_values"
 
-MAP_FILE=''                     # Name of input map file.
-COLLECTION=''                   # Used only to specify items to delete.
-EPERSON='libra@virginia.edu'    # DSpace account of submitter.
+NOHUP='true'    # Background the delete process.
+WAIT='true'     # Wait for background delete process to finish.
+HELP=''         # Display help only.
+ALL=''          # All items from collections in data/collection_*.txt
+NAMES=()        # Arguments to be interpreted for handles of items to delete.
+HANDLES=()      # Handles of items to delete.
+MAP_FILES=()    # Source mapfile(s).
+COLLECTIONS=()  # Source collections.
+ARGS=()         # Other arguments passed to dspace_delete_bg.
+IN_ARGS=''      # When true remaining options are for dspace_delete_bg.
 
-REMOTE_ARGS=()                  # Other arguments passed to "dspace import".
-HELP=''                         # Detected -h or --help flag.
-SRC=''                          # Handles of item(s) to delete.
-
+readonly REMOTE_IMPORT_DIR='import'
+readonly ORIGINAL_IFS="$IFS"
 readonly NL='
 '
 
@@ -27,22 +54,50 @@ readonly NL='
 # Functions
 # =============================================================================
 
-function flag_arg() # --flag=value | flag value
-{
-    local FLAG="$1"                         # "--flag=value" or "flag value".
-    local VALUE="${FLAG#*=}"                # Check for "--flag=value".
-    [[ "$VALUE" = "$FLAG" ]] && VALUE="$2"  # Default to "flag value".
-    [[ "$VALUE" ]] || abort "missing $FLAG argument"
-    echo "$VALUE"
-}
-
-function set_map() # path_name
+function add_name() # handle_or_mapfile_or_collection
 {
     local VALUE="$1"
-    [[ "$VALUE" ]] || return
-    [[ "$MAP_FILE" = "$VALUE" ]] && return
-    [[ "$MAP_FILE" ]] && abort "mapfile already set to '$MAP_FILE'"
-    MAP_FILE="$VALUE"
+    blank "$VALUE" && return
+    for PART in "`echo "$VALUE" | sed -E 's/[;|\n]+/\n/g'`"; do
+        [[ "$PART" ]] && NAMES+=("$PART")
+    done
+}
+
+function add_handle() # handle_or_list_file
+{
+    local VALUE="$1"
+    blank "$VALUE" && return
+    if [[ -e "$VALUE" ]] ; then
+        HANDLES+=(`cat "$VALUE"`)
+    else
+        for PART in `echo "$VALUE" | sed -E 's/[;|\n]+/\n/g'`; do
+            [[ "$PART" ]] && HANDLES+=("$PART")
+        done
+    fi
+}
+
+function add_mapfile() # file
+{
+    local VALUE="$1"
+    blank "$VALUE" && return
+    for PART in `echo "$VALUE" | sed -E 's/[;|\n]+/\n/g'`; do
+        [[ "$PART" ]] && MAP_FILES+=("$PART")
+    done
+}
+
+function add_collection() # name_or_handle_or_list_file
+{
+    local VALUE="$1"
+    blank "$VALUE" && return
+    IFS="$NL"
+    if [[ -e "$VALUE" ]] ; then
+        COLLECTIONS+=(`cat "$VALUE"`)
+    else
+        for PART in `echo "$VALUE" | sed -E 's/[;|\n]+/\n/g'`; do
+            [[ "$PART" ]] && COLLECTIONS+=("$PART")
+        done
+    fi
+    IFS="$ORIGINAL_IFS"
 }
 
 # =============================================================================
@@ -51,16 +106,17 @@ function set_map() # path_name
 
 while [[ $# -gt 0 ]] ; do
     case "$1" in
-        --collection=*)     COLLECTION=`flag_arg "$1"` ;;
-        --collection|-c)    COLLECTION=`flag_arg "$1" "$2"`; shift ;;
-        --eperson=*)        EPERSON=`flag_arg "$1"` ;;
-        --eperson|-e)       EPERSON=`flag_arg "$1" "$2"`; shift ;;
-        --mapfile=*)        set_map `flag_arg "$1"` ;;
-        --mapfile|-m)       set_map `flag_arg "$1" "$2"`; shift ;;
-        --help|-h)          HELP=true; KEEP_MAP=true ;;
-        -*)                 REMOTE_ARGS+=("'$1'") ;;
-        *.map)              set_map "$1" ;;
-        *)                  SRC="$SRC $1" ;;
+        --foreground)     NOHUP='' ;;
+        --help|-h)        HELP=true ;;
+        --all)            ALL=true ;;
+        --handle=*)       add_handle "`flag_arg "$1"`" ;;
+        --handle)         add_handle "`flag_arg "$1" "$2"`"; shift ;;
+        --mapfile=*)      add_mapfile "`flag_arg "$1"`" ;;
+        --mapfile|-m)     add_mapfile "`flag_arg "$1" "$2"`"; shift ;;
+        --collection=*)   add_collection "`flag_arg "$1"`" ;;
+        --collection|-c)  add_collection "`flag_arg "$1" "$2"`"; shift ;;
+        -*)               ARGS+=("$1"); IN_ARGS=true ;;
+        *)                [[ "$IN_ARGS" ]] && ARGS+=("$1") || add_name "$1" ;;
     esac
     shift
 done
@@ -70,91 +126,130 @@ done
 # =============================================================================
 
 if [[ "$HELP" ]] ; then
-    PROGRAM=`basename "$0"`
-    echo "Usage: $PROGRAM map_file [flags]"
-    echo "Usage: $PROGRAM --mapfile FILE"
-    echo "Usage: $PROGRAM --collection COLLECTION_TO_EMPTY"
+    echo "Usage: $PROGNAME [DEPLOYMENT] [OPTIONS] ITEMS..."
+    echo "Usage: $PROGNAME [DEPLOYMENT] --all"
+    cat <<'EOF'
+    DEPLOYMENT:
+    --production    Delete from the production DSpace service.
+    --staging       Delete from the staging DSpace service.
+
+    OPTIONS:
+    --all           All items from collections in data/collection_*.txt
+    --handle        Next is a handle or list of handles.
+    --mapfile       Next is a mapfile or newline-delimited list of mapfiles.
+    --collection    Next is a collection or list of collections.
+    --foreground    Do not run in the background with "nohup".
+EOF
     exit 0
 fi
 
-# If $MAP_FILE was not given, construct a temporary one from $SRC.
-if [[ ! "$MAP_FILE" ]] ; then
-    PROGRAM=`basename "$0"`
-    TMP_DIR="$PRJ_DIR/tmp"
-    TMP_SRC="$TMP_DIR/$PROGRAM.$$.txt"
-    TMP_MAP="$TMP_DIR/$PROGRAM.$$.map"
-    trap "rm -f '$TMP_SRC' '$TMP_MAP'" EXIT
-    readonly SED_STRIP='s/^[ \t]+|[ \t]+$//'
-    mkdir -p "$TMP_DIR"
+# =============================================================================
+# Finish gathering specifiers of items to delete.
+# =============================================================================
 
-    if [[ ! "$SRC" ]] ; then
-        # If $SRC was not given get items to delete from --collection.
-        [[ "$COLLECTION" ]] || abort 'no collection, mapfile, or source given'
-        echo "Fetching collection '${COLLECTION}'..."
-        dspace_item --uuid --handle --scope "$COLLECTION" > "$TMP_SRC"
-        echo "NOTE: collection '${COLLECTION}' will be emptied but not removed"
-        COLLECTION='' # Don't need to pass this to "dspace import".
-
-    elif [[ -e "$SRC" ]] ; then
-        # Strip file lines.
-        sed -E "$SED_STRIP" "$SRC" > "$TMP_SRC"
-
-    elif `echo "$SRC" | grep -q "$NL"` ; then
-        # Strip literal lines.
-        echo "$SRC" | sed -E "$SED_STRIP" > "$TMP_SRC"
-
-    else
-        # Transform list into lines.
-        echo "$SRC" | sed -E 's/[,;| \t\n]+/\n/g' > "$TMP_SRC"
-    fi
-
-    if `head -1 "$TMP_SRC" | grep -q ' '` ; then
-        # Already in mapfile form.
-        mv "$TMP_SRC" "$TMP_MAP"
-    else
-        # Convert to mapfile form.
-        sed -E 's/^/x /' "$TMP_SRC" > "$TMP_MAP"
-    fi
-
-    MAP_FILE="$TMP_MAP"
+# Take "--all" collections from the data file plus PUB_COLLECTION (which should
+# the catch-all fallback default collection not listed in the data file).
+if [[ "$ALL" ]] ; then
+    SOURCE="$PRJ_DIR/data/collection_$DSPACE_DEPLOYMENT.txt"
+    ALL_COLLECTIONS=`sed -n -E 's/^(item\/[0-9]+).*$/\1/p' "$SOURCE"`
+    add_collection "$PUB_COLLECTION${NL}$ALL_COLLECTIONS"
 fi
 
-# Make sure the submitter is in the form of a DSpace user name.
-case "$EPERSON" in
-    *@*)    ;; # OK
-    '')     EPERSON="$USER@virginia.edu" ;;
-    *)      EPERSON="$EPERSON@virginia.edu" ;;
-esac
+# Analyze direct arguments into handles, mapfiles, and collections.
+for NAME in "${NAMES[@]}"; do
+    if [[ "$NAME" =~ item/[0-9]+ ]] ; then
+        add_handle "$NAME"
+    elif [[ -e "$NAME" ]] ; then
+        add_mapfile "$NAME"
+    elif [[ "$NAME" ]] ; then
+        add_collection "$NAME"
+    fi
+done
+
+# Ensure items to delete were specified in some manner.
+declare -i H_COUNT=${#HANDLES[*]}
+declare -i M_COUNT=${#MAP_FILES[*]}
+declare -i C_COUNT=${#COLLECTIONS[*]}
+[[ `expr $H_COUNT + $M_COUNT + $C_COUNT` -eq 0 ]] && abort 'no items specified'
 
 # =============================================================================
 # Verify pre-conditions.
 # =============================================================================
 
+# Make sure the bin directory of the user account on the DSpace host includes a
+# copy of remote/bin/dspace_delete_bg.
+dspace_update_home --check --quiet || (
+    announce 'Updating scripts on remote system'
+    dspace_update_home || abort
+)
+
 # Make sure the DSpace account import subdirectory is created and prepared.
-REMOTE_SUBDIR='import'
-dspace_sh mkdir -p "$REMOTE_SUBDIR" ||
+dspace_sh mkdir -p "$REMOTE_IMPORT_DIR" ||
     abort 'DSpace account import subdirectory failed'
 
 # =============================================================================
-# Copy mapfile to DSpace.
+# Build a mapfile of the handles to delete and copy it to the DSpace host.
 # =============================================================================
 
-MAP_NAME=`basename "$MAP_FILE"`
-echo "Copying $MAP_NAME for remote 'dspace import --delete' command..."
-dspace_cp "$MAP_FILE" :"$REMOTE_SUBDIR" || exit $ERROR_STATUS
-MAP_FILE="$MAP_NAME" # Adjust for remote use.
+TMP_MAP="$PROGNAME.$$.map"
+TMP_SRC="$PROGNAME.$$.txt"
+trap "rm -f '$TMP_SRC' '$TMP_MAP'" EXIT
+> "$TMP_SRC"
+
+# Extract handle from each item.
+for HANDLE in "${HANDLES[@]}" ; do
+    echo "$HANDLE" | sed -E 's/^.*(item\/[0-9]+).*$/\1/' >> "$TMP_SRC"
+done
+
+# Extract handles from each line of each file.
+for FILE in "${MAP_FILES[@]}" ; do
+    cat "$FILE" | sed -E 's/^.*(item\/[0-9]+).*$/\1/' >> "$TMP_SRC"
+done
+
+# Get item handles from each collection.
+if [[ $C_COUNT -gt 0 ]] ; then
+    announce "Listing items from $C_COUNT collections"
+    for COLLECTION in "${COLLECTIONS[@]}" ; do
+        echo "Listing items from collection '${COLLECTION}'"
+        dspace_item --handle --scope "$COLLECTION" >> "$TMP_SRC"
+    done
+    echo 'NOTE: collection will be emptied but not removed'
+fi
+
+# Construct a mapfile where each line is a unique identifier followed by an
+# item handle.
+declare -i COUNT
+for HANDLE in `sort -u "$TMP_SRC"` ; do
+    ((COUNT++))
+    echo "$COUNT $HANDLE"
+done > "$TMP_MAP"
+
+MAP_NAME=`basename "$TMP_MAP"`
+announce "Copying $MAP_NAME for remote dspace_delete_bg command"
+dspace_cp "$TMP_MAP" :"$REMOTE_IMPORT_DIR" || exit $ERROR_STATUS
 
 # =============================================================================
-# Run the import command.
+# Invoke DSpace import on the remote system.
 # =============================================================================
 
-# Run import command which will generate $MAP_FILE with item subdirectories
-# mapped to the handles of the DSpace items generated from them.
-[[ "$COLLECTION" ]] && REMOTE_ARGS+=(-c "'$COLLECTION'")
-[[ "$EPERSON"    ]] && REMOTE_ARGS+=(-e "'$EPERSON'")
-[[ "$MAP_FILE"   ]] && REMOTE_ARGS+=(-m "'$MAP_FILE'")
-dspace_sh "
-    cd '$REMOTE_SUBDIR' &&
-    \$HOME/bin/dspace import --delete ${REMOTE_ARGS[@]} &&
-    rm -f '$MAP_FILE'
-"
+COMMAND="bin/dspace_delete_bg '$MAP_NAME' ${ARGS[@]}"
+
+if [[ "$NOHUP" ]] ; then
+    DATE=`date -I`
+    IMPORT_LOG="$DATE-$PROGNAME.txt"
+    nohup dspace_sh "$COMMAND" > "$IMPORT_LOG" 2>&1 &
+    IMPORT_PID=$!
+    announce "Running dspace_delete_bg on $DSPACE_PUBLIC"
+    echo "PID: $IMPORT_PID"
+    echo "LOG: $IMPORT_LOG"
+    if [[ "$WAIT" ]] ; then
+        echo
+        tail -f "$IMPORT_LOG" &
+        TAIL_PID=$!
+        wait $IMPORT_PID
+        kill $TAIL_PID
+    fi
+    exit 0
+else
+    dspace_sh "$COMMAND --foreground"
+fi
