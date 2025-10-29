@@ -14,12 +14,12 @@ BIN_DIR=`dirname "$PROGRAM"`
 
 source "$BIN_DIR/dspace_values"
 
-REMOTE_HOST="$DSPACE_PRIVATE"
-REMOTE_USER="$USER"
-PRIVATE_KEY="$HOME/.ssh/id_rsa"
+readonly REMOTE_HOST="$DSPACE_PRIVATE"      # Target remote host.
+readonly REMOTE_USER="$USER"                # Remote host user account.
+readonly PRIVATE_KEY="$HOME/.ssh/id_rsa"    # Credentials file for scp.
 
-SEND='to'
-RECV='from'
+readonly SEND='to'                          # Copying to $REMOTE_HOST.
+readonly RECV='from'                        # Copying from $REMOTE_HOST.
 
 # =============================================================================
 # Functions
@@ -101,8 +101,8 @@ if [[ "$DIRECTION" = "$SEND" ]] ; then
     # Make sure sources do not appear to be remote items.
     for FILE in "${NAMES[@]}" ; do
         case "$FILE" in
-            scp:*)  abort "$0: local source '$FILE' begins with 'scp:'" ;;
-            :*)     abort "$0: local source '$FILE' begins with ':'" ;;
+            scp:*)  abort "local source '$FILE' begins with 'scp:'" ;;
+            :*)     abort "local source '$FILE' begins with ':'" ;;
         esac
         SOURCE+=("$FILE")
     done
@@ -117,14 +117,14 @@ elif [[ "$DIRECTION" = "$RECV" ]] ; then
     # Make sure sources do not appear to be local items.
     for FILE in "${NAMES[@]}" ; do
         case "$FILE" in
-            ../*) abort "$0: remote source '$FILE' begins with '../'" ;;
-            ./*)  abort "$0: remote source '$FILE' begins with './'" ;;
+            ../*) abort "remote source '$FILE' begins with '../'" ;;
+            ./*)  abort "remote source '$FILE' begins with './'" ;;
         esac
         SOURCE+=(`remote "$FILE"`)
     done
 
 else
-    abort "$0: invalid direction '$DIRECTION'"
+    abort "invalid direction '$DIRECTION'"
 fi
 
 # =============================================================================

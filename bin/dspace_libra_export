@@ -23,25 +23,12 @@ PRJ_DIR=`dirname "$BIN_DIR"`
 source "$BIN_DIR/dspace_values"
 
 # Terraform repo on the local system.
-TI_PRJ=`realpath "$PRJ_DIR/../terraform-infrastructure"`
+readonly TI_PRJ=`realpath "$PRJ_DIR/../terraform-infrastructure"`
 
 # Properties of the remote system.
-LIBRA_HOST='10.130.110.92'
-LIBRA_USER='ec2-user'
-EXPORT_SRC='libra-open-export' # Export subdirectory name.
-
-# =============================================================================
-# Functions
-# =============================================================================
-
-function announce() # output_lines...
-{
-    for MSG in "$@" ; do
-        echo
-        echo -n '***' "$MSG"
-    done
-    echo ' ...'
-}
+readonly LIBRA_HOST='10.130.110.92'
+readonly LIBRA_USER='ec2-user'
+readonly EXPORT_SRC='libra-open-export' # Export subdirectory name.
 
 # =============================================================================
 # Process command line arguments.
@@ -73,6 +60,7 @@ DST_DIR="$OUT_DIR/$OUT_NAME"
 
 if [[ -e "$DST_DIR" ]] ; then
     if [[ "$FORCE" ]] ; then
+        announce "Removing existing '$DST_DIR'"
         rm -rf "$DST_DIR"
     else
         abort "$OUT_DIR already contains an export subdirectory ($OUT_NAME)"
@@ -87,7 +75,7 @@ mkdir -p "$OUT_DIR"
 
 if [[ ! -d "$TI_PRJ" ]] ; then
     TI_SRC='git@gitlab.com:uvalib/terraform-infrastructure.git'
-    abort "Missing $TI_PRJ" "Need to run: git clone $TI_SRC"
+    abort "missing $TI_PRJ" "need to run: git clone $TI_SRC"
 fi
 
 # =============================================================================

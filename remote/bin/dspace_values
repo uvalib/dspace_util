@@ -2,7 +2,14 @@
 #
 # Script values -- intended to be "sourced" not run -- within a DSpace shell.
 
-ERROR_STATUS=127
+ERROR_STATUS=100
+
+# Ensure that dspace_util scripts are available.
+[[ "$PROGRAM"  ]] || PROGRAM=`realpath "$0"`
+[[ "$BIN_DIR"  ]] || BIN_DIR=`dirname "$PROGRAM"`
+[[ "$PROGNAME" ]] || PROGNAME=`basename "$PROGRAM"`
+
+[[ ":$PATH:" = *":$BIN_DIR:"* ]] || PATH="$BIN_DIR:$PATH"
 
 # =============================================================================
 # Functions
@@ -14,4 +21,18 @@ function abort() # output_lines...
         echo "$MSG" 1>&2
     done
     exit $ERROR_STATUS
+}
+
+function blank() # value
+{
+    [[ "$1" =~ ^' '*$ ]]
+}
+
+function flag_arg() # --flag=value | --flag value
+{
+    local FLAG="$1"                         # "--flag=value" or "flag value".
+    local VALUE="${FLAG#*=}"                # Check for "--flag=value".
+    [[ "$VALUE" = "$FLAG" ]] && VALUE="$2"  # Default to "flag value".
+    blank "$VALUE" && abort "missing $FLAG argument"
+    echo "$VALUE"
 }

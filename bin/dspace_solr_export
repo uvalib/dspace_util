@@ -9,9 +9,9 @@ BIN_DIR=`dirname "$PROGRAM"`
 
 source "$BIN_DIR/dspace_values"
 
-SOLR_HOST="$DSPACE_PRIVATE"
-SOLR_PORT=8983
-SOLR_CORE='search'
+readonly SOLR_HOST="$DSPACE_PRIVATE"
+readonly SOLR_PORT=8983
+readonly SOLR_CORE='search'
 
 # =============================================================================
 # Functions

@@ -10,9 +10,9 @@ BIN_DIR=`dirname "$PROGRAM"`
 
 source "$BIN_DIR/dspace_values"
 
-REMOTE_HOST="$DSPACE_PRIVATE"
-REMOTE_USER="$USER"
-PRIVATE_KEY="$HOME/.ssh/id_rsa"
+readonly REMOTE_HOST="$DSPACE_PRIVATE"
+readonly REMOTE_USER="$USER"
+readonly PRIVATE_KEY="$HOME/.ssh/id_rsa"
 
 # =============================================================================
 # Process command-line ssh flags

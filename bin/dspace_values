@@ -2,11 +2,12 @@
 #
 # Script values -- intended to be "sourced" not run.
 
-ERROR_STATUS=127
+ERROR_STATUS=100
 
 # Ensure that dspace_util scripts are available.
-[[ "$PROGRAM" ]] || PROGRAM=`realpath "$0"`
-[[ "$BIN_DIR" ]] || BIN_DIR=`dirname "$PROGRAM"`
+[[ "$PROGRAM"  ]] || PROGRAM=`realpath "$0"`
+[[ "$BIN_DIR"  ]] || BIN_DIR=`dirname "$PROGRAM"`
+[[ "$PROGNAME" ]] || PROGNAME=`basename "$PROGRAM"`
 
 [[ ":$PATH:" = *":$BIN_DIR:"* ]] || PATH="$BIN_DIR:$PATH"
 
@@ -46,10 +47,38 @@ set -- "${SCRIPT_ARGS[@]}"
 # Functions
 # =============================================================================
 
+function announce() # output_lines...
+{
+    for MSG in "$@" ; do
+        echo
+        echo -n '***' "$MSG"
+    done
+    echo ' ...'
+}
+
 function abort() # output_lines...
 {
     for MSG in "$@" ; do
-        echo "$MSG" 1>&2
+        echo "$PROGNAME: $MSG" 1>&2
     done
     exit $ERROR_STATUS
+}
+
+function strip()
+{
+    sed -E -e 's/^[ \t]+//' -e 's/[ \t]+$//'
+}
+
+function blank() # value
+{
+    [[ "$1" =~ ^' '*$ ]]
+}
+
+function flag_arg() # --flag=value | --flag value
+{
+    local FLAG="$1"                         # "--flag=value" or "--flag value".
+    local VALUE="${FLAG#*=}"                # Check for "--flag=value".
+    [[ "$VALUE" = "$FLAG" ]] && VALUE="$2"  # Default to "flag value".
+    blank "$VALUE" && abort "missing $FLAG argument"
+    echo "$VALUE"
 }

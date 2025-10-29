@@ -15,21 +15,10 @@ PRJ_DIR=`dirname "$BIN_DIR"`
 source "$BIN_DIR/dspace_values"
 
 # Terraform repo on the local system.
-TI_PRJ=`realpath "$PRJ_DIR/../terraform-infrastructure"`
-DSPACE="dspace.library.virginia.edu/$DSPACE_DEPLOYMENT"
+readonly TI_PRJ=`realpath "$PRJ_DIR/../terraform-infrastructure"`
 
-# =============================================================================
-# Functions
-# =============================================================================
-
-function announce() # output_lines...
-{
-    for MSG in "$@" ; do
-        echo
-        echo -n '***' "$MSG"
-    done
-    echo ' ...'
-}
+# Properties of the remote system.
+readonly DSPACE="dspace.library.virginia.edu/$DSPACE_DEPLOYMENT"
 
 # =============================================================================
 # Process command line arguments.
@@ -62,7 +51,7 @@ if [[ -d "$TI_PRJ" ]] ; then
     git pull || exit $?
 else
     TI_SRC='git@gitlab.com:uvalib/terraform-infrastructure.git'
-    abort "Missing $TI_PRJ" "Need to run: git clone $TI_SRC"
+    abort "missing $TI_PRJ" "need to run: git clone $TI_SRC"
 fi
 
 # =============================================================================

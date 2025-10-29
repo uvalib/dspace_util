@@ -41,15 +41,6 @@ ARGS=() # Other arguments passed to "dspace export".
 # Functions
 # =============================================================================
 
-function flag_arg() # --flag=value | flag value
-{
-    local FLAG="$1"                         # "--flag=value" or "flag value".
-    local VALUE="${FLAG#*=}"                # Check for "--flag=value".
-    [[ "$VALUE" = "$FLAG" ]] && VALUE="$2"  # Default to "flag value".
-    [[ "$VALUE" ]] || abort "missing $FLAG argument"
-    echo "$VALUE"
-}
-
 function set_type() # "ITEM" | "COLLECTION"
 {
     local VALUE="$1"
@@ -84,9 +75,8 @@ done
 # =============================================================================
 
 if [[ "$HELP" ]] ; then
-    PROGRAM=`basename "$0"`
-    echo "Usage: $PROGRAM -i target_item [flags]"
-    echo "Usage: $PROGRAM -c target_collection [flags]"
+    echo "Usage: $PROGNAME -i target_item [flags]"
+    echo "Usage: $PROGNAME -c target_collection [flags]"
     echo 'DSpace export flags:'
     dspace export --help | sed -e '/^usage.*$/d' -e '/^\s*-t,/d'
     exit 0

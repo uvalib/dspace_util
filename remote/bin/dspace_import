@@ -53,15 +53,6 @@ ARGS=()                         # Other arguments passed to "dspace export".
 # Functions
 # =============================================================================
 
-function flag_arg() # --flag=value | flag value
-{
-    local FLAG="$1"                         # "--flag=value" or "flag value".
-    local VALUE="${FLAG#*=}"                # Check for "--flag=value".
-    [[ "$VALUE" = "$FLAG" ]] && VALUE="$2"  # Default to "flag value".
-    [[ "$VALUE" ]] || abort "missing $FLAG argument"
-    echo "$VALUE"
-}
-
 function set_zip() # path_name
 {
     local VALUE="$1"
