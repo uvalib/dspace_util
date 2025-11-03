@@ -19,7 +19,7 @@ require 'base_options'
 #
 BATCH_SIZE = 1000
 
-# The value of `option.phase` when only creating OrgUnit entities.
+# The value of `option.phase` when creating all entities.
 #
 # @type [Integer]
 #
@@ -37,7 +37,7 @@ ORG_UNIT_PHASE = 1
 #
 PERSON_PHASE = ORG_UNIT_PHASE.next
 
-# The value of `option.phase` when only creating Person entities.
+# The value of `option.phase` when only creating Publication entities.
 #
 # @type [Integer]
 #
