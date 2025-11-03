@@ -5,7 +5,7 @@
 #
 # DSpace API community methods.
 
-require 'dspace/entity'
+require 'dspace/item'
 
 # Information about current DSpace communities.
 #
@@ -69,7 +69,7 @@ module Dspace::Community
 
   # Information for a community acquired from the DSpace API.
   #
-  class Entry < Dspace::Entity::Entry
+  class Entry < Dspace::Item::Entry
 
     include Dspace::Api
     include Dspace::Community::Path
@@ -79,7 +79,7 @@ module Dspace::Community
     KEYS = (superclass::KEYS + instance_methods(false)).freeze
 
     # =========================================================================
-    # :section: Dspace::Entity::Entry overrides
+    # :section: Dspace::Item::Entry overrides
     # =========================================================================
 
     public

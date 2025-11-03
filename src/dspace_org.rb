@@ -8,8 +8,8 @@
 require 'common'
 require 'logging'
 require 'dspace'
-require 'entity_options'
-require 'entity_listing'
+require 'item_options'
+require 'item_listing'
 
 # =============================================================================
 # :section: Classes
@@ -17,7 +17,7 @@ require 'entity_listing'
 
 # Display of OrgUnit entities in tabular form.
 #
-class OrgUnitListing < EntityListing
+class OrgUnitListing < ItemListing
 
   def self.template
     { 'UUID' => :uuid, 'Handle' => :handle, 'OrgUnit' => :title }

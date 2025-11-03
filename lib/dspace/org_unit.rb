@@ -105,7 +105,7 @@ module Dspace::OrgUnit
     #
     # @return [String]
     #
-    def entity_query(*arg, **opt)
+    def item_query(*arg, **opt)
       super(*arg, **opt, entity_type: 'OrgUnit')
     end
 
@@ -115,8 +115,8 @@ module Dspace::OrgUnit
     #
     # @return [Array<String>]
     #
-    def entity_term(arg)
-      name, handle = entity_values(arg, :name, :handle)
+    def item_term(arg)
+      name, handle = item_values(arg, :name, :handle)
       term = []
       term << "handle:#{handle}"               if handle
       term << "organization.legalName:#{name}" if name

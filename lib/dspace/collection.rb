@@ -5,7 +5,6 @@
 #
 # DSpace API collection methods.
 
-require 'dspace/entity'
 require 'dspace/community'
 
 # Information about current DSpace collections.
@@ -29,7 +28,7 @@ module Dspace::Collection
     KEYS = (superclass::KEYS + instance_methods(false)).freeze
 
     # =========================================================================
-    # :section: Dspace::Entity::Entry overrides
+    # :section: Dspace::Item::Entry overrides
     # =========================================================================
 
     public
@@ -46,7 +45,7 @@ module Dspace::Collection
     end
 
     # =========================================================================
-    # :section: Dspace::Entity::Entry overrides
+    # :section: Dspace::Item::Entry overrides
     # =========================================================================
 
     protected

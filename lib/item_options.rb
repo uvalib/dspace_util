@@ -1,4 +1,4 @@
-# lib/entity_options.rb
+# lib/item_options.rb
 #
 # frozen_string_literal: true
 # warn_indent:           true
@@ -13,7 +13,7 @@ require 'table_options'
 # :section: Methods
 # =============================================================================
 
-def get_options = @option = EntityOptions.new
+def get_options = @option = ItemOptions.new
 def option      = @option || get_options
 
 # =============================================================================
@@ -21,9 +21,9 @@ def option      = @option || get_options
 # =============================================================================
 
 # Options applicable to applications which output information about DSpace
-# entities in tabular form.
+# items in tabular form.
 #
-class EntityOptions < TableOptions
+class ItemOptions < TableOptions
 
   # ===========================================================================
   # :section: Properties

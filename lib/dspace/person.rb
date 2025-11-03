@@ -93,7 +93,7 @@ module Dspace::Person
       entry[:last_name]    ||= field.(:'person.familyName')
       entry[:computing_id] ||= field.(:'person.identifier')
       unless entry[:first_name] && entry[:last_name]
-        values = entity_specifier(entry[:name], fatal: false)
+        values = item_specifier(entry[:name], fatal: false)
         entry[:first_name] ||= values[:first_name] if values[:first_name]
         entry[:last_name]  ||= values[:last_name]  if values[:last_name]
       end
@@ -113,7 +113,7 @@ module Dspace::Person
     #
     # @return [String]
     #
-    def entity_query(*arg, **opt)
+    def item_query(*arg, **opt)
       super(*arg, **opt, entity_type: 'Person')
     end
 
@@ -123,9 +123,8 @@ module Dspace::Person
     #
     # @return [Array<String>]
     #
-    def entity_term(arg)
-      cid, last, first =
-        entity_values(arg, :computing_id, :last_name, :first_name)
+    def item_term(arg)
+      cid,last,first = item_values(arg, :computing_id, :last_name, :first_name)
       term = []
       term << "person.identifier:#{cid}"  if cid
       term << "person.familyName:#{last}" if last
@@ -140,7 +139,7 @@ module Dspace::Person
     #
     # @return [Hash{Symbol=>String}]
     #
-    def entity_specifier(arg, fatal: true)
+    def item_specifier(arg, fatal: true)
       arg = arg.to_s.squish
       if arg.blank?
         raise 'empty string' if fatal

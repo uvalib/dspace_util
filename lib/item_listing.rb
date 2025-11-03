@@ -1,4 +1,4 @@
-# lib/entity_listing.rb
+# lib/item_listing.rb
 #
 # frozen_string_literal: true
 # warn_indent:           true
@@ -11,7 +11,7 @@ require 'table_listing'
 # :section: Class
 # =============================================================================
 
-# Display of entities in tabular form.
+# Display of items in tabular form.
 #
-class EntityListing < TableListing
+class ItemListing < TableListing
 end

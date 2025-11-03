@@ -137,7 +137,7 @@ module Dspace::Api
     # @param [Array<String,Hash>] item  All items if empty and no search params
     # @param [Hash]               opt   Passed to #execute or #current_table.
     #
-    # @return [Hash{String=>Dspace::Entity::Entry}]
+    # @return [Hash{String=>Dspace::Item::Entry}]
     #
     def find_or_fetch(*item, **opt)
       c_opt = opt.extract!(:fetch, :fast, :write_saved) # For current_table.
@@ -167,7 +167,7 @@ module Dspace::Api
     # @param [Boolean, nil] full      Passed to #transform_items.
     # @param [Hash]         opt       Passed to #get_items.
     #
-    # @return [Hash{String=>Dspace::Entity::Entry}]
+    # @return [Hash{String=>Dspace::Item::Entry}]
     #
     def execute(*, sort_key: :title, no_mark: nil, full: nil, **opt)
       debug { "#{self.class}.#{__method__} sort_key: #{sort_key}, no_mark: #{no_mark}, full: #{full}, #{opt}" }
@@ -225,7 +225,7 @@ module Dspace::Api
     # @param [Symbol]      result_key   One of `Entry#keys`.
     # @param [Hash]        opt          Passed to #transform_item.
     #
-    # @return [Hash{String=>Dspace::Entity::Entry}]
+    # @return [Hash{String=>Dspace::Item::Entry}]
     #
     def transform_items(list, result_key:, **opt)
       list.map { |item|
@@ -240,10 +240,10 @@ module Dspace::Api
     # @param [Hash] item
     # @param [Hash] opt               Passed to Entry#initialize.
     #
-    # @return [Dspace::Entity::Entry]
+    # @return [Dspace::Item::Entry]
     #
     def transform_item(item, **opt)
-      Dspace::Entity::Entry.new(item, **opt)
+      Dspace::Item::Entry.new(item, **opt)
     end
 
     # =========================================================================
@@ -256,7 +256,7 @@ module Dspace::Api
     #
     # @param [Hash] opt               To #get_current_table on first run.
     #
-    # @return [Hash{String=>Dspace::Entity::Entry}]
+    # @return [Hash{String=>Dspace::Item::Entry}]
     #
     def current_table(**opt)
       debug { "#{self.class}.#{__method__} #{opt}" }
@@ -284,7 +284,7 @@ module Dspace::Api
     #
     # @param [Hash] opt               Passed to #execute.
     #
-    # @return [Hash{String=>Dspace::Entity::Entry}]
+    # @return [Hash{String=>Dspace::Item::Entry}]
     #
     def get_current_data(**opt)
       debug { "#{self.class}.#{__method__} #{opt}" }
@@ -295,7 +295,7 @@ module Dspace::Api
     #
     # @param [Hash] opt               Passed to #transform_item.
     #
-    # @return [Hash{String=>Dspace::Entity::Entry}]
+    # @return [Hash{String=>Dspace::Item::Entry}]
     # @return [nil] If the storage_path file is not found or empty.
     #
     def get_stored_table(**opt)

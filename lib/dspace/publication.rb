@@ -95,7 +95,7 @@ module Dspace::Publication
     #
     # @return [String]
     #
-    def entity_query(*arg, **opt)
+    def item_query(*arg, **opt)
       super(*arg, **opt, entity_type: 'Publication')
     end
 
@@ -105,8 +105,8 @@ module Dspace::Publication
     #
     # @return [Array<String>]
     #
-    def entity_term(arg)
-      author, title, handle = entity_values(arg, :author, :title, :handle)
+    def item_term(arg)
+      author, title, handle = item_values(arg, :author, :title, :handle)
       term = []
       term << "handle:#{handle}"                if handle
       term << "dc.title:#{title}"               if title
@@ -114,13 +114,13 @@ module Dspace::Publication
       term
     end
 
-    # Transform the String argument into properties for #entity_terms.
+    # Transform the String argument into properties for #item_terms.
     #
     # @param [String] arg
     #
     # @return [Hash{Symbol=>String}]
     #
-    def entity_specifier(arg)
+    def item_specifier(arg)
       arg = arg&.squish
       case
         when arg.blank?                then raise 'empty string'

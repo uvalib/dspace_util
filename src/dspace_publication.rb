@@ -8,8 +8,8 @@
 require 'common'
 require 'logging'
 require 'dspace'
-require 'entity_options'
-require 'entity_listing'
+require 'item_options'
+require 'item_listing'
 
 # =============================================================================
 # :section: Classes
@@ -17,7 +17,7 @@ require 'entity_listing'
 
 # Display of Publication entities in tabular form.
 #
-class PublicationListing < EntityListing
+class PublicationListing < ItemListing
 
   def self.template
     { 'UUID' => :uuid, 'Handle' => :handle, 'Title' => :title }

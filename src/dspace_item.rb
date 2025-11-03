@@ -8,17 +8,8 @@
 require 'common'
 require 'logging'
 require 'dspace'
-require 'entity_options'
-require 'entity_listing'
-
-# =============================================================================
-# :section: Classes
-# =============================================================================
-
-# Display of generic DSpace items in tabular form.
-#
-class ItemListing < EntityListing
-end
+require 'item_options'
+require 'item_listing'
 
 # =============================================================================
 # :section: Methods
