@@ -41,11 +41,11 @@ GEM
     nokogiri (1.18.10-x86_64-linux-musl)
       racc (~> 1.4)
     racc (1.8.1)
-    rubyzip (3.2.1)
+    rubyzip (3.2.2)
     securerandom (0.4.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    uri (1.0.4)
+    uri (1.1.0)
 
 PLATFORMS
   aarch64-linux-gnu
