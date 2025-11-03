@@ -21,4 +21,4 @@ module Dspace
   extend Dspace::OrgUnit
   extend Dspace::Publication
 
-end
+end unless defined?(Dspace)

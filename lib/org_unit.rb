@@ -16,7 +16,7 @@ require 'entity'
 #
 # @type [Array<String>]
 #
-UVA_ORG_NAMES = [
+UVA_ORG_NAMES ||= [
   'University of Virginia',
   'Univ. of Virginia',
   'UVA',
@@ -30,7 +30,7 @@ UVA_ORG_NAMES = [
 #
 # @type [String]
 #
-UVA_ORG_NAME = UVA_ORG_NAMES.first
+UVA_ORG_NAME ||= UVA_ORG_NAMES.first
 
 # =============================================================================
 # :section: Classes

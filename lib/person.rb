@@ -13,7 +13,7 @@ require 'org_unit'
 # :section: Constants
 # =============================================================================
 
-UVA_DOMAIN = 'virginia.edu'
+UVA_DOMAIN ||= 'virginia.edu'
 
 # =============================================================================
 # :section: Classes
