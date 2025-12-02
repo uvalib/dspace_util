@@ -16,7 +16,7 @@ LOCAL_VALUES="$BIN_DIR/.values"
 [[ -f "$LOCAL_VALUES" ]] && source "$LOCAL_VALUES"
 
 # Extract the script argument indicating which deployment to interact with.
-# This is the option indicated by [DEPLOYMENT] in script comments.
+# This is the option indicated by [DEPLOYMENT] in script usage comments.
 SCRIPT_ARGS=()
 for ARG in "$@" ; do
     case "$ARG" in
@@ -40,8 +40,8 @@ set -- "${SCRIPT_ARGS[@]}"
 
 # Default locations for import/export.
 [[ "$COMMON_ROOT" ]] || export COMMON_ROOT="$HOME/libra-dspace"
-[[ "$EXPORT_DIR"  ]] || export EXPORT_DIR='libra-export'
-[[ "$IMPORT_DIR"  ]] || export IMPORT_DIR='dspace-import'
+[[ "$EXPORT_DIR"  ]] || export EXPORT_DIR='libra-export'  # Rel to $COMMON_ROOT
+[[ "$IMPORT_DIR"  ]] || export IMPORT_DIR='dspace-import' # Rel to $COMMON_ROOT
 
 # =============================================================================
 # Functions

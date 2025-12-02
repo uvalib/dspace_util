@@ -1,8 +1,8 @@
 #! /bin/bash
 #
-# Get information about DSpace collections.
+# Get information about DSpace collections in tabular form.
 #
-# Usage: dspace_collection [DEPLOYMENT] [OPTIONS] [NAME...]
+# Usage: dspace_collection [DEPLOYMENT] [OPTIONS]
 # Usage: dspace_collection --help
 
 PROGRAM=`realpath "$0"`

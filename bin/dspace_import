@@ -7,7 +7,7 @@
 # Usage: dspace_import [DEPLOYMENT] [OPTIONS] [GENERATE_OPT] [REMOTE_OPT]
 # Usage: dspace_import --help
 #
-# Script options:
+# OPTIONS
 #   --retry         Regenerate imports and submit the new zips.
 #   --force         Re-acquire LibraOpen exports, generate imports, and submit.
 #   --start DATE    Acquire LibraOpen exports starting with DATE.
@@ -90,7 +90,7 @@ EOF
 fi
 
 # =============================================================================
-# Verify pre-conditions.
+# Ensure pre-conditions are met.
 # =============================================================================
 
 # Move to the common import/export directory.

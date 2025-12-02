@@ -2,8 +2,8 @@
 #
 # Run `dspace import --delete` in the background.
 #
-# This is primarily for use by dspace_delete on the developer machine to have a
-# single process which can be run in the background.
+# This is primarily for use by `dspace_delete` on the developer machine to have
+# a single process which can be run in the background.
 #
 # Usage: dspace_delete_bg MAPFILE [--foreground] [DSPACE_IMPORT_OPTS]
 # Usage: dspace_delete_bg --mapfile MAPFILE [--foreground] [DSPACE_IMPORT_OPTS]
@@ -41,7 +41,7 @@ while [[ $# -gt 0 ]] ; do
 done
 
 # =============================================================================
-# Verify pre-conditions.
+# Ensure pre-conditions are met.
 # =============================================================================
 
 # Make sure the DSpace account import subdirectory is created and prepared.

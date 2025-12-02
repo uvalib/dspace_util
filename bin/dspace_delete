@@ -2,7 +2,7 @@
 #
 # Remove items from DSpace.
 #
-# Usage: dspace_delete [DEPLOYMENT] [OPTIONS] ITEMS...
+# Usage: dspace_delete [DEPLOYMENT] [OPTIONS] ITEM...
 # Usage: dspace_delete [DEPLOYMENT] --all
 #
 # Script options:
@@ -12,21 +12,29 @@
 #   --collection    Next is a collection or list of collections.
 #   --foreground    Do not run in the background with "nohup".
 #
-# ITEMS may be:
+# Each ITEM may be:
 #
-# * Item handles or lists of item handles.
+# * An item handle or list of item handles.
 #   Item handles may be either be in the two column format expected by DSpace
 #   where the second column is a handle, or simple lists of handles one per
 #   line.
 #
-# * Mapfiles or newline-delimited lists of mapfiles.
+# * A mapfile or newline-delimited list of mapfiles.
 #   Mapfiles may be either be in the two column format expected by DSpace where
 #   the second column is a handle, or simple lists of handles one per line.
 #
-# * Collection names or lists of collection names.
+# * A collection or list of collections.
 #   Collections can be specified by handle (or as a file containing handles)
 #   but only after a --collection flag; plain arguments which are handles will
 #   always be interpreted as items.
+#   Collections are emptied but not removed.
+#
+# To ensure that network disconnection does not cause long-running imports to
+# fail, the remote shell is run with "nohup" by default.
+#
+# Note that, because this script requires support on the DSpace host side,
+# it will run `dspace_update_home` for you in order to ensure that the remote
+# side is up-to-date.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
@@ -173,7 +181,7 @@ declare -i C_COUNT=${#COLLECTIONS[*]}
 [[ `expr $H_COUNT + $M_COUNT + $C_COUNT` -eq 0 ]] && abort 'no items specified'
 
 # =============================================================================
-# Verify pre-conditions.
+# Ensure pre-conditions are met.
 # =============================================================================
 
 # Make sure the bin directory of the user account on the DSpace host includes a

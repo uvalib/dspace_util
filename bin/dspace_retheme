@@ -1,6 +1,9 @@
 #! /bin/bash
 #
-# Restart DSpace UI with updated configuration from terraform-infrastructure.
+# Restart DSpace UI with updated configuration from
+# https://github.com/uvalib/dspace_theme
+#
+# (Both "staging" and "production" have the same UI configuration.)
 #
 # Usage: dspace_retheme [DEPLOYMENT]
 

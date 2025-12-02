@@ -36,7 +36,7 @@ function remote() # path_name
 }
 
 # =============================================================================
-# Process command-line ssh flags
+# Process command-line scp options
 # =============================================================================
 
 DIRECTION=''    # $SEND if copying to; $RECV if copying from.

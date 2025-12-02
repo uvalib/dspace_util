@@ -3,7 +3,7 @@
 # Run a command on the DSpace host.
 #
 # Usage: dspace_sh [DEPLOYMENT] [SSH_OPTS]                  Interactive shell.
-# Usage: dspace_sh [DEPLOYMENT] [SSH_OPTS] [--] cmd [args]  Remote command.
+# Usage: dspace_sh [DEPLOYMENT] [SSH_OPTS] [--] CMD [ARGS]  Remote command.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
@@ -15,11 +15,11 @@ readonly REMOTE_USER="$USER"
 readonly PRIVATE_KEY="$HOME/.ssh/id_rsa"
 
 # =============================================================================
-# Process command-line ssh flags
+# Process command-line ssh options
 # =============================================================================
 
-KEY_GIVEN=''
-SSH_OPT=()
+KEY_GIVEN=''    # Whether $PRIVATE_KEY was overridden on the command line.
+SSH_OPT=()      # Options passed to ssh.
 
 while [[ $# -gt 0 ]] ; do
     case "$1" in

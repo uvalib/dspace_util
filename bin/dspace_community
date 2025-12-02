@@ -1,8 +1,8 @@
 #! /bin/bash
 #
-# Get information about DSpace communities and sub-communities.
+# Get information about DSpace communities in tabular form.
 #
-# Usage: dspace_community [DEPLOYMENT] [OPTIONS] [NAME...]
+# Usage: dspace_community [DEPLOYMENT] [OPTIONS]
 # Usage: dspace_community --help
 
 PROGRAM=`realpath "$0"`

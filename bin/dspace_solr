@@ -1,8 +1,15 @@
 #! /bin/bash
 #
-# View the DSpace Solr admin page.
+# View the DSpace Solr administration page.
 #
-# Usage: dspace_solr [DEPLOYMENT] [-chrome|-firefox]
+# Usage: dspace_solr [DEPLOYMENT] [OPTIONS]
+#
+# OPTIONS
+#   -chrome     Specify display in a local Chrome browser
+#   -firefox    Specify display in a local Firefox browser
+#
+# If necessary an ssh tunnel will be created.
+# The tunnel will persist in the background after the command is done.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`

@@ -2,7 +2,7 @@
 #
 # Get information about DSpace items of any type.
 #
-# Usage: dspace_item [DEPLOYMENT] [OPTIONS] [NAME...]
+# Usage: dspace_item [DEPLOYMENT] [OPTIONS] HANDLE...
 # Usage: dspace_item --help
 
 PROGRAM=`realpath "$0"`

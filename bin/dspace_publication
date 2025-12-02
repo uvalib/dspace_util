@@ -2,11 +2,12 @@
 #
 # Get information about DSpace Publication entities.
 #
-# Usage: dspace_publication [DEPLOYMENT] [OPTIONS] NAME...
+# Usage: dspace_publication [DEPLOYMENT] [OPTIONS] [TERM...]
 # Usage: dspace_publication --help
 #
-# Each `name` argument may be a computing ID, a last name, a first and last
-# name surrounded by quotes, or a "last, first" name in bibliographic order.
+# Each TERM argument may be "author:AUTHOR_NAME", "title:TITLE_TEXT", or a
+# publication handle. (A string without a prefix is assumed to be TITLE_TEXT.)
+# With no arguments, all Publications are listed.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`

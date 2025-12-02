@@ -15,7 +15,7 @@ privileges.
 Code here supports the activity of transferring items from LibraOpen to DSpace,
 in particular `dspace_import` which can perform the full end-to-end transfer.
 
-The import process creates DSpace _entities_ rather than simply DSpace "items";
+The import process creates DSpace "entities" rather than simply DSpace "items";
 this includes:
 
 * **Publication** entities corresponding to exported LibraOpen submissions.
@@ -156,14 +156,14 @@ Publication entities, but the final 500-item zip file fails.
 In this case, copy the records of the successful submissions to the project's
 temporary directory with:
 
-```bash
+```sh
 bin/dspace_cp_from import/dspace-import-1.map import/dspace-import-2.map ./tmp
 ```
 
 Then make use of them to re-process exports to generate a single zip file which
 will cause the rest of the items to be imported:
 
-```bash
+```sh
 bin/dspace_import --retry --phase 3 --skip tmp/dspace-import-1.map --skip tmp/dspace-import-2.map
 ```
 
@@ -176,16 +176,29 @@ items, resulting in a zip file through which only the remaining
 Scripts from the "bin" directory are meant to be run on a developer
 workstation.
 
-Note that all scripts assume that AWS Command Line utilities have been
-installed and are available in the current \$PATH.
-
 All of the scripts except `dspace_libra_export` accept a deployment option to
-specify the target DSpace host:
+specify the target DSpace system:
 
-* Staging host:    "--staging"    or "--deployment=staging"
-* Production host: "--production" or "--deployment=production"
+* Staging system:    "--staging"    or "--deployment=staging"
+* Production system: "--production" or "--deployment=production"
 
 The default deployment is "production".
+
+### Prerequisites
+
+All scripts assume that AWS Command Line utilities have been installed and are
+available in the current \$PATH.
+
+Additionally, `dspace_libra_export` requires these programs to be installed on
+local workstation and available in the current \$PATH:
+
+* ccrypt
+* terraform
+* ansible-playbook
+
+Some scripts invoke an underlying Ruby program.
+These programs assume that the Ruby version indicated by ".ruby-version" has
+been installed via `rvm` with a gemset named by ".ruby-gemset".
 
 <!---------------------------------------------------------------------------->
 
@@ -194,7 +207,7 @@ The default deployment is "production".
 This is an optional script that can be created to provide local default values.
 In particular, the default deployment can be set there with the line
 
-```bash
+```sh
 [[ "$DSPACE_DEPLOYMENT" ]] || export DSPACE_DEPLOYMENT='staging'
 ```
 
@@ -204,7 +217,10 @@ In particular, the default deployment can be set there with the line
 
 This provides common definitions for all of the scripts, including default
 values for environment variables.
-(It "sourced" by the scripts and is not intended to be executed directly.)
+
+It is "sourced" by the scripts and is not intended to be executed directly.
+In particular, it is used to extract the deployment option in order to set the
+DSPACE_DEPLOYMENT environment variable.
 
 All defaults can be overridden locally within an optional `bin/.values` script,
 particularly for sensitive information that should not be pushed to GitHub
@@ -216,22 +232,40 @@ along with this project's source code.
 
 Run a command on the DSpace host.
 
+#### Usage
+
+```sh
+dspace_sh [DEPLOYMENT] [SSH_OPTS]                  # Interactive shell.
+dspace_sh [DEPLOYMENT] [SSH_OPTS] [--] CMD [ARGS]  # Remote command.
+```
+
 With no command argument, this opens an interactive shell on the remote system.
 
 #### Options
 
-All flags are passed to the `ssh` program except for the following:
+All options are passed to the `ssh` program except for the following:
 
-##### --production | --staging
+| Option       | Description                          | Notes   |
+|:-------------|:-------------------------------------|:--------|
+| --production | Specify the production DSpace system | **[1]** |
+| --staging    | Specify the staging DSpace system    | **[1]** |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
 
 <!---------------------------------------------------------------------------->
 
 ### `dspace_cp`
 
 Copy files to or from the DSpace host.
+
+#### Usage
+
+```sh
+dspace_cp [DEPLOYMENT] [SSH_OPTS] SOURCES... TARGET
+dspace_cp --to [DEPLOYMENT] [SSH_OPTS] LOCAL_SOURCES...
+dspace_cp --from [DEPLOYMENT] [SSH_OPTS] REMOTE_SOURCES...
+```
 
 The last argument indicates the direction:
 * If it begins with ":" or "scp:" then it is interpreted as the remote
@@ -243,31 +277,74 @@ The last argument indicates the direction:
 
 #### Options
 
-All flags are passed to the `scp` program except for the following:
+All options are passed to the `scp` program except for the following:
 
-##### --production | --staging
+| Option       | Description                          | Notes   |
+|:-------------|:-------------------------------------|:--------|
+| --production | Specify the production DSpace system | **[1]** |
+| --staging    | Specify the staging DSpace system    | **[1]** |
+| --to         | Copy to the DSpace host              |         |
+| --from       | Copy from the DSpace host            |         |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
 
-##### --to
+<!---------------------------------------------------------------------------->
+
+### `dspace_cp_to`
 
 Copy to the DSpace host.
+(Equivalent to `dspace_cp --to`.)
+
+#### Usage
+
+```sh
+dspace_cp_to [DEPLOYMENT] [OPTIONS] LOCAL_PATHS... [REMOTE_TARGET]
+```
 
 All arguments are interpreted as local source files and/or directories which
 will be copied to the home directory of the remote account.
 
-The script `dspace_cp_to` executes `dspace_cp --to`.
+#### Options
 
-##### --from
+All options are passed to the `scp` program except for the following:
+
+| Option       | Description                          | Notes   |
+|:-------------|:-------------------------------------|:--------|
+| --production | Specify the production DSpace system | **[1]** |
+| --staging    | Specify the staging DSpace system    | **[1]** |
+
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
+
+<!---------------------------------------------------------------------------->
+
+### `dspace_cp_from`
 
 Copy from the DSpace host.
+(Equivalent to `dspace_cp --from`.)
+
+#### Usage
+
+```sh
+dspace_cp_to [DEPLOYMENT] [OPTIONS] LOCAL_PATHS... [REMOTE_TARGET]
+```
 
 All arguments are interpreted as remote source files and/or directories
 relative to the home directory of the remote account which will be copied to
 the local current working directory.
 
-The script `dspace_cp_from` executes `dspace_cp --from`.
+#### Options
+
+All options are passed to the `scp` program except for the following:
+
+| Option       | Description                          | Notes   |
+|:-------------|:-------------------------------------|:--------|
+| --production | Specify the production DSpace system | **[1]** |
+| --staging    | Specify the staging DSpace system    | **[1]** |
+
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
 
 <!---------------------------------------------------------------------------->
 
@@ -275,23 +352,33 @@ The script `dspace_cp_from` executes `dspace_cp --from`.
 
 Get information about DSpace OrgUnit entities in tabular form.
 
-Each argument may be a department name or an OrgUnit handle.
+#### Usage
+
+```sh
+dspace_org [DEPLOYMENT] [OPTIONS] [TERM...]
+```
+
+Each TERM argument may be an OrgUnit (department) name or an OrgUnit handle.
 With no arguments, all OrgUnits are listed.
 
 #### Options
 
-##### --production | --staging
+| Option       | Description                              | Notes   |
+|:-------------|:-----------------------------------------|:--------|
+| --production | Specify the production DSpace system     | **[1]** |
+| --staging    | Specify the staging DSpace system        | **[1]** |
+| --scope      | Limit search to the indicated collection |         |
+| --fast       | Used saved data if possible              |         |
+| --uuid       | Output only UUIDs                        | **[2]** |
+| --handle     | Output only handles                      | **[2]** |
+| --name       | Output only names                        | **[2]** |
+| --quiet      | Suppress console output                  |         |
+| --verbose    | Verbose console output                   |         |
+| --debug      | Diagnostic console output                |         |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
-
-##### --scope
-
-Limit search to the indicated collection.
-
-##### --fast
-
-Used saved data if possible.
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
+**[2]** May be combined to output multiple columns.<br/>
 
 <!---------------------------------------------------------------------------->
 
@@ -299,24 +386,34 @@ Used saved data if possible.
 
 Get information about DSpace Person entities in tabular form.
 
-Each name argument may be a computing ID, a last name, a first and last name
+#### Usage
+
+```sh
+dspace_person [DEPLOYMENT] [OPTIONS] [TERM...]
+```
+
+Each TERM argument may be a computing ID, a last name, a first and last name
 surrounded by quotes, or a "last, first" name in bibliographic order.
 With no arguments, all Persons are listed.
 
 #### Options
 
-##### --production | --staging
+| Option       | Description                              | Notes   |
+|:-------------|:-----------------------------------------|:--------|
+| --production | Specify the production DSpace system     | **[1]** |
+| --staging    | Specify the staging DSpace system        | **[1]** |
+| --scope      | Limit search to the indicated collection |         |
+| --fast       | Used saved data if possible              |         |
+| --uuid       | Output only UUIDs                        | **[2]** |
+| --handle     | Output only handles                      | **[2]** |
+| --name       | Output only names                        | **[2]** |
+| --quiet      | Suppress console output                  |         |
+| --verbose    | Verbose console output                   |         |
+| --debug      | Diagnostic console output                |         |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
-
-##### --scope
-
-Limit search to the indicated collection.
-
-##### --fast
-
-Used saved data if possible.
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
+**[2]** May be combined to output multiple columns.<br/>
 
 <!---------------------------------------------------------------------------->
 
@@ -324,25 +421,35 @@ Used saved data if possible.
 
 Get information about DSpace Publication entities in tabular form.
 
-Each name argument may be "author:AUTHOR_NAME", "title:TITLE_TEXT", or a
-handle.
+#### Usage
+
+```sh
+dspace_publication [DEPLOYMENT] [OPTIONS] [TERM...]
+```
+
+Each TERM argument may be "author:AUTHOR_NAME", "title:TITLE_TEXT", or a
+publication handle.
 (A string without a prefix is assumed to be TITLE_TEXT.)
 With no arguments, all Publications are listed.
 
 #### Options
 
-##### --production | --staging
+| Option       | Description                              | Notes   |
+|:-------------|:-----------------------------------------|:--------|
+| --production | Specify the production DSpace system     | **[1]** |
+| --staging    | Specify the staging DSpace system        | **[1]** |
+| --scope      | Limit search to the indicated collection |         |
+| --fast       | Used saved data if possible              |         |
+| --uuid       | Output only UUIDs                        | **[2]** |
+| --handle     | Output only handles                      | **[2]** |
+| --name       | Output only names                        | **[2]** |
+| --quiet      | Suppress console output                  |         |
+| --verbose    | Verbose console output                   |         |
+| --debug      | Diagnostic console output                |         |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
-
-##### --scope
-
-Limit search to the indicated collection.
-
-##### --fast
-
-Used saved data if possible.
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
+**[2]** May be combined to output multiple columns.<br/>
 
 <!---------------------------------------------------------------------------->
 
@@ -350,23 +457,33 @@ Used saved data if possible.
 
 Get information about DSpace collections in tabular form.
 
+#### Usage
+
+```sh
+dspace_collection [DEPLOYMENT] [OPTIONS]
+```
+
 This does not currently take arguments.
 With no arguments, all collections are listed.
 
 #### Options
 
-##### --production | --staging
+| Option       | Description                                | Notes   |
+|:-------------|:-------------------------------------------|:--------|
+| --production | Specify the production DSpace system       | **[1]** |
+| --staging    | Specify the staging DSpace system          | **[1]** |
+| --full       | Show full community path to the collection |         |
+| --fast       | Used saved data if possible                |         |
+| --uuid       | Output only UUIDs                          | **[2]** |
+| --handle     | Output only handles                        | **[2]** |
+| --name       | Output only names                          | **[2]** |
+| --quiet      | Suppress console output                    |         |
+| --verbose    | Verbose console output                     |         |
+| --debug      | Diagnostic console output                  |         |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
-
-##### --full
-
-Display the full community path to the collection.
-
-##### --fast
-
-Used saved data if possible.
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
+**[2]** May be combined to output multiple columns.<br/>
 
 <!---------------------------------------------------------------------------->
 
@@ -374,23 +491,33 @@ Used saved data if possible.
 
 Get information about DSpace communities in tabular form.
 
+#### Usage
+
+```sh
+dspace_community [DEPLOYMENT] [OPTIONS]
+```
+
 This does not currently take arguments.
 With no arguments, all communities are listed.
 
 #### Options
 
-##### --production | --staging
+| Option       | Description                               | Notes   |
+|:-------------|:------------------------------------------|:--------|
+| --production | Specify the production DSpace system      | **[1]** |
+| --staging    | Specify the staging DSpace system         | **[1]** |
+| --full       | Show full community path to the community |         |
+| --fast       | Used saved data if possible               |         |
+| --uuid       | Output only UUIDs                         | **[2]** |
+| --handle     | Output only handles                       | **[2]** |
+| --name       | Output only names                         | **[2]** |
+| --quiet      | Suppress console output                   |         |
+| --verbose    | Verbose console output                    |         |
+| --debug      | Diagnostic console output                 |         |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
-
-##### --full
-
-Display the full community path to the community.
-
-##### --fast
-
-Used saved data if possible.
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
+**[2]** May be combined to output multiple columns.<br/>
 
 <!---------------------------------------------------------------------------->
 
@@ -398,62 +525,76 @@ Used saved data if possible.
 
 Remove DSpace items by name or collection.
 
-Items may be provided as handle value(s) on the command line, provided through
-a "--mapfile", or specified by a "--collection".
-Note that the collection will have its constituent items removed but the
-collection itself will need to be removed through the DSpace UI.
+#### Usage
+
+```sh
+dspace_delete [DEPLOYMENT] [OPTIONS] ITEM...
+dspace_delete [DEPLOYMENT] --all
+```
+
+Each ITEM may be:
+
+* An item handle or list of item handles.<br/>
+  Item handles may be either be in the two column format expected by DSpace
+  where the second column is a handle, or simple lists of handles one per
+  line.
+
+* A mapfile or newline-delimited list of mapfiles.<br/>
+  Mapfiles may be either be in the two column format expected by DSpace where
+  the second column is a handle, or simple lists of handles one per line.
+
+* A collection or list of collections.<br/>
+  Collections can be specified by handle (or as a file containing handles)
+  but only after a --collection flag; plain arguments which are handles will
+  always be interpreted as items.
+  Collections are emptied but not removed.
 
 To ensure that network disconnection does not cause long-running imports to
 fail, the remote shell is run with "nohup" by default.
+
+Note that, because this script requires support on the DSpace host side,
+it will run `dspace_update_home` for you in order to ensure that the remote
+side is up-to-date.
 
 #### Options
 
 Below LIST indicates a single command line argument that contains a list of
 individual items separated by ";", "|" or "\n".
 
-##### --production | --staging
+| Option                            | Description                                                       | Notes                 |
+|:----------------------------------|:------------------------------------------------------------------|:----------------------|
+| --production                      | Specify the production DSpace system                              | **[1]**               |
+| --staging                         | Specify the staging DSpace system                                 | **[1]**               |
+| --all                             | Delete all items from collections listed in `data/collection.txt` |                       |
+| --handle (HANDLE\|LIST)           | A single handle or list of handles to delete                      | **[2]**               |
+| --mapfile (FILE\|LIST)            | A file or list of files, each with handles of items to delete     | **[2]**,&nbsp;**[3]** |
+| --collection (NAME\|HANDLE\|LIST) | A collection or list of collections whose items will be deleted   | **[2]**,&nbsp;**[4]** |
+| --foreground                      | Do not run in the background with "nohup"                         |                       |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
-
-##### --all
-
-Delete all items from collections listed in `data/collection_production.txt` or
-`data/collection_staging.txt` (depending on the given deployment).
-
-##### --handle (HANDLE|LIST)
-
-A single handle or list of handles to delete.
-
-This option may be given multiple times.
-
-##### --mapfile (FILE|LIST)
-
-A file or list of files, each of which contains the handles of items to
-delete.
-This file may be a mapfile generated by a DSpace import or simply a list of
-handles, one per line, which will be converted into that form.
-
-This option may be given multiple times.
-
-##### --collection (NAME|HANDLE|LIST)
-
-A collection or list of collections whose items will be deleted.
-Collections may be specified as names or as handles.
-The set of items to delete is determined by fetching the list of items within
-each collection.
-
-This option may be given multiple times.
-
-##### --foreground
-
-Do not run in the background with "nohup".
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
+**[2]** This option may be given multiple times.<br/>
+**[3]** This file may be a mapfile generated by a DSpace import or simply a
+list of handles, one per line, which will be converted into that form.<br/>
+**[4]** Collections may be specified as names or as handles.  The set of items
+to delete is determined by fetching the list of items within each
+collection.<br/>
 
 <!---------------------------------------------------------------------------->
 
 ### `dspace_lookup`
 
-Get JSON details of a DSpace item.
+Get JSON details of a single DSpace item.
+
+#### Usage
+
+```sh
+dspace_lookup [DEPLOYMENT] HANDLE
+dspace_lookup [DEPLOYMENT] UUID
+```
+
+For convenience, a full path can be supplied and the item identifier will be
+extracted from it.
 
 The item may be a collection, however DSpace only returns metadata about the
 collection itself and does not provide a way to get the items associated with
@@ -461,26 +602,41 @@ the collection.
 
 #### Options
 
-##### --production | --staging
+| Option       | Description                          | Notes   |
+|:-------------|:-------------------------------------|:--------|
+| --production | Specify the production DSpace system | **[1]** |
+| --staging    | Specify the staging DSpace system    | **[1]** |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
 
 <!---------------------------------------------------------------------------->
 
 ### `dspace_solr`
 
-Open the DSpace Solr admin page on a local browser, creating an ssh tunnel if
-necessary.
+View the DSpace Solr administration page.
 
+If necessary an ssh tunnel will be created.
 The tunnel will persist in the background after the command is done.
+
+#### Usage
+
+```sh
+dspace_solr [DEPLOYMENT] [OPTIONS]
+```
 
 #### Options
 
-##### --production | --staging
+| Option       | Description                                | Notes   |
+|:-------------|:-------------------------------------------|:--------|
+| --production | Specify the production DSpace system       | **[1]** |
+| --staging    | Specify the staging DSpace system          | **[1]** |
+| -chrome      | Specify display in a local Chrome browser  | **[2]** |
+| -firefox     | Specify display in a local Firefox browser | **[2]** |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
+**[2]** Google Chrome is the default browser.<br/>
 
 <!---------------------------------------------------------------------------->
 
@@ -488,12 +644,24 @@ Indicate the target DSpace host.
 
 Retrieve DSpace Solr search records.
 
+#### Usage
+
+```sh
+dspace_solr_export [DEPLOYMENT] [OPTIONS]
+```
+
 #### Options
 
-##### --production | --staging
+| Option       | Description                                | Notes         |
+|:-------------|:-------------------------------------------|:--------------|
+| --production | Specify the production DSpace system       | **[1]**       |
+| --staging    | Specify the staging DSpace system          | **[1]**       |
+| --start DATE | Get records submitted no earlier than DATE |               |
+| --end DATE   | Get records submitted no later than DATE   |               |
+| --rows N     | Only fetch N records                       | Default: 5000 |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
 
 <!---------------------------------------------------------------------------->
 
@@ -502,12 +670,27 @@ Indicate the target DSpace host.
 A convenience script for copying the files of "remote/bin" to the user's DSpace
 home ~/bin directory.
 
+#### Usage
+
+```sh
+dspace_update_home [DEPLOYMENT]
+dspace_update_home [DEPLOYMENT] --as-needed [--quiet]
+dspace_update_home [DEPLOYMENT] --check [--quiet]
+```
+
 #### Options
 
-##### --production | --staging
+| Option       | Description                          | Notes   |
+|:-------------|:-------------------------------------|:--------|
+| --production | Specify the production DSpace system | **[1]** |
+| --staging    | Specify the staging DSpace system    | **[1]** |
+| --as-needed  | Skip copy if up-to-date              |         |
+| --check      | Indicate whether up-to-date          |         |
+| --quiet      | Suppress console output              | **[2]** |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
+**[2]** Meaningful only for --check or --as-needed.<br/>
 
 <!---------------------------------------------------------------------------->
 
@@ -519,12 +702,21 @@ or
 [staging/ansible/config/dspace](https://github.com/uvalib/terraform-infrastructure/dspace.library.virginia.edu/staging/ansible/config/dspace)
 from the local copy of terraform-infrastructure on the developer workstation.
 
+#### Usage
+
+```sh
+dspace_restart [DEPLOYMENT]
+```
+
 #### Options
 
-##### --production | --staging
+| Option       | Description                          | Notes   |
+|:-------------|:-------------------------------------|:--------|
+| --production | Specify the production DSpace system | **[1]** |
+| --staging    | Specify the staging DSpace system    | **[1]** |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
 
 <!---------------------------------------------------------------------------->
 
@@ -535,12 +727,21 @@ https://github.com/uvalib/dspace_theme
 .
 (Both "staging" and "production" have the same UI configuration.)
 
+#### Usage
+
+```sh
+dspace_retheme [DEPLOYMENT]
+```
+
 #### Options
 
-##### --production | --staging
+| Option       | Description                          | Notes   |
+|:-------------|:-------------------------------------|:--------|
+| --production | Specify the production DSpace system | **[1]** |
+| --staging    | Specify the staging DSpace system    | **[1]** |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
 
 <!---------------------------------------------------------------------------->
 
@@ -560,20 +761,36 @@ Note that, because this script requires support on the DSpace host side,
 it will run `dspace_update_home` for you in order to ensure that the remote
 side is up-to-date.
 
+#### Usage
+
+```sh
+dspace_import [DEPLOYMENT] [OPTIONS] [GENERATE_OPT] [REMOTE_OPT]
+```
+
 #### Options
 
 All options are passed to the local `bin/dspace_import_zip` script except for
 the following:
 
-##### --production | --staging
+| Option            | Description                                                | Notes   |
+|:------------------|:-----------------------------------------------------------|:--------|
+| --production      | Specify the production DSpace system                       | **[1]** |
+| --staging         | Specify the staging DSpace system                          | **[1]** |
+| --retry           | Overwrite existing import directory and zip file(s)        |         |
+| --force           | Acquire fresh LibraOpen exports                            |         |
+| --start DATE      | Passed to `bin/dspace_libra_export`                        |         |
+| --eperson ID      | Passed to `remote/bin/dspace_import`                       |         |
+| --collection COLL | Passed to `remote/bin/dspace_import`                       |         |
+| --remote          | Assume zip files have already been copied to remote system |         |
+| --foreground      | Do not run in the background with "nohup"                  |         |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
 
 ##### --retry
 
 While normally the script guards against overwriting an existing import
-directory or import zip files(s),
+directory or import zip file(s),
 using this option allows them to be removed before proceeding.
 This can be used as an alternative to manually clearing out these intermediate
 files before running the script.
@@ -586,8 +803,6 @@ exports.
 
 ##### --start DATE
 
-Passed to `bin/dspace_libra_export`.
-
 This option will cause LibraOpen exports to be acquired which were created on
 or after the given date.
 This only applies if the export directory is empty or does not exist;
@@ -596,8 +811,6 @@ order to force a new export/import sequence.
 
 ##### --eperson
 
-Passed to `remote/bin/dspace_import`.
-
 Entities are normally created with "dc.description.provenance" indicating that
 it was submitted by "Import Owner (libra@virginia.edu)".
 If there was a compelling use-case for indicating a different submitting user,
@@ -605,22 +818,12 @@ this would be the option to use to cause that to happen.
 
 ##### --collection
 
-Passed to `remote/bin/dspace_import`.
-
 This should probably not be used since imported entities are generated with a
 "collections" file which specifies the appropriate collection depending on the
 nature of the entity (Publication, Person, or OrgUnit).
 Due to the way that the DSpace command line works, specifying a collection will
 mean that _all_ imported entities will be placed into that collection
 (which is probably not desirable for OrgUnit and Person entities).
-
-##### --remote
-
-Assume zip files have already been copied to remote system.
-
-##### --foreground
-
-Do not run in the background with "nohup".
 
 <!---------------------------------------------------------------------------->
 
@@ -639,47 +842,30 @@ where "nnn" is a zero-filled number.
 The resulting zip file(s) can be copied to DSpace for use with the remote
 dspace_import script to bulk submit the items to DSpace.
 
+#### Usage
+
+```sh
+dspace_import_zip [DEPLOYMENT] [OPTIONS]
+```
+
 #### Options
 
-##### --production | --staging
+| Option          | Description                                                                                                   | Notes   |
+|:----------------|:--------------------------------------------------------------------------------------------------------------|:--------|
+| --record LIST   | List of records to extract                                                                                    |         |
+| --skip LIST     | List of records to ignore                                                                                     |         |
+| --phase N       | Import phase to perform.                                                                                      |         |
+| --phase 1       | Import orgs.                                                                                                  |         |
+| --phase 2       | Import persons.                                                                                               |         |
+| --phase 3       | Import publications.                                                                                          |         |
+| --max-records N | Only process N exports                                                                                        |         |
+| --batch-count N | Split output into N zip files                                                                                 |         |
+| --batch-size N  | Make zip files of size N bytes                                                                                |         |
+| --fast          | Use saved org and person data where possible                                                                  |         |
+| --no-fetch      | Avoid acquiring data which would prevent import because the intended import already appears to have happened. | **[1]** |
 
-Indicate the target DSpace host.
-(The default is taken from the DSPACE_DEPLOYMENT environment variable.)
-
-##### --record RECORDS
-
-List of records to extract.
-
-##### --skip RECORDS
-
-List of records to ignore.
-
-##### --phase N
-
-Import phase to perform.
-
-##### --max-records N
-
-Only process N exports.
-
-##### --batch-count N
-
-Split output into N zip files.
-
-##### --batch-size N
-
-Make zip files of size N.
-
-##### --fast
-
-Use saved org and person data where possible.
-
-##### --no-fetch
-
-Avoid acquiring data which would prevent import because the intended import
-already appears to have happened.
-
-NOTE: This is a questionable feature and may be removed or revamped.
+NOTES<br/>
+**[1]** This is a questionable feature and may be removed or modified.<br/>
 
 #### Prerequisites
 
@@ -701,34 +887,20 @@ time.
 This script does not accept a deployment option since it does not directly
 involve any DSpace instance.
 
+#### Usage
+
+```sh
+dspace_libra_export [OPTIONS]
+```
+
 #### Options
 
-##### --force
-
-Replace the target output directory.
-
-##### --common DIR_PATH
-
-Root directory of the output directory.
-
-##### --export DIR_NAME
-
-Name of the output directory.
-
-##### --start DATE
-
-Get LibraOpen exports created on or after the given date.
-
-#### Prerequisites
-
-This script requires
-
-* ccrypt
-* terraform
-* ansible-playbook
-
-These are expected to be installed on the local workstation and available in
-the current \$PATH.
+| Option            | Description                                              | Notes |
+|:------------------|:---------------------------------------------------------|:------|
+| --force           | Replace the target output directory                      |       |
+| --common DIR_PATH | Root directory of the output directory                   |       |
+| --export DIR_NAME | Name of the output directory                             |       |
+| --start DATE      | Get LibraOpen exports created on or after the given date |       |
 
 <!---------------------------------------------------------------------------->
 
@@ -777,6 +949,20 @@ large bulk submissions into batches.
 This command can be run manually on the DSpace host, however it may be
 preferable to run the entire end-to-end LibraOpen-export-to-DSpace-import
 process from the local development machine through the `dspace_import` command.
+
+### `dspace_import_bg`
+
+Run dspace_import on multiple zip files in the background.
+
+This is primarily for use by `dspace_import` on the developer machine to have
+a single process which can be run in the background.
+
+### `dspace_delete_bg`
+
+Run `dspace import --delete` in the background.
+
+This is primarily for use by `dspace_delete` on the developer machine to have
+a single process which can be run in the background.
 
 <!---------------------------------------------------------------------------->
 <!-- Directory link references used above:

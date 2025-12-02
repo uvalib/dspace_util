@@ -2,11 +2,12 @@
 #
 # Get information about DSpace Person entities.
 #
-# Usage: dspace_person [DEPLOYMENT] [OPTIONS] [NAME...]
+# Usage: dspace_person [DEPLOYMENT] [OPTIONS] [TERM...]
 # Usage: dspace_person --help
 #
-# Each `name` argument may be a computing ID, a last name, a first and last
-# name surrounded by quotes, or a "last, first" name in bibliographic order.
+# Each TERM argument may be a computing ID, a last name, a first and last name
+# surrounded by quotes, or a "last, first" name in bibliographic order.
+# With no arguments, all Persons are listed.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`

@@ -4,7 +4,7 @@
 #
 # Usage: dspace_libra_export [OPTIONS]
 #
-# Options:
+# OPTIONS
 #   --force         Overwrite existing destination subdirectory.
 #   --common dir    Common root for export and import directories.
 #   --export name   Destination subdirectory name for copied exports.

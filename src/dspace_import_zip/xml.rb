@@ -45,7 +45,7 @@ class Xml < Nokogiri::XML::Builder
     make_element(value, e, q, &blk)
   end
 
-  # Emit one <dcvalue> element for a single-value field.
+  # Emit multiple <dcvalue> elements for a multi-valued field.
   #
   # @param [Array,String,nil] value   Element value.
   # @param [String]      e            Element name attribute.

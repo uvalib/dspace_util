@@ -4,9 +4,9 @@
 #
 # -i    The ID or Handle of target item (sets --type ITEM)
 # -c    The ID or Handle of target collection (sets --type COLLECTION)
-# -*    One of the "dspace export" flags below.
+# -*    One of the "dspace export" options below.
 #
-# For reference, "dspace export" command line arguments are:
+# For reference, "dspace export" command line options are:
 #
 # Argument          Description                     Notes
 # Short Long
@@ -83,7 +83,7 @@ if [[ "$HELP" ]] ; then
 fi
 
 # =============================================================================
-# Verify pre-conditions.
+# Ensure pre-conditions are met.
 # =============================================================================
 
 # Ensure that arguments include "-i item_id" or "-c collection_id".

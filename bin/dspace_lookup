@@ -1,12 +1,16 @@
 #! /bin/bash
 #
-# Get JSON details of a DSpace item by handle or UUID.
+# Get JSON details of a single DSpace item.
 #
-# Usage: dspace_lookup [DEPLOYMENT] item_handle
-# Usage: dspace_lookup [DEPLOYMENT] item_uuid
+# Usage: dspace_lookup [DEPLOYMENT] HANDLE
+# Usage: dspace_lookup [DEPLOYMENT] UUID
 #
 # For convenience, a full path can be supplied and the item identifier will be
 # extracted from it.
+#
+# The item may be a collection, however DSpace only returns metadata about the
+# collection itself and does not provide a way to get the items associated with
+# the collection.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`

@@ -2,8 +2,8 @@
 #
 # Run dspace_import on multiple zip files in the background.
 #
-# This is primarily for use by dspace_import on the developer machine to have a
-# single process which can be run in the background.
+# This is primarily for use by `dspace_import` on the developer machine to have
+# a single process which can be run in the background.
 #
 # Usage: dspace_import_bg ZIP_FILES... [--foreground] [DSPACE_IMPORT_OPTS]
 

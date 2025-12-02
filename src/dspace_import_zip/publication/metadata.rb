@@ -370,7 +370,7 @@ module Publication::Metadata
       super
     end
 
-    # Emit one <dcvalue> element for a single-value field.
+    # Emit multiple <dcvalue> elements for a multi-valued field.
     #
     # @param [Symbol]      field      Work field holding the element value.
     # @param [String]      e          Element name attribute

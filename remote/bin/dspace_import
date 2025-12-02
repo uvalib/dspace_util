@@ -9,7 +9,7 @@
 # then the remainder are `dspace import` command line arguments although
 # certain combinations are untested.
 #
-# Local script options:
+# OPTIONS
 #   --nohup             Background the import process.
 #   --wait              Wait for background import process to finish.
 #
@@ -122,7 +122,7 @@ EOF
 fi
 
 # =============================================================================
-# Verify pre-conditions.
+# Ensure pre-conditions are met.
 # =============================================================================
 
 # The zip file should be first argument to script; other flags like '-v' may

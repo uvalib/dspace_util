@@ -2,7 +2,12 @@
 #
 # Export DSpace Solr search records.
 #
-# Usage: dspace_solr_export [DEPLOYMENT] [-s start_date] [-e end_date] [-r rows]
+# Usage: dspace_solr_export [DEPLOYMENT] [OPTIONS]
+#
+# OPTIONS
+#   --start DATE    Get records submitted no earlier than DATE.
+#   --end DATE      Get records submitted no later than DATE.
+#   --rows N        Only fetch N records (default: 5000).
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`

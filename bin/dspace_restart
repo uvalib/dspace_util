@@ -1,11 +1,13 @@
 #! /bin/bash
 #
-# Restart DSpace with updated configuration from terraform-infrastructure.
+# Restart DSpace with updated configuration from either
+# "production/ansible/config/dspace" or "staging/ansible/config/dspace"
+# from the local copy of terraform-infrastructure on the developer workstation.
 #
 # Usage: dspace_restart [DEPLOYMENT]                        New system config
 # Usage: dspace_restart [DEPLOYMENT] --target UI            New UI config
 #
-# Options:
+# OPTIONS
 #   --target [system|UI]              Target subsystem (default: "system").
 
 PROGRAM=`realpath "$0"`
