@@ -268,21 +268,23 @@ module Publication::Metadata
     def issue_date(value, field: :published_date)
       value = value[field] if value.is_a?(Hash)
       value = value.to_s.squish.sub(/^(forthcoming|in.progress)\D*/i, '')
+      return if value.blank?
       yymmdd =
         case value
           when /^(\d{4})$/                             then [$1,  1,  1]
-          when /^spring (\d{4})$/                      then [$1,  3,  1]
-          when /^summer (\d{4})$/                      then [$1,  6,  1]
-          when /^fall (\d{4})$/                        then [$1,  9,  1]
-          when /^winter (\d{4})$/                      then [$1, 12,  1]
+          when /^spring (\d{4})$/i                     then [$1,  3,  1]
+          when /^summer (\d{4})$/i                     then [$1,  6,  1]
+          when /^fall (\d{4})$/i                       then [$1,  9,  1]
+          when /^winter (\d{4})$/i                     then [$1, 12,  1]
           when /^(\d{4})-(\d{1,2})$/                   then [$1, $2,  1]
           when /^(\d{4})-(\d{1,2})-(\d{1,2})( *T.*)?$/ then [$1, $2, $3]
           when /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/       then [$3, $1, $2]
-          when /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/       then ["20#{$3}", $1, $2]
+          when /^([012]\d)\/(\d{1,2})\/(\d{2})$/       then ["20#{$3}", $1, $2]
+          when /^(\d\d)\/(\d{1,2})\/(\d{2})$/          then ["19#{$3}", $1, $2]
         end
       if yymmdd
         '%04d-%02d-%02d' % yymmdd.map(&:to_i)
-      elsif value.present?
+      else
         # noinspection RubyMismatchedArgumentType
         Date.parse(value).to_s rescue value
       end
@@ -297,8 +299,10 @@ module Publication::Metadata
     #
     def submit_date(value, field: :date_modified)
       value = value[field] if value.is_a?(Hash)
-      value = value.to_s.strip
-      "Original submission date: #{value}" if value.present?
+      value = value.to_s.strip.presence or return
+      value.sub!(/\.\d+(Z|\+\d\d?:\d\d)$/, '\1')
+      value.sub!(/\+00:00$/, 'Z')
+      "Original submission date: #{value}"
     end
 
   end
@@ -381,26 +385,6 @@ module Publication::Metadata
     def multi(field, e, q = nil, &blk)
       field = work_metadata[field]
       super
-    end
-
-    # =========================================================================
-    # :section: Xml overrides
-    # =========================================================================
-
-    protected
-
-    # Emit a <dcvalue> element for non-blank data.
-    #
-    # @param [String, nil] value      Element value.
-    # @param [String]      e          Element name attribute
-    # @param [String, nil] q          Qualifier attribute
-    #
-    # @return [Nokogiri::XML::Node, nil]
-    #
-    def make_element(value, e, q, &blk)
-      value = value&.strip
-      value = blk.call(value) if blk
-      super(value, e, q)
     end
 
   end
