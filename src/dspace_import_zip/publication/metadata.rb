@@ -190,6 +190,175 @@ module Publication::Metadata
     end
 
     # =========================================================================
+    # :section: Internal methods - subject
+    # =========================================================================
+
+    # LibraOpen "keyword" value which should be used without splitting.
+    #
+    # Otherwise, a value containing a comma is interpreted as a list of keyword
+    # phrases to be split into separate subject terms.
+    #
+    # @type [Hash{String=>Array<String>}]
+    #
+    #--
+    # noinspection SpellCheckingInspection
+    #++
+    SUBJECT_PHRASE = {
+      'Advanced chronic kidney disease (ACKD), palliative care (PC)'    => ['Advanced Chronic Kidney Disease', 'ACKD', 'Palliative Care', 'PC'],
+      'African Americans'                                               => ['African-Americans'],
+      'Artificial Intelligence (AI)'                                    => ['Artificial Intelligence', 'AI'],
+      'Artificial intelligence (AI)'                                    => ['Artificial Intelligence', 'AI'],
+      'BERT (Bidirectional Encoder Representations from Transformers)'  => ['BERT', 'Bidirectional Encoder Representations from Transformers'],
+      'Belief elicitation, BDM, Lottery Choice, BDM, risk aversion'     => ['Belief Elicitation', 'BDM', 'Lottery Choice', 'Risk Aversion'],
+      'Broadband, equity, digital'                                      => ['Broadband', 'Digital Equity'],
+      'Charlottesville, VA'                                             => nil,
+      'Charlottesville, Virginia'                                       => ['Charlottesville, VA'],
+      'Clausen, Hugh J., 1926-'                                         => nil,
+      'Community Learning through Data Driven Discovery (CLD3)'         => ['Community Learning Through Data Driven Discovery', 'CLD3'],
+      'Computer, Math, and Physical Sciences'                           => nil,
+      'Cooperative Extension System (CES)'                              => ['Cooperative Extension System', 'CES'],
+      'Exploratory data analysis (EDA)'                                 => ['Exploratory Data Analysis', 'EDA'],
+      'FGLI (first generation low income)'                              => ['FGLI', 'First Generation Low Income'],
+      'Haughney, Edward W. , 1917-'                                     => ['Haughney, Edward W., 1917-'],
+      'Learning Health Systems (LHS)'                                   => ['Learning Health Systems', 'LHS'],
+      'Levie, Howard S., 1907- 2009'                                    => ['Levie, Howard S., 1907-2009'],
+      'Machine learning (ML)'                                           => ['Machine Learning', 'ML'],
+      'Nardotti, Michael, 1947-'                                        => nil,
+      'Natural Language Processing (NLP)'                               => ['Natural Language Processing', 'NLP'],
+      'Open Educational Resources (OER)'                                => ['Open Educational Resources', 'OER'],
+      'Parker, Harold E., 1918-'                                        => nil,
+      'SACO (Subject Authority Cooperative Program)'                    => ['SACO', 'Subject Authority Cooperative Program'],
+      'Saville & Co., Inc'                                              => ['Saville'],
+      'Social Justice, Equity and Inclusion'                            => ['Social Justice', 'Equity', 'Inclusion'],
+      'Social Justice, Equity, and Inclusion'                           => ['Social Justice', 'Equity', 'Inclusion'],
+      'Social construction of technology (SCOT)'                        => ['Social Construction of Technology', 'SCOT'],
+      'Third-party (private sector) data'                               => ['Third-Party (Private Sector) Data'],
+      'Vietnamese Conflict, 1961-1975'                                  => nil,
+      'White, Charles, 1939-'                                           => nil,
+      'Wiener, Frederick Bernays, 1906-1996'                            => nil,
+    }.map { |k, v| [k, (v || [k]).freeze] }.to_h.freeze
+
+    # LibraOpen "keyword" part which should not be capitalized.
+    #
+    # @type [Array<String>]
+    #
+    SUBJECT_WORD = %w[
+      a
+      an
+      and
+      bin
+      cMYC
+      dN/dS
+      de
+      des
+      fMRI
+      for
+      iTHRIV
+      in
+      lncRNA
+      mHealth
+      of
+      on
+      pN/pS
+      the
+    ].freeze
+
+    # LibraOpen "keyword" part which should be corrected or transformed.
+    #
+    # @type [Hash{String=>String}]
+    #
+    #--
+    # noinspection SpellCheckingInspection
+    #++
+    SUBJECT_FIX = {
+      '19th-Century'              => '19th Century',
+      'Aged-related'              => 'Age-Related',
+      'Agrictulture'              => 'Agriculture',
+      'Catalogue'                 => 'Catalog',
+      'Cell-to-cell'              => 'Cell-to-Cell',
+      'Charlottesville, VA'       => 'Charlottesville, Virginia',
+      'Colleciton'                => 'Collection',
+      'Colletion'                 => 'collection',
+      'Community-building'        => 'Community-Building',
+      'Consumer-resource'         => 'Consumer-Resource',
+      'Context-dependence'        => 'Context Dependence',
+      'Cultual'                   => 'Cultural',
+      'Decision-making'           => 'Decision-Making',
+      'DeepFakes'                 => 'Deep Fakes',
+      'Deepfakes'                 => 'Deep Fakes',
+      'Difference-in-differences' => 'Difference-in-Differences',
+      'Dual-mode'                 => 'Dual-Mode',
+      'Evidence-based'            => 'Evidence-Based',
+      'Faith-based'               => 'Faith-Based',
+      'First-generation'          => 'First-Generation',
+      'GSVScapstone'              => 'GSVS Capstone',
+      'Gender-based'              => 'Gender-Based',
+      'Gender-diverse'            => 'Gender-Diverse',
+      'Grfp'                      => 'GRFP',
+      'High-fat'                  => 'High-Fat',
+      'Hip-hop'                   => 'Hip-Hop',
+      'Host-pathogen'             => 'Host-Pathogen',
+      'Human-computer'            => 'Human-Computer',
+      'Human-labeled'             => 'Human-Labeled',
+      'Humanites'                 => 'Humanities',
+      'Ithriv'                    => 'iTHRIV',
+      'Job-ads'                   => 'Job Postings',
+      'Leanring'                  => 'Learning',
+      'LncRNAs'                   => 'lncRNA',
+      'Low-income'                => 'Low-Income',
+      'Metal-insulator'           => 'Metal-Insulator',
+      'Musicial'                  => 'Musical',
+      'Nih'                       => 'NIH',
+      'Nsf'                       => 'NSF',
+      'Off-site'                  => 'Off-Site',
+      'Patient-provider'          => 'Patient-Provider',
+      'Peer-reviewed'             => 'Peer-Reviewed',
+      'Plaigiarism'               => 'Plagiarism',
+      'Privacy-preserving'        => 'Privacy-Preserving',
+      'Rank-dependent'            => 'Rank-Dependent',
+      'Rear-end'                  => 'Rear-End',
+      'Repsoirtory'               => 'Repository',
+      'Research-and-development'  => 'Research and Development',
+      'Self-binding'              => 'Self-Binding',
+      'Self-control'              => 'Self-Control',
+      'Socio-demographic'         => 'Socio-Demographic',
+      'Socio-ecological'          => 'Socio-Ecological',
+      'Spectroscopyk'             => 'Spectroscopy',
+      'Succesion'                 => 'Succession',
+      'Task-based'                => 'Task-Based',
+      'Time-space'                => 'Time-Space',
+      'UVa'                       => 'UVA',
+      'UVaOHP'                    => 'UVA OHP',
+      'Well-being'                => 'Well-Being',
+      'Work-life'                 => 'Work-Life',
+      'Zero-inflated'             => 'Zero-Inflated',
+    }.freeze
+
+    # Get DSpace "dc.subject" value(s) from a LibraOpen "keyword" value.
+    #
+    # @param [String, Hash] value
+    # @param [Symbol]       field
+    #
+    # @return [Array<String>, nil]
+    #
+    def subject(value, field: :keyword)
+      value = value[field] if value.is_a?(Hash)
+      value = value.to_s.squish.presence or return
+      value = value.gsub(/"/, '').sub(/\s*[,.]+$/, '')
+      SUBJECT_PHRASE[value.upcase_first] ||
+        value.split(/\s*[,;]\s*/).compact_blank.map do |phrase|
+          phrase.split(' ').map { |word|
+            if SUBJECT_WORD.include?(word)
+              word
+            else
+              word = word.upcase_first
+              SUBJECT_FIX[word] || word
+            end
+          }.join(' ')
+        end
+    end
+
+    # =========================================================================
     # :section: Internal methods - type
     # =========================================================================
 
@@ -345,7 +514,7 @@ module Publication::Metadata
         multi( :language,          'language',     'iso')            { language_iso(_1) }
         multi( :rights,            'rights')                         { rights(_1) }
         multi( :rights,            'rights',       'uri')            { rights_uri(_1) }
-        multi( :keyword,           'subject')
+        multi( :keyword,           'subject')                        { subject(_1) }
         multi( :related_url,       'relation')
         multi( :sponsoring_agency, 'description',  'sponsorship')
         single(:resource_type,     'type')                           { resource(_1) }

@@ -65,21 +65,23 @@ class Xml < Nokogiri::XML::Builder
 
   protected
 
-  # Emit a <dcvalue> element for non-blank data.
+  # Emit one or more <dcvalue> elements for non-blank data.
   #
   # @param [String, nil] value        Element value.
   # @param [String]      e            Element name attribute
   # @param [String, nil] q            Qualifier attribute
   #
-  # @return [Nokogiri::XML::Node, nil]
+  # @return [void]
   #
   def make_element(value, e, q, &blk)
     value = value&.strip
     value = blk.call(value) if blk
     return if value.blank?
     qualifier = q ? { qualifier: q } : {}
-    # noinspection RubyResolve
-    dcvalue(value, element: e, **qualifier)
+    Array.wrap(value).each do |v|
+      # noinspection RubyResolve
+      dcvalue(v, element: e, **qualifier)
+    end
   end
 
 end
