@@ -9,13 +9,13 @@ require 'common'
 require 'logging'
 
 require 'optparse'
+require 'singleton'
 
 # =============================================================================
 # :section: Methods
 # =============================================================================
 
-def get_options = @option = BaseOptions.new
-def option      = @option || get_options
+def option = BaseOptions.instance
 
 # =============================================================================
 # :section: Class
@@ -24,6 +24,8 @@ def option      = @option || get_options
 # Generic options applicable to any application.
 #
 class BaseOptions
+
+  include Singleton
 
   DEBUG = false
 

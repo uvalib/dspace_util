@@ -13,8 +13,7 @@ require 'base_options'
 # :section: Methods
 # =============================================================================
 
-def get_options = @option = TableOptions.new
-def option      = @option || get_options
+def option = TableOptions.instance
 
 # =============================================================================
 # :section: Class

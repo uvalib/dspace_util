@@ -71,8 +71,7 @@ ORG_PREFIX = 'org-'
 # :section: Methods
 # =============================================================================
 
-def get_options = @option = Options.new
-def option      = @option || get_options
+def option = Options.instance
 
 # =============================================================================
 # :section: Class

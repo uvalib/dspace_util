@@ -22,6 +22,5 @@ require_relative 'dspace_import_zip/import_zip'
 # =============================================================================
 
 if $0 == __FILE__
-  get_options
   make_import_dir and make_import_zip
 end
