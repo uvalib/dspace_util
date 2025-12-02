@@ -12,4 +12,6 @@ PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
 PROGNAME=`basename "$PROGRAM"`
 
+source "$BIN_DIR/dspace_values"
+
 exec "$BIN_DIR/run_ruby" "$PROGNAME" "$@"

@@ -26,6 +26,12 @@ module Dspace::Api
   #
   PAGE_SIZE = 100
 
+  # External hostname for the DSpace API service.
+  #
+  # @return [String]
+  #
+  API_HOST = ENV['DSPACE_API'].freeze
+
   # External hostname for the machine hosting the DSpace instance.
   #
   # @return [String]
@@ -104,7 +110,7 @@ module Dspace::Api
   # @param [Hash]   opt               Additional URL options.
   #
   def dspace_api_url(path, **opt)
-    root = "https://#{PUBLIC_HOST}/server/api"
+    root = "https://#{API_HOST}/server/api"
     path = path.start_with?('http') ? path.dup : File.join(root, path)
     if opt.present?
       path << (path.include?('?') ? '&' : '?')

@@ -21,7 +21,7 @@ require 'pp'
 #
 PROJECT_DIRECTORY = File.dirname(__FILE__, 2).freeze
 
-# Target DSpace deployment (either "staging" or "production").
+# Target DSpace deployment (either "production", "staging", or "development").
 #
 # @return [String]
 #
@@ -30,18 +30,6 @@ DEPLOYMENT = ENV['DSPACE_DEPLOYMENT'].freeze
 # =============================================================================
 # :section: Methods
 # =============================================================================
-
-# Indicate whether the execution is target is the staging DSpace instance.
-#
-def staging?
-  DEPLOYMENT == 'staging'
-end
-
-# Indicate whether the execution is target is the production DSpace instance.
-#
-def production?
-  DEPLOYMENT == 'production'
-end
 
 # Create a hash from a JSON file.
 #

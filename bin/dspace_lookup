@@ -17,7 +17,7 @@ BIN_DIR=`dirname "$PROGRAM"`
 
 source "$BIN_DIR/dspace_values"
 
-readonly REMOTE_HOST="$DSPACE_PUBLIC"
+readonly REMOTE_HOST="$DSPACE_API"
 readonly HANDLE_PREFIX="$DSPACE_PREFIX"
 
 # =============================================================================

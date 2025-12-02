@@ -16,12 +16,11 @@ source "$BIN_DIR/dspace_values"
 NOHUP='true'    # Background the delete process.
 WAIT='true'     # Wait for background delete process to finish.
 MAP_FILE=''     # The single mapfile provided.
+SRC_DIR=''      # Directory of map file.
 ARGS=()         # Other arguments passed to `dspace import --delete`.
 IN_ARGS=''      # When true remaining options are for `dspace import --delete`.
 
 EPERSON='libra@virginia.edu' # DSpace account of submitter.
-
-readonly IMPORT_SUBDIR="$HOME/import"
 
 # =============================================================================
 # Process command line arguments.
@@ -34,6 +33,8 @@ while [[ $# -gt 0 ]] ; do
         --eperson|-e)   EPERSON=`flag_arg "$1" "$2"`; shift ;;
         --mapfile=*)    MAP_FILE=`flag_arg "$1"` ;;
         --mapfile|-m)   MAP_FILE=`flag_arg "$1" "$2"`; shift ;;
+        --source=*)     SRC_DIR=`flag_arg "$1"` ;;
+        --source|-s)    SRC_DIR=`flag_arg "$1" "$2"`; shift ;;
         -*)             ARGS+=("$1"); IN_ARGS=true ;;
         *)              [[ "$IN_ARGS" ]] && ARGS+=("$1") || MAP_FILE="$1" ;;
     esac
@@ -44,11 +45,11 @@ done
 # Ensure pre-conditions are met.
 # =============================================================================
 
+# Must include mapfile to specify items to delete.
+[[ "$MAP_FILE" ]] || abort 'no mapfile given'
+
 # Make sure the DSpace account import subdirectory is created and prepared.
-mkdir -p "$IMPORT_SUBDIR"   || exit $?
-cd "$IMPORT_SUBDIR"         || exit $?
-sudo chmod g+w *.map        || exit $?
-sudo chown dspace *.map     || exit $?
+dspace_prep || exit $?
 
 # Make sure the submitter is in the form of a DSpace user name.
 case "$EPERSON" in
@@ -56,15 +57,33 @@ case "$EPERSON" in
     '')     EPERSON="$USER@virginia.edu" ;;
     *)      EPERSON="$EPERSON@virginia.edu" ;;
 esac
-ARGS+=(-e "'$EPERSON'")
 
-# Include mapfile.
-[[ "$MAP_FILE" ]] || abort 'no mapfile given'
-ARGS+=(-m "'$MAP_FILE'")
+if [[ "$DSPACE_DOCKER" ]] ; then
+    # If DSpace runs in a Docker container, $MAP_FILE must be absolute
+    # (otherwise it would be expected in the top-level of the container's file
+    # system).
+    case "$SRC_DIR" in
+        ''|"$IMPORT_PATH"|"$HOST_IMPORT_PATH") SRC_DIR="$DSPACE_IMPORT_PATH" ;;
+        "$DSPACE_IMPORT_PATH") ;; # OK
+        *) abort "$SRC_DIR not mapped to $DSPACE_IMPORT_PATH" ;;
+    esac
+    MAP_FILE="$SRC_DIR/$MAP_FILE"
+else
+    # Make a relative source directory path absolute.
+    case "$SRC_DIR" in
+        '') SRC_DIR="$IMPORT_PATH" ;;
+        *)  SRC_DIR=`realpath "$SRC_DIR"` ;;
+    esac
+    cd "$SRC_DIR" || exit $?
+fi
 
 # =============================================================================
 # Run dspace_delete for each item in the temporary mapfile.
 # =============================================================================
+
+[[ "$SRC_DIR"  ]] && ARGS+=(-s "'$SRC_DIR'")
+[[ "$MAP_FILE" ]] && ARGS+=(-m "'$MAP_FILE'")
+[[ "$EPERSON"  ]] && ARGS+=(-e "'$EPERSON'")
 
 COMMAND="dspace import --delete ${ARGS[@]}"
 

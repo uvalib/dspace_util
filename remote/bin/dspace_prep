@@ -1,0 +1,26 @@
+#! /bin/bash
+#
+# Prepare for importing to DSpace.
+#
+# Files to and from the DSpace CLI are maintained in a common location.
+#
+# If DSpace is run in a Docker container, in the Docker image $HOST_IMPORT_PATH
+# must already be mounted on $DSPACE_IMPORT_PATH.
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
+chmod +x "$HOME" || exit $?
+cd "$HOME"       || exit $?
+
+if [[ "$DSPACE_DOCKER" ]] ; then
+    [[ -s "$IMPORT_DIR" ]] || ln -s "$HOST_IMPORT_PATH" "$IMPORT_DIR" || exit $?
+    sudo chown -R root:admin "$HOST_IMPORT_PATH" || exit $?
+    sudo chmod -R g+w "$HOST_IMPORT_PATH"        || exit $?
+else
+    mkdir -p "$HOST_IMPORT_PATH"                 || exit $?
+    sudo chown -R dspace "$HOST_IMPORT_PATH"     || exit $?
+    sudo chmod -R g+w "$HOST_IMPORT_PATH"        || exit $?
+fi

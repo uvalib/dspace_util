@@ -53,8 +53,6 @@ COLLECTIONS=()  # Source collections.
 ARGS=()         # Other arguments passed to dspace_delete_bg.
 IN_ARGS=''      # When true remaining options are for dspace_delete_bg.
 
-readonly REMOTE_IMPORT_DIR='import'
-readonly ORIGINAL_IFS="$IFS"
 readonly NL='
 '
 
@@ -97,6 +95,7 @@ function add_collection() # name_or_handle_or_list_file
 {
     local VALUE="$1"
     blank "$VALUE" && return
+    local ORIGINAL_IFS="$IFS"
     IFS="$NL"
     if [[ -e "$VALUE" ]] ; then
         COLLECTIONS+=(`cat "$VALUE"`)
@@ -184,16 +183,7 @@ declare -i C_COUNT=${#COLLECTIONS[@]}
 # Ensure pre-conditions are met.
 # =============================================================================
 
-# Make sure the bin directory of the user account on the DSpace host includes a
-# copy of remote/bin/dspace_delete_bg.
-dspace_update_home --check --quiet || (
-    announce 'Updating scripts on remote system'
-    dspace_update_home || abort
-)
-
-# Make sure the DSpace account import subdirectory is created and prepared.
-dspace_sh mkdir -p "$REMOTE_IMPORT_DIR" ||
-    abort 'DSpace account import subdirectory failed'
+dspace_prep
 
 # =============================================================================
 # Build a mapfile of the handles to delete and copy it to the DSpace host.
@@ -234,7 +224,7 @@ done > "$TMP_MAP"
 
 MAP_NAME=`basename "$TMP_MAP"`
 announce "Copying $MAP_NAME for remote dspace_delete_bg command"
-dspace_cp "$TMP_MAP" :"$REMOTE_IMPORT_DIR" || exit $ERROR_STATUS
+dspace_cp "$TMP_MAP" :"$DSPACE_IMPORT_DIR" || exit $?
 
 # =============================================================================
 # Invoke DSpace import on the remote system.

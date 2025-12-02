@@ -15,10 +15,9 @@ source "$BIN_DIR/dspace_values"
 NOHUP='true'    # Background the import process.
 WAIT='true'     # Wait for background import process to finish.
 ZIP_FILES=()    # Zip import files.
+SRC_DIR=''      # Directory of input zip file.
 ARGS=()         # Other arguments passed to dspace_import.
 IN_ARGS=''      # When true remaining options are for dspace_import.
-
-readonly IMPORT_SUBDIR="$HOME/import"
 
 # =============================================================================
 # Process command line arguments.
@@ -27,6 +26,8 @@ readonly IMPORT_SUBDIR="$HOME/import"
 while [[ $# -gt 0 ]] ; do
     case "$1" in
         --foreground) NOHUP='' ;;
+        --source=*)   SRC_DIR=`flag_arg "$1"` ;;
+        --source|-s)  SRC_DIR=`flag_arg "$1" "$2"`; shift ;;
         -*)           ARGS+=("$1"); IN_ARGS=true ;;
         *)            [[ "$IN_ARGS" ]] && ARGS+=("$1") || ZIP_FILES+=("$1") ;;
     esac
@@ -38,14 +39,20 @@ done
 # =============================================================================
 
 # Make sure the DSpace account import subdirectory is created and prepared.
-mkdir -p "$IMPORT_SUBDIR"   || exit $?
-cd "$IMPORT_SUBDIR"         || exit $?
-sudo chmod g+w *.zip        || exit $?
-sudo chown dspace *.zip     || exit $?
+dspace_prep || exit $?
+
+# Make sure zip file is in terms of the location within the Docker container.
+if [[ "$DSPACE_DOCKER" ]] ; then
+    SRC_DIR="$DSPACE_IMPORT_PATH"
+elif [[ "$SRC_DIR" != "$PWD" ]] ; then
+    cd "$SRC_DIR" || exit $?
+fi
 
 # =============================================================================
 # Run dspace_import for each zip file.
 # =============================================================================
+
+[[ "$SRC_DIR" ]] && ARGS+=(-s "'$SRC_DIR'")
 
 IMPORT_ZIP_FILES="
     for ZIP in ${ZIP_FILES[@]}; do

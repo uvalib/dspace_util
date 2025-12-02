@@ -1,0 +1,10 @@
+#! /bin/bash
+#
+# Report the DSpace deployment of the current system.
+
+case `hostname` in
+    ip-10-130-110-94.ec2.internal)  echo 'production' ;;
+    ip-10-130-109-84.ec2.internal)  echo 'staging' ;;
+    ip-10-130-109-105.ec2.internal) echo 'development' ;;
+    *)                              echo '' ;;
+esac

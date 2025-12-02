@@ -41,8 +41,6 @@ EXPORT_ARGS=()  # Arguments passed to "bin/dspace_libra_export".
 IMPORT_ARGS=()  # Arguments passed to "bin/dspace_import_zip".
 REMOTE_ARGS=()  # Arguments passed to the remote `dspace_import`.
 
-readonly REMOTE_IMPORT_DIR='import'
-
 # =============================================================================
 # Process command line arguments.
 # =============================================================================
@@ -110,20 +108,7 @@ if [[ ! "$REMOTE_ONLY" ]] ; then
     fi
 fi
 
-# Make sure the bin directory of the user account on the DSpace host includes a
-# copy of remote/bin/dspace_import.
-dspace_update_home --check --quiet || (
-    announce 'Updating scripts on remote system'
-    dspace_update_home || abort
-)
-
-# Make sure the DSpace account import subdirectory is created and prepared.
-dspace_sh "
-    chmod +x $HOME &&
-    mkdir -p '$REMOTE_IMPORT_DIR' &&
-    sudo chown dspace '$REMOTE_IMPORT_DIR' &&
-    sudo chmod 775 '$REMOTE_IMPORT_DIR'
-" || abort "DSpace account ${REMOTE_IMPORT_DIR} subdirectory failed"
+dspace_prep
 
 # =============================================================================
 # Acquire LibraOpen exports.
@@ -154,7 +139,7 @@ fi
 ZIP_FILES=`ls *.zip 2>/dev/null | tr "\n" ' '` || exit $?
 if [[ ! "$REMOTE_ONLY" ]] ; then
     announce "Copying $ZIP_FILES"
-    dspace_cp $ZIP_FILES :"$REMOTE_IMPORT_DIR" || exit $?
+    dspace_cp $ZIP_FILES :"$DSPACE_IMPORT_DIR" || exit $?
 fi
 
 # =============================================================================

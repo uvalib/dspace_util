@@ -4,8 +4,48 @@
 #
 # @see https://wiki.lyrasis.org/display/DSDOC8x/Command+Line+Operations
 
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
 MEMORY='512m'   # Default is '256m'.
 PERM_GEN='128m' # Default is '64m'.
-[[ "$JAVA_OPTS" ]] || export JAVA_OPTS="-Xmx$MEMORY -Xms$MEMORY -XX:MaxPermSize=$PERM_GEN -Dfile.encoding=UTF-8"
 
-exec sudo -u dspace /opt/dspace/bin/dspace "$@"
+[[ "$JAVA_OPTS" ]] || JAVA_OPTS="-Xmx$MEMORY -Xms$MEMORY -Dfile.encoding=UTF-8"
+
+# =============================================================================
+# For DSpace directly run in a VM.
+# =============================================================================
+
+if [[ ! "$DSPACE_DOCKER" ]] ; then
+    export JAVA_OPTS="$JAVA_OPTS -XX:MaxPermSize=$PERM_GEN"
+    exec sudo -u dspace /opt/dspace/bin/dspace "$@"
+fi
+
+# =============================================================================
+# Command line for DSpace run in a Docker container.
+# =============================================================================
+
+# Java in the Docker instance doesn't like MaxPermSize.
+CONTAINER='dspace'
+DOCKER_CMD=()
+DOCKER_OPT=(--env JAVA_OPTS="$JAVA_OPTS")
+
+while [[ $# -gt 0 ]] ; do
+    case "$1" in
+        bash|shell) DOCKER_CMD=(bash -l -i) ;;
+        sh)         DOCKER_CMD=(sh -l -i) ;;
+        *)          break ;; # Remainder to command run in container.
+    esac
+    shift
+done
+
+if [[ ${#DOCKER_CMD[@]} -eq 0 ]] ; then
+    DOCKER_CMD=(bin/dspace)
+else
+    DOCKER_OPT+=(-i)
+    echo "Interactive shell inside Docker container '$CONTAINER'"
+fi
+
+exec sudo docker exec "${DOCKER_OPT[@]}" "$CONTAINER" "${DOCKER_CMD[@]}" "$@"

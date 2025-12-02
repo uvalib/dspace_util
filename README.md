@@ -694,6 +694,30 @@ NOTES<br/>
 
 <!---------------------------------------------------------------------------->
 
+### `dspace_prep`
+
+Prepare the DSpace host for importing to DSpace.
+
+This is run by scripts which run commands on the remote system.
+
+#### Usage
+
+```sh
+dspace_prep [DEPLOYMENT]
+```
+
+#### Options
+
+| Option       | Description                          | Notes   |
+|:-------------|:-------------------------------------|:--------|
+| --production | Specify the production DSpace system | **[1]** |
+| --staging    | Specify the staging DSpace system    | **[1]** |
+
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
+
+<!---------------------------------------------------------------------------->
+
 ### `dspace_restart`
 
 Restart DSpace with updated configuration from either
@@ -959,6 +983,14 @@ Run `dspace import --delete` in the background.
 
 This is primarily for use by `dspace_delete` on the developer machine to have
 a single process which can be run in the background.
+
+### `dspace_prep`
+
+Prepare for importing to DSpace.
+
+### `dspace_deployment`
+
+Report the DSpace deployment of the current system.
 
 <!---------------------------------------------------------------------------->
 <!-- Directory link references used above:

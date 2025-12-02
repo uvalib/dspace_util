@@ -132,12 +132,6 @@ fi
 [[ "$ZIP_FILE" ]] || ZIP_FILE=`basename "$ZIP_PATH"`
 [[ "$MAP_FILE" ]] || MAP_FILE=`basename "$ZIP_FILE" .zip`.map
 
-# Make a relative source directory path absolute.
-case "$SRC_DIR" in
-    '') SRC_DIR="$HOME" ;;
-    *)  SRC_DIR=`realpath "$SRC_DIR"` ;;
-esac
-
 # Make sure the submitter is in the form of a DSpace user name.
 case "$EPERSON" in
     *@*)    ;; # OK
@@ -145,13 +139,35 @@ case "$EPERSON" in
     *)      EPERSON="$EPERSON@virginia.edu" ;;
 esac
 
+# Make a relative source directory path absolute.
+[[ "$SRC_DIR" ]] || SRC_DIR="$IMPORT_PATH"
+case "$SRC_DIR" in
+    "$IMPORT_PATH"|"$HOST_IMPORT_PATH") ;; # OK
+    "$DSPACE_IMPORT_PATH")              SRC_DIR="$HOST_IMPORT_PATH" ;;
+    *)                                  SRC_DIR=`realpath "$SRC_DIR"` ;;
+esac
+
 # Move into the zip directory, which should be writable by user "dspace".
-[[ "$SRC_DIR" = "$PWD" ]] || cd "$SRC_DIR" || exit $?
+cd "$SRC_DIR" || exit $?
 
 # If there is an existing mapfile, move it out of the way unless attempting to
 # resume a failed import.
 if [[ -z "$KEEP_MAP" && -e "$MAP_FILE" ]] ; then
     mv "$MAP_FILE" "$MAP_FILE".`date +'%T.%N'` || exit $?
+fi
+
+# If DSpace runs in a Docker container, zip files must be in the directory
+# which is mounted within the Docker container at $DSPACE_IMPORT_PATH, and
+# $MAP_FILE must be absolute (otherwise it will be deposited in the top-level
+# of the container's file system).
+if [[ "$DSPACE_DOCKER" ]] ; then
+    case "$SRC_DIR" in
+        "$IMPORT_PATH"|"$HOST_IMPORT_PATH") SRC_DIR="$DSPACE_IMPORT_PATH" ;;
+        "$DSPACE_IMPORT_PATH") ;; # OK
+        *) abort "$SRC_DIR not mapped to $DSPACE_IMPORT_PATH" ;;
+    esac
+    SRC_DIR="$DSPACE_IMPORT_PATH"
+    MAP_FILE="$SRC_DIR/$MAP_FILE"
 fi
 
 # =============================================================================

@@ -36,3 +36,26 @@ function flag_arg() # --flag=value | --flag value
     blank "$VALUE" && abort "missing $FLAG argument"
     echo "$VALUE"
 }
+
+# =============================================================================
+# DSpace variations
+# =============================================================================
+
+[[ "$DSPACE_DEPLOYMENT" ]] || export DSPACE_DEPLOYMENT=`dspace_deployment`
+[[ "$DSPACE_DEPLOYMENT" ]] || abort "unexpected hostname '`hostname`'"
+
+if [[ ! "$DSPACE_DOCKER" ]] ; then
+    export DSPACE_DOCKER=''
+    [[ "$DSPACE_DEPLOYMENT" == 'development' ]] && DSPACE_DOCKER=true
+fi
+
+export IMPORT_DIR='import'
+export IMPORT_PATH="$HOME/$IMPORT_DIR"
+
+if [[ "$DSPACE_DOCKER" ]] ; then
+    export HOST_IMPORT_PATH='/opt/dspace-docker/imports/rwl'
+    export DSPACE_IMPORT_PATH='/dspace/imports/rwl'
+else
+    export HOST_IMPORT_PATH="$IMPORT_PATH"
+    export DSPACE_IMPORT_PATH="$IMPORT_PATH"
+fi

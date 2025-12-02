@@ -1,0 +1,22 @@
+#! /bin/bash
+#
+# Prepare the DSpace host for importing to DSpace.
+#
+# This is run by scripts which run commands on the remote system.
+#
+# Usage: dspace_prep [DEPLOYMENT]
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+
+source "$BIN_DIR/dspace_values"
+
+# Make sure the bin directory of the user account on the DSpace host includes
+# executable copies of required scripts.
+dspace_update_home --check --quiet || (
+    announce 'Updating scripts on remote system'
+    dspace_update_home || abort
+)
+
+# Make sure the DSpace account import subdirectory is created and prepared.
+dspace_sh dspace_prep || abort 'DSpace account import subdirectory failed'
