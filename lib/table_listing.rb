@@ -13,6 +13,12 @@
 #
 class TableListing
 
+  # Column separator used for --data output.
+  #
+  # @type [String]
+  #
+  DATA_DELIMITER = '|'
+
   # ===========================================================================
   # :section:
   # ===========================================================================
@@ -55,8 +61,12 @@ class TableListing
       @value_key = only
       template   = template.select { |_, v| only.include?(v) }
     end
-    @heading_row = only ? (head || false) : (head || head.nil?)
     @col_heading = template.keys.map(&:to_s)
+    case
+      when option.data then @heading_row = false
+      when only        then @heading_row = head || false
+      else                  @heading_row = !head.is_a?(FalseClass)
+    end
   end
 
   # Mapping of column heading to data extraction key.
@@ -76,8 +86,9 @@ class TableListing
   #
   # @param [Array<Hash>, Hash{*=>Hash}] source
   # @param [Boolean]                    head
+  # @param [Boolean]                    data
   #
-  def output(source, head: heading_row)
+  def output(source, head: heading_row, data: option.data)
     col_count = value_key.size
     column = (0...col_count).map { [] }
     if head
@@ -94,7 +105,7 @@ class TableListing
         column[col] << val
       end
     end
-    output_columns(column)
+    output_columns(column, delimiter: (DATA_DELIMITER if data))
   end
 
 end

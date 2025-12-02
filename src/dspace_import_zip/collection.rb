@@ -46,7 +46,7 @@ class Collection < Hash
   # ===========================================================================
 
   # An object which holds a department name which may match one listed in
-  # "data/collection_*.txt".
+  # "data/collection.txt".
   #
   class Dept < Hash
 
@@ -175,17 +175,39 @@ class Collection < Hash
 
     protected
 
-    # Read the data file which associates collections with normalized
-    # department names.
+    # Read the data file which associates collections their handles and add in
+    # normalized department names.
     #
     # @param [String] file            Project-relative path to the data file.
     #
     # @return [Hash{String=>Collection]
     #
-    def get_data_table(file: "data/collection_#{DEPLOYMENT}.txt")
-      read_data(file) do |result, (handle, name, depts, *)|
-        depts = depts.split(';').map(&:strip).compact_blank
-        result[handle] = new(name, handle, *depts)
+    def get_data_table(file: "tmp/saved/#{DEPLOYMENT}/structure.txt")
+      read_data(file) do |result, (handle, collection, *)|
+        depts = department_table[collection] || []
+        result[handle] = new(collection, handle, *depts)
+      end
+    end
+
+    # Mapping of collection name to associated departments.
+    #
+    # @return [Hash{String=>Array<String>]
+    #
+    def department_table
+      @department_table ||= get_department_table.freeze
+    end
+
+    # Read the data file which associates collections with normalized
+    # department name(s).
+    #
+    # @param [String] file            Project-relative path to the data file.
+    #
+    # @return [Hash{String=>Array<String>]
+    #
+    def get_department_table(file: 'data/collection.txt')
+      read_data(file) do |result, (_community, collection, depts, *)|
+        next if depts.blank?
+        result[collection] = depts.split(';').map(&:strip).compact_blank
       end
     end
 

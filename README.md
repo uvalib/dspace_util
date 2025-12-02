@@ -769,6 +769,40 @@ NOTES<br/>
 
 <!---------------------------------------------------------------------------->
 
+### `dspace_structure`
+
+Generate DSpace communities and collections via `dspace structure-builder`.
+
+NOTE: Collections are not created with an entity type.
+That will have to be modified manually for any collection created here.
+
+#### Usage
+
+```sh
+dspace_structure [DEPLOYMENT] [--check]
+dspace_structure [DEPLOYMENT] --refresh
+dspace_structure [DEPLOYMENT] --create
+dspace_structure [DEPLOYMENT] --create --community NAME [--collection NAME]
+```
+
+#### Options
+
+| Option            | Description                                           | Notes   |
+|:------------------|:------------------------------------------------------|:--------|
+| --production      | Specify the production DSpace system                  | **[1]** |
+| --staging         | Specify the staging DSpace system                     | **[1]** |
+| --check           | Verify all expected communities and collections exist |         |
+| --refresh         | Refresh handles in tmp/saved/*/structure.txt          |         |
+| --create          | Create all expected communities and collections       |         |
+| --community NAME  | Create community                                      |         |
+| --collection NAME | Create collection                                     | **[2]** |
+
+NOTES<br/>
+**[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
+**[1]** Must be preceded by a --collection.<br/>
+
+<!---------------------------------------------------------------------------->
+
 ### `dspace_import`
 
 This script performs

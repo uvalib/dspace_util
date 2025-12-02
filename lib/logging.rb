@@ -66,19 +66,20 @@ end
 
 # Output each row of a two-dimensional array of columns.
 #
-# @param [Array<Array<(Array<String>)>] column
+# @param [Array<Array<(Array<String>)>] columns
+# @param [String, nil]                  delimiter   If provided do not format.
 #
-def output_columns(column)
-  max_col = column.size - 1
-  max_row = column[0].size - 1
-  width   = column.map { _1.compact.map(&:size).max }
+def output_columns(columns, delimiter: nil)
+  max_col = columns.size - 1
+  max_row = columns[0].size - 1
+  width   = (columns.map { _1.compact.map(&:size).max } if delimiter.nil?)
   (0..max_row).each do |row|
     cols =
       (0..max_col).map do |col|
-        value = column[col][row]
-        value = '%-*s' % [width[col], value] if col < max_col
+        value = columns[col][row]
+        value = '%-*s' % [width[col], value] if width && (col < max_col)
         value
       end
-    output_line cols.join('  ')
+    output_line cols.join(delimiter || '  ')
   end
 end

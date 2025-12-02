@@ -1,0 +1,345 @@
+#! /bin/bash
+#
+# Generate DSpace communities and collections via `dspace structure-builder`.
+#
+# Usage: dspace_structure [DEPLOYMENT] [--check]
+# Usage: dspace_structure [DEPLOYMENT] --refresh
+# Usage: dspace_structure [DEPLOYMENT] --create
+# Usage: dspace_structure [DEPLOYMENT] --create --community NAME [--collection NAME]
+# Usage: dspace_structure --help
+#
+# OPTIONS
+#   --check             Verify all expected communities and collections exist.
+#   --refresh           Refresh handles in tmp/saved/*/structure.txt.
+#   --create            Create all expected communities and collections.
+#   --community NAME    Create community.
+#   --collection NAME   Create collection.
+#
+# NOTE: Collections are not created with an entity type.
+# That will have to be modified manually for any collection created here.
+
+PROGRAM=`realpath "$0"`
+BIN_DIR=`dirname "$PROGRAM"`
+PRJ_DIR=`dirname "$BIN_DIR"`
+DAT_DIR="$PRJ_DIR/data"
+TMP_DIR="$PRJ_DIR/tmp"
+
+source "$BIN_DIR/dspace_values"
+
+REFRESH=''                          # Refresh tmp/saved/*/structure.txt.
+CREATE=''                           # Create communities/collections.
+CHECK=''                            # Check only.
+HELP=''                             # Display help only.
+ALL=''                              # All communities/collections from $SRC_TXT
+SRC_TXT="$DAT_DIR/collection.txt"   # Defined communities/collections.
+DST_TXT="$TMP_DIR/saved/$DSPACE_DEPLOYMENT/structure.txt" # ...with handles.
+SRC_XML='structure.xml'             # Supplied communities/collections.
+DST_XML='structure_handles.xml'     # Generated handles.
+EPERSON='rwl@virginia.edu'          # Must be an administrator.
+
+declare -A ARGS_TABLE               # Collections provided keyed by community.
+declare -A CREATE_TABLE             # Collections to create keyed by community.
+
+readonly ORIGINAL_IFS="$IFS"
+readonly TAB='   '
+readonly NL='
+'
+
+IFS="$NL"
+
+# =============================================================================
+# Functions
+# =============================================================================
+
+function array_index() # array_var value
+{
+    local -n ARRAY_VAR="$1"
+    local VALUE="$2"
+    for INDEX in ${!ARRAY_VAR[@]} ; do
+        [[ "${ARRAY_VAR[$INDEX]}" == "$VALUE" ]] && echo "$INDEX" && return
+    done
+}
+
+function list_contains() # list_var value
+{
+    local -n LIST_VAR="$1"
+    local VALUE="$2"
+    local INDEX
+    if [[ "$VALUE" ]] ; then
+        local ARRAY=($LIST_VAR)
+        INDEX=`array_index ARRAY "$VALUE"`
+    fi
+    [[ "$INDEX" ]]
+}
+
+function list_missing() # list_var value
+{
+    if list_contains "$@" ; then
+        false
+    else
+        true
+    fi
+}
+
+function list_add() # list_var value
+{
+    local -n LIST_VAR="$1"
+    local ADDED_VALUE="$2"; [[ "$ADDED_VALUE" ]] || return
+    local CURRENT_LIST="$LIST_VAR"
+    local CURRENT_VALUE=`echo "$CURRENT_LIST" | sed -E 's/^\s+$//'`
+    if [[ ! "$CURRENT_VALUE" ]] ; then
+        LIST_VAR="$ADDED_VALUE"
+    elif list_missing CURRENT_LIST "$ADDED_VALUE" ; then
+        LIST_VAR="$CURRENT_LIST$NL$ADDED_VALUE"
+    fi
+}
+
+function table_add() # table_var key value
+{
+    local -n TABLE_VAR="$1"
+    local TABLE_KEY="$2"; [[ "$TABLE_KEY" ]] || return $ERROR_STATUS
+    local ADDED_VALUE="$3";
+    local CURRENT_LIST="${TABLE_VAR[$TABLE_KEY]}"
+    local CURRENT_VALUE=`echo "$CURRENT_LIST" | sed -E 's/^\s+$//'`
+    if [[ ! "$CURRENT_VALUE" ]] ; then
+        TABLE_VAR[$TABLE_KEY]="$ADDED_VALUE"
+    elif list_missing CURRENT_LIST "$ADDED_VALUE" ; then
+        TABLE_VAR[$TABLE_KEY]="$CURRENT_LIST$NL$ADDED_VALUE"
+    fi
+}
+
+# =============================================================================
+# Process command line arguments.
+# =============================================================================
+
+PREVIOUS_COMMUNITY=''
+
+function community_arg() # community
+{
+    local COMMUNITY="$1"
+    local COLLECTION=''
+    table_add ARGS_TABLE "$COMMUNITY" "$COLLECTION" || return $ERROR_STATUS
+    PREVIOUS_COMMUNITY="$COMMUNITY"
+}
+
+function collection_arg() # collection
+{
+    local COMMUNITY="$PREVIOUS_COMMUNITY"
+    local COLLECTION="$1"
+    table_add ARGS_TABLE "$COMMUNITY" "$COLLECTION" ||
+        abort "no community given for collection '$COLLECTION'"
+}
+
+while [[ $# -gt 0 ]] ; do
+    case "$1" in
+        --check)        CHECK=true ;;
+        --create)       CREATE=true ;;
+        --refresh)      REFRESH=true ;;
+        --community)    community_arg "$2"; shift ;;
+        --collection)   collection_arg "$2"; shift ;;
+        *)              HELP=true ;;
+    esac
+    shift
+done
+
+unset PREVIOUS_COMMUNITY
+unset -f community_arg collection_arg
+
+[[ ${#ARGS_TABLE[@]} -eq 0 ]] && ALL=true
+[[ "$CREATE" && "$CHECK" ]] && abort 'must either --create or --check'
+[[ "$CREATE" ]] || CHECK=true
+
+# =============================================================================
+# Early exit for "--help".
+# =============================================================================
+
+if [[ "$HELP" ]] ; then
+    echo "Usage: $PROGNAME [DEPLOYMENT] [--check]"
+    echo "Usage: $PROGNAME [DEPLOYMENT] --refresh"
+    echo "Usage: $PROGNAME [DEPLOYMENT] --create"
+    echo "Usage: $PROGNAME [DEPLOYMENT] --create --community NAME [--collection NAME]"
+    cat <<'EOF'
+    DEPLOYMENT:
+    --production        Operate on the production DSpace service.
+    --staging           Operate on the staging DSpace service.
+
+    OPTIONS:
+    --check             Verify all expected communities and collections exist.
+    --refresh           Refresh handles in tmp/saved/*/structure.txt.
+    --create            Create all expected communities and collections.
+    --community NAME    Create community.
+    --collection NAME   Create collection.
+EOF
+    exit 0
+fi
+
+# =============================================================================
+# Build a table of communities/collections to create.
+# =============================================================================
+
+SRC_DATA=''         # Lines formatted like $SRC_TXT data.
+COMMUNITY_NAMES=''  # Used instead of table keys to preserve order.
+
+if [[ "$ALL" ]] ; then
+    SRC_DATA=`data_lines "$SRC_TXT"`
+    [[ "$SRC_DATA" ]] || abort "no data in $SRC_TXT"
+else
+    for COMMUNITY in ${!ARGS_TABLE[@]} ; do
+        COLLECTIONS="${ARGS_TABLE[$COMMUNITY]}"
+        if [[ "$COLLECTIONS" ]] ; then
+            for COLLECTION in $COLLECTIONS; do
+                list_add SRC_DATA "$COMMUNITY | $COLLECTION"
+            done
+        else
+            list_add SRC_DATA "$COMMUNITY |"
+        fi
+    done
+fi
+
+for DATA_LINE in $SRC_DATA; do
+    COMMUNITY=`echo "$DATA_LINE" | data_column 1`
+    COLLECTION=`echo "$DATA_LINE" | data_column 2`
+    list_add COMMUNITY_NAMES "$COMMUNITY"
+    [[ "$COLLECTION" ]] && table_add CREATE_TABLE "$COMMUNITY" "$COLLECTION"
+done
+
+unset SRC_DATA
+
+# =============================================================================
+# Early exit for "--check" or "--refresh".
+# =============================================================================
+
+if [[ "$CHECK" || "$REFRESH" ]] ; then
+    ERRORS=()
+    COMM_LINES=`dspace_community --fast --data | data_lines`
+    COLL_LINES=`dspace_collection --fast --data | data_lines`
+    COMM_NAMES=(`echo "$COMM_LINES" | data_column 3`)
+    COLL_NAMES=(`echo "$COLL_LINES" | data_column 4`)
+
+    # Check for existing required communities and collections.
+    for COMMUNITY in $COMMUNITY_NAMES; do
+        COMM_IDX=`array_index COMM_NAMES "$COMMUNITY"`
+        [[ "$COMM_IDX" ]] || ERRORS+=("missing community '$COMMUNITY'")
+        for COLLECTION in ${CREATE_TABLE[$COMMUNITY]}; do
+            COLL_IDX=`array_index COLL_NAMES "$COLLECTION"`
+            [[ "$COLL_IDX" ]] || ERRORS+=("missing collection '$COLLECTION'")
+        done
+    done
+
+    # Refresh $DST_TXT or check that it exists and has the expected contents.
+    if [[ "$REFRESH" ]] ; then
+        [[ ${#ERRORS[@]} -eq 0 ]] && (
+            HDL_HEADER='# HANDLE'
+            NAME_HEADER='COLLECTION NAME'
+            COLUMN_VALUES=`echo "$COLL_LINES" | data_column 2`
+            COLUMN_WIDTH=`echo "$HDL_HEADER$NL$COLUMN_VALUES" | wc -L`
+            COLL_HANDLES=($COLUMN_VALUES)
+            echo "# tmp/saved/$DSPACE_DEPLOYMENT/structure.txt"
+            echo '#'
+            echo '# Publication collections required to receive imports.'
+            echo "# Generated by $PROGRAM"
+            echo
+            printf '%-*s # %s\n' "$COLUMN_WIDTH" "$HDL_HEADER" "$NAME_HEADER"
+            for COMMUNITY in $COMMUNITY_NAMES; do
+                for COLLECTION in ${CREATE_TABLE[$COMMUNITY]}; do
+                    COLL_IDX=`array_index COLL_NAMES "$COLLECTION"`
+                    HANDLE="${COLL_HANDLES[$COLL_IDX]}"
+                    case "$COLLECTION" in
+                        ~*) NAME="$COLLECTION" ;;
+                        *)  NAME="  $COLLECTION" ;;
+                    esac
+                    printf '%-*s | %s\n' "$COLUMN_WIDTH" "$HANDLE" "$NAME"
+                done
+            done
+        ) > "$DST_TXT"
+    elif [[ ! -e "$DST_TXT" ]] ; then
+        ERRORS+=("missing: '$DST_TXT'")
+    elif [[ ! -f "$DST_TXT" ]] ; then
+        ERRORS+=("not a file: '$DST_TXT'")
+    elif [[ ! -r "$DST_TXT" ]] ; then
+        ERRORS+=("not readable: '$DST_TXT'")
+    elif [[ ! -s "$DST_TXT" ]] ; then
+        ERRORS+=("empty file: '$DST_TXT'")
+    else
+        COLLECTION_NAMES=(`data_lines "$DST_TXT" | data_column 2`)
+        for COMMUNITY in $COMMUNITY_NAMES; do
+            for COLLECTION in ${CREATE_TABLE[$COMMUNITY]}; do
+                COLL_IDX=`array_index COLLECTION_NAMES "$COLLECTION"`
+                [[ "$COLL_IDX" ]] && continue
+                ERRORS+=("structure.txt missing collection '$COLLECTION'")
+            done
+        done
+    fi
+
+    # Emit error messages and exit.
+    [[ ${#ERRORS[@]} -gt 0 ]] && abort "${ERRORS[@]}"
+    exit 0
+fi
+
+# =============================================================================
+# Ensure pre-conditions are met.
+# =============================================================================
+
+dspace_prep
+
+# =============================================================================
+# Create $SRC_XML from $SRC_TXT or communities/collections from command line.
+# =============================================================================
+
+function escape_xml() # string
+{
+    echo "$1" |
+    sed "
+        s/&/\\&amp;/g
+        s/</\\&lt;/g
+        s/>/\\&gt;/g
+        s/\"/\\&quot;/g
+        s/'.'/\\&apos;/g
+    "
+}
+
+cd "$TMP_DIR"
+(
+    echo '<import_structure>'
+    for COMMUNITY in $COMMUNITY_NAMES; do
+        echo "$TAB<community>"
+        echo "$TAB$TAB<name>`escape_xml "$COMMUNITY"`</name>"
+        for COLLECTION in ${CREATE_TABLE[$COMMUNITY]}; do
+            echo "$TAB$TAB<collection>"
+            echo "$TAB$TAB$TAB<name>`escape_xml "$COLLECTION"`</name>"
+            echo "$TAB$TAB</collection>"
+        done
+        echo "$TAB</community>"
+    done
+    echo '</import_structure>'
+) > "$SRC_XML"
+
+IFS="$ORIGINAL_IFS"
+
+# =============================================================================
+# Generate communities/collections from $SRC_XML and get back $DST_XML.
+# =============================================================================
+
+if [[ "$DSPACE_DOCKER" ]] ; then
+    COPY_SRC="sudo bash -c \"cat > '$SRC_XML'\""
+    DSPACE_IMPORT_PATH='/dspace/imports/rwl'
+    SRC="$DSPACE_IMPORT_PATH/$SRC_XML"
+    DST="$DSPACE_IMPORT_PATH/$DST_XML"
+else
+    COPY_SRC="cat > '$SRC_XML' && dspace_prep"
+    SRC="$SRC_XML"
+    DST="$DST_XML"
+fi
+
+dspace_sh "
+    cd '$DSPACE_IMPORT_DIR' &&
+    $COPY_SRC &&
+    dspace structure-builder -f '$SRC' -o '$DST' -e '$EPERSON' &&
+    cat '$DST_XML'
+" < "$SRC_XML" > "$DST_XML"
+
+# =============================================================================
+# Update $DST_TXT accordingly.
+# =============================================================================
+
+[[ "$ALL" ]] && run_ruby dspace_structure "$DST_XML" > "$DST_TXT"

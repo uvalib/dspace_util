@@ -1,0 +1,93 @@
+# data/collection.txt
+#
+# Mapping of publication collection to department(s) of publication author(s).
+
+# COMMUNITY                                         # COLLECTION NAME                                                   # NORMALIZED DEPARTMENT NAME(S)
+College of Arts & Sciences                          | ~ GENERAL, College of Arts & Sciences                             | Arts & Sciences; Dean's Office, College of Arts & Sciences; Learning Design and Technology; Undergraduate; Undergraduate Academic Programs and Admin; Visiting Scholar
+College of Arts & Sciences                          |   African American and African Studies                            | African American and African Studies
+College of Arts & Sciences                          |   American Studies                                                | American Studies
+College of Arts & Sciences                          |   Anthropology                                                    | Anthropology
+College of Arts & Sciences                          |   Astronomy                                                       | Astronomy
+College of Arts & Sciences                          |   Biology                                                         | Biology
+College of Arts & Sciences                          |   Chemistry                                                       | Chemistry
+College of Arts & Sciences                          |   Classics                                                        | Classics
+College of Arts & Sciences                          |   Drama                                                           | Drama
+College of Arts & Sciences                          |   East Asian                                                      | East Asian Language Literature and Cultures
+College of Arts & Sciences                          |   Economics                                                       | Economics
+College of Arts & Sciences                          |   English                                                         | English
+College of Arts & Sciences                          |   Environmental Sciences                                          | Environmental Sciences
+College of Arts & Sciences                          |   French                                                          | French
+College of Arts & Sciences                          |   Geography                                                       | Geography
+College of Arts & Sciences                          |   German                                                          | German
+College of Arts & Sciences                          |   History                                                         | History
+College of Arts & Sciences                          |   Mathematics                                                     | Mathematics
+College of Arts & Sciences                          |   Media Studies                                                   | Media Studies
+College of Arts & Sciences                          |   Middle Eastern and South Asian                                  | Middle Eastern and South Asian Languages and Cultures
+College of Arts & Sciences                          |   Music                                                           | Music
+College of Arts & Sciences                          |   Philosophy                                                      | Philosophy
+College of Arts & Sciences                          |   Physics                                                         | Physics
+College of Arts & Sciences                          |   Politics                                                        | Politics
+College of Arts & Sciences                          |   Psychology                                                      | Psychology
+College of Arts & Sciences                          |   Religious Studies                                               | Religious Studies
+College of Arts & Sciences                          |   Sociology                                                       | Sociology
+College of Arts & Sciences                          |   Spanish, Italian & Portuguese                                   | Spanish, Italian & Portuguese
+College of Arts & Sciences                          |   Women, Gender & Sexuality                                       | Women, Gender & Sexuality
+Darden School of Business                           | ~ GENERAL, Darden School of Business                              | Academic Operations
+Frank Batten School of Leadership and Public Policy | ~ GENERAL, Frank Batten School of Leadership and Public Policy    | Leadership and Public Policy; Dean Administration; Social Entrepreneurship Initiative
+Global Studies                                      | ~ GENERAL, Global Studies                                         | Global Studies; Global Studies and Politics; Global Environments + Sustainability
+McIntire School of Commerce                         | ~ GENERAL, McIntire School of Commerce                            | Commerce
+School of Architecture                              | ~ GENERAL, School of Architecture                                 | Architecture; Dean's Office, School of Architecture
+School of Architecture                              |   Architectural History                                           | Architectural History
+School of Architecture                              |   Landscape Architecture                                          | Landscape Architecture
+School of Architecture                              |   Urban and Environmental Planning                                | Urban and Environmental Planning
+School of Data Science                              | ~ GENERAL, School of Data Science                                 | Data Science; Dean's Office, School of Data Science; Data Science Graduate; Diversity & Inclusion; Environmental Institute; Faculty Affairs; Research; Research Administration Arts & Sciences; Research Development
+School of Education and Human Development           | ~ GENERAL, School of Education and Human Development              | Education; Education Leadership, Foundations & Policy; Kinesiology; Youth-Nex
+School of Engineering                               | ~ GENERAL, School of Engineering                                  | Engineering; Center for Applied Biomechanics; Engineering Foundations; Engineering and Society; Graduate Programs Office; Graduate Writing Lab; Institute for Parallel Computation; Undergrad Office
+School of Engineering                               |   Applied Mathematics                                             | Applied Mathematics
+School of Engineering                               |   Biomedical Engineering                                          | Biomedical Engineering
+School of Engineering                               |   Chemical Engineering                                            | Chemical Engineering
+School of Engineering                               |   Civil and Environmental Engineering                             | Civil and Environmental Engineering
+School of Engineering                               |   Computer Science                                                | Computer Science
+School of Engineering                               |   Electrical and Computer Engineering                             | Electrical and Computer Engineering
+School of Engineering                               |   Engineering Systems and Environment                             | Engineering Systems and Environment
+School of Engineering                               |   Materials Science and Engineering                               | Materials Science and Engineering
+School of Engineering                               |   Mechanical and Aerospace Engineering                            | Mechanical and Aerospace Engineering
+School of Engineering                               |   Systems and Information Engineering                             | Systems and Information Engineering
+School of Law                                       | ~ GENERAL, School of Law                                          | Law; Law Library; Law School Central; Faculty Main
+School of Medicine                                  | ~ GENERAL, School of Medicine                                     | Medicine; Dean's Office, School of Medicine; Dean's Office, Medical Center; Admin; Beirne B. Carter Center for Immunology Research; Cancer Center; Center for Advanced Vision Science; Center for Diabetes Technology; Center for Membrane and Cell Physiology; Center for Public Health Genomics; Curriculum; Diversity Programs; EVP for Health Affairs; General Administration; Health Analytics; Medical Educational Affairs Admin; Medical Research Administration; Medical Student Affairs; Midlife Health; Public Health Sciences; Research & Clinical Trial Analytics
+School of Medicine                                  |   Anesthesiology                                                  | Anesthesiology
+School of Medicine                                  |   Biochemistry and Molecular Genetics                             | Biochemistry and Molecular Genetics
+School of Medicine                                  |   Dermatology                                                     | Dermatology
+School of Medicine                                  |   Family Medicine                                                 | Family Medicine
+School of Medicine                                  |   Health Sciences Library                                         | Health Sciences Library
+School of Medicine                                  |   Hematology-Oncology                                             | Hematology-Oncology
+School of Medicine                                  |   Infectious Diseases                                             | Infectious Diseases
+School of Medicine                                  |   Medicine                                                        | Medicine
+School of Medicine                                  |   Microbiology                                                    | Microbiology
+School of Medicine                                  |   Molecular Physiology and Biological Physics                     | Molecular Physiology and Biological Physics
+School of Medicine                                  |   Nephrology                                                      | Nephrology
+School of Medicine                                  |   Neurology                                                       | Neurology
+School of Medicine                                  |   Neuroscience                                                    | Neuroscience
+School of Medicine                                  |   Ophthalmology                                                   | Ophthalmology
+School of Medicine                                  |   Orthopaedic Surgery                                             | Orthopaedic Surgery
+School of Medicine                                  |   Pathology                                                       | Pathology; Experimental Pathology
+School of Medicine                                  |   Psychiatry and Neurobehavioral Sciences                         | Psychiatry and Neurobehavioral Sciences; Inpatient Psychiatry
+School of Medicine                                  |   Radiation Oncology                                              | Radiation Oncology
+School of Medicine                                  |   Radiology and Medical Imaging                                   | Radiology
+School of Medicine                                  |   Surgery                                                         | Surgery; Research
+School of Nursing                                   | ~ GENERAL, School of Nursing                                      | Nursing; Administrative Operations
+~ Other UVA                                         | ~ GENERAL, Other UVA                                              | University of Virginia; SCPS; Scps
+~ Other UVA                                         |   UVA Wise                                                        | UVAWise-History & Philosophy; UVAWise-Library
+~ Other UVA                                         |   Research Computing                                              | Research Computing; Centers for Computation Intensive Research & Scholarship
+~ Other UVA                                         |   Student Affairs                                                 | Career Center; Dean of Students; LNEC Accommodations; Newcomb Hall and UPC; Orientation; Student Disability Access Center; VP Office
+~ Other UVA                                         |   Facilities Management                                           | Project & Construction Management
+~ Other UVA                                         |   Faculty                                                         | 2021 University of Virginia Faculty Senate
+~ Other UVA                                         |   Library                                                         | UVA Library; Dean's Office, University Library; Scholarly Communication; Teaching & Learning Services; Library IT General; Scholars Lab; Research & Learning Services; Project Management; Research Data Svcs & Social Natl & Engng Science Svs; Arts & Humanities Services; Software Development; Univ Librarian-General
+~ Other UVA                                         |   Academic Preservation Trust                                     | Academic Preservation Trust
+~ Other UVA                                         |   Provost                                                         | Center for Teaching Excellence; Office of Graduate and Postdoctoral Affairs; Student Financial Services; Summer and Special Academic Programs; Vice Prov-Global Affairs
+~ Other UVA                                         |   Biocomplexity Institute                                         | Biocomplexity Institute; Network Systems Science and Advanced Computing; Social and Decision Analytics
+~ Other UVA                                         |   integrated Translational Health Research Institute of Virginia  | iTHRIV
+~ Other UVA                                         |   Karsh Institute of Democracy                                    | Academic Initiatives; Democracy Initiative; Democracy Labs; Equity Center
+~ Other UVA                                         |   Virginia Foundation for the Humanities                          | Virginia Foundation for the Humanities
+~ Other UVA                                         |   Weldon Cooper Center for Public Service                         | Weldon Cooper Center for Public Service; Institute for Engagement and Negotiation
+~ Outside UVA                                       | ~ GENERAL, Outside UVA                                            |

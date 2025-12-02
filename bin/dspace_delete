@@ -5,8 +5,8 @@
 # Usage: dspace_delete [DEPLOYMENT] [OPTIONS] ITEM...
 # Usage: dspace_delete [DEPLOYMENT] --all
 #
-# Script options:
-#   --all           All items from collections listed in data/collection_*.txt.
+# OPTIONS
+#   --all           All items from collections listed in data/collection.txt.
 #   --handle        Next is a handle or list of handles.
 #   --mapfile       Next is a mapfile or newline-delimited list of mapfiles.
 #   --collection    Next is a collection or list of collections.
@@ -45,7 +45,7 @@ source "$BIN_DIR/dspace_values"
 NOHUP='true'    # Background the delete process.
 WAIT='true'     # Wait for background delete process to finish.
 HELP=''         # Display help only.
-ALL=''          # All items from collections in data/collection_*.txt
+ALL=''          # All items from collections in data/collection.txt
 NAMES=()        # Arguments to be interpreted for handles of items to delete.
 HANDLES=()      # Handles of items to delete.
 MAP_FILES=()    # Source mapfile(s).
@@ -141,7 +141,7 @@ if [[ "$HELP" ]] ; then
     --staging       Delete from the staging DSpace service.
 
     OPTIONS:
-    --all           All items from collections in data/collection_*.txt
+    --all           All items from collections in data/collection.txt
     --handle        Next is a handle or list of handles.
     --mapfile       Next is a mapfile or newline-delimited list of mapfiles.
     --collection    Next is a collection or list of collections.
@@ -154,12 +154,11 @@ fi
 # Finish gathering specifiers of items to delete.
 # =============================================================================
 
-# Take "--all" collections from the data file plus PUB_COLLECTION (which should
-# the catch-all fallback default collection not listed in the data file).
+# Get "--all" collections from the data file.
 if [[ "$ALL" ]] ; then
-    SOURCE="$PRJ_DIR/data/collection_$DSPACE_DEPLOYMENT.txt"
-    ALL_COLLECTIONS=`sed -n -E 's/^(item\/[0-9]+).*$/\1/p' "$SOURCE"`
-    add_collection "$PUB_COLLECTION${NL}$ALL_COLLECTIONS"
+    COLL_LINES="$PRJ_DIR/data/collection.txt"
+    COLL_NAMES=`data_lines "$COLL_LINES" | data_column 2`
+    add_collection "$COLL_NAMES"
 fi
 
 # Analyze direct arguments into handles, mapfiles, and collections.

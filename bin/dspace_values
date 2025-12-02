@@ -103,3 +103,16 @@ function flag_arg() # --flag=value | --flag value
     blank "$VALUE" && abort "missing $FLAG argument"
     echo "$VALUE"
 }
+
+function data_lines() # [file]
+{
+    local FILE="${1:--}"    # default: '-' (stdin)
+    sed -E -e 's/^[ \t]+//' -e 's/[ \t]+$//' -e '/^(#.*)?$/d' "$FILE"
+}
+
+function data_column() # column [file]
+{
+    local COLUMN="$1"       # column number to extract
+    local FILE="${2:--}"    # default: '-' (stdin)
+    cut -d'|' -f"$COLUMN" "$FILE" | sed -E -e 's/^[ \t]+//' -e 's/[ \t]+$//'
+}
