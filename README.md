@@ -179,8 +179,9 @@ workstation.
 All of the scripts except `dspace_libra_export` accept a deployment option to
 specify the target DSpace system:
 
-* Staging system:    "--staging"    or "--deployment=staging"
-* Production system: "--production" or "--deployment=production"
+* Production system:  "--production"  or "--deployment=production"
+* Staging system:     "--staging"     or "--deployment=staging"
+* Development system: "--development" or "--deployment=development"
 
 The default deployment is "production".
 
@@ -245,10 +246,11 @@ With no command argument, this opens an interactive shell on the remote system.
 
 All options are passed to the `ssh` program except for the following:
 
-| Option       | Description                          | Notes   |
-|:-------------|:-------------------------------------|:--------|
-| --production | Specify the production DSpace system | **[1]** |
-| --staging    | Specify the staging DSpace system    | **[1]** |
+| Option        | Description                           | Notes   |
+|:--------------|:--------------------------------------|:--------|
+| --production  | Specify the production DSpace system  | **[1]** |
+| --staging     | Specify the staging DSpace system     | **[1]** |
+| --development | Specify the development DSpace system | **[1]** |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -279,12 +281,13 @@ The last argument indicates the direction:
 
 All options are passed to the `scp` program except for the following:
 
-| Option       | Description                          | Notes   |
-|:-------------|:-------------------------------------|:--------|
-| --production | Specify the production DSpace system | **[1]** |
-| --staging    | Specify the staging DSpace system    | **[1]** |
-| --to         | Copy to the DSpace host              |         |
-| --from       | Copy from the DSpace host            |         |
+| Option        | Description                           | Notes   |
+|:--------------|:--------------------------------------|:--------|
+| --production  | Specify the production DSpace system  | **[1]** |
+| --staging     | Specify the staging DSpace system     | **[1]** |
+| --development | Specify the development DSpace system | **[1]** |
+| --to          | Copy to the DSpace host               |         |
+| --from        | Copy from the DSpace host             |         |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -309,10 +312,11 @@ will be copied to the home directory of the remote account.
 
 All options are passed to the `scp` program except for the following:
 
-| Option       | Description                          | Notes   |
-|:-------------|:-------------------------------------|:--------|
-| --production | Specify the production DSpace system | **[1]** |
-| --staging    | Specify the staging DSpace system    | **[1]** |
+| Option        | Description                           | Notes   |
+|:--------------|:--------------------------------------|:--------|
+| --production  | Specify the production DSpace system  | **[1]** |
+| --staging     | Specify the staging DSpace system     | **[1]** |
+| --development | Specify the development DSpace system | **[1]** |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -338,10 +342,11 @@ the local current working directory.
 
 All options are passed to the `scp` program except for the following:
 
-| Option       | Description                          | Notes   |
-|:-------------|:-------------------------------------|:--------|
-| --production | Specify the production DSpace system | **[1]** |
-| --staging    | Specify the staging DSpace system    | **[1]** |
+| Option        | Description                           | Notes   |
+|:--------------|:--------------------------------------|:--------|
+| --production  | Specify the production DSpace system  | **[1]** |
+| --staging     | Specify the staging DSpace system     | **[1]** |
+| --development | Specify the development DSpace system | **[1]** |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -363,18 +368,19 @@ With no arguments, all OrgUnits are listed.
 
 #### Options
 
-| Option       | Description                              | Notes   |
-|:-------------|:-----------------------------------------|:--------|
-| --production | Specify the production DSpace system     | **[1]** |
-| --staging    | Specify the staging DSpace system        | **[1]** |
-| --scope      | Limit search to the indicated collection |         |
-| --fast       | Used saved data if possible              |         |
-| --uuid       | Output only UUIDs                        | **[2]** |
-| --handle     | Output only handles                      | **[2]** |
-| --name       | Output only names                        | **[2]** |
-| --quiet      | Suppress console output                  |         |
-| --verbose    | Verbose console output                   |         |
-| --debug      | Diagnostic console output                |         |
+| Option        | Description                              | Notes   |
+|:--------------|:-----------------------------------------|:--------|
+| --production  | Specify the production DSpace system     | **[1]** |
+| --staging     | Specify the staging DSpace system        | **[1]** |
+| --development | Specify the development DSpace system    | **[1]** |
+| --scope       | Limit search to the indicated collection |         |
+| --fast        | Used saved data if possible              |         |
+| --uuid        | Output only UUIDs                        | **[2]** |
+| --handle      | Output only handles                      | **[2]** |
+| --name        | Output only names                        | **[2]** |
+| --quiet       | Suppress console output                  |         |
+| --verbose     | Verbose console output                   |         |
+| --debug       | Diagnostic console output                |         |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -398,18 +404,19 @@ With no arguments, all Persons are listed.
 
 #### Options
 
-| Option       | Description                              | Notes   |
-|:-------------|:-----------------------------------------|:--------|
-| --production | Specify the production DSpace system     | **[1]** |
-| --staging    | Specify the staging DSpace system        | **[1]** |
-| --scope      | Limit search to the indicated collection |         |
-| --fast       | Used saved data if possible              |         |
-| --uuid       | Output only UUIDs                        | **[2]** |
-| --handle     | Output only handles                      | **[2]** |
-| --name       | Output only names                        | **[2]** |
-| --quiet      | Suppress console output                  |         |
-| --verbose    | Verbose console output                   |         |
-| --debug      | Diagnostic console output                |         |
+| Option        | Description                              | Notes   |
+|:--------------|:-----------------------------------------|:--------|
+| --production  | Specify the production DSpace system     | **[1]** |
+| --staging     | Specify the staging DSpace system        | **[1]** |
+| --development | Specify the development DSpace system    | **[1]** |
+| --scope       | Limit search to the indicated collection |         |
+| --fast        | Used saved data if possible              |         |
+| --uuid        | Output only UUIDs                        | **[2]** |
+| --handle      | Output only handles                      | **[2]** |
+| --name        | Output only names                        | **[2]** |
+| --quiet       | Suppress console output                  |         |
+| --verbose     | Verbose console output                   |         |
+| --debug       | Diagnostic console output                |         |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -434,18 +441,19 @@ With no arguments, all Publications are listed.
 
 #### Options
 
-| Option       | Description                              | Notes   |
-|:-------------|:-----------------------------------------|:--------|
-| --production | Specify the production DSpace system     | **[1]** |
-| --staging    | Specify the staging DSpace system        | **[1]** |
-| --scope      | Limit search to the indicated collection |         |
-| --fast       | Used saved data if possible              |         |
-| --uuid       | Output only UUIDs                        | **[2]** |
-| --handle     | Output only handles                      | **[2]** |
-| --name       | Output only names                        | **[2]** |
-| --quiet      | Suppress console output                  |         |
-| --verbose    | Verbose console output                   |         |
-| --debug      | Diagnostic console output                |         |
+| Option        | Description                              | Notes   |
+|:--------------|:-----------------------------------------|:--------|
+| --production  | Specify the production DSpace system     | **[1]** |
+| --staging     | Specify the staging DSpace system        | **[1]** |
+| --development | Specify the development DSpace system    | **[1]** |
+| --scope       | Limit search to the indicated collection |         |
+| --fast        | Used saved data if possible              |         |
+| --uuid        | Output only UUIDs                        | **[2]** |
+| --handle      | Output only handles                      | **[2]** |
+| --name        | Output only names                        | **[2]** |
+| --quiet       | Suppress console output                  |         |
+| --verbose     | Verbose console output                   |         |
+| --debug       | Diagnostic console output                |         |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -468,18 +476,19 @@ With no arguments, all collections are listed.
 
 #### Options
 
-| Option       | Description                                | Notes   |
-|:-------------|:-------------------------------------------|:--------|
-| --production | Specify the production DSpace system       | **[1]** |
-| --staging    | Specify the staging DSpace system          | **[1]** |
-| --full       | Show full community path to the collection |         |
-| --fast       | Used saved data if possible                |         |
-| --uuid       | Output only UUIDs                          | **[2]** |
-| --handle     | Output only handles                        | **[2]** |
-| --name       | Output only names                          | **[2]** |
-| --quiet      | Suppress console output                    |         |
-| --verbose    | Verbose console output                     |         |
-| --debug      | Diagnostic console output                  |         |
+| Option        | Description                                | Notes   |
+|:--------------|:-------------------------------------------|:--------|
+| --production  | Specify the production DSpace system       | **[1]** |
+| --staging     | Specify the staging DSpace system          | **[1]** |
+| --development | Specify the development DSpace system      | **[1]** |
+| --full        | Show full community path to the collection |         |
+| --fast        | Used saved data if possible                |         |
+| --uuid        | Output only UUIDs                          | **[2]** |
+| --handle      | Output only handles                        | **[2]** |
+| --name        | Output only names                          | **[2]** |
+| --quiet       | Suppress console output                    |         |
+| --verbose     | Verbose console output                     |         |
+| --debug       | Diagnostic console output                  |         |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -502,18 +511,19 @@ With no arguments, all communities are listed.
 
 #### Options
 
-| Option       | Description                               | Notes   |
-|:-------------|:------------------------------------------|:--------|
-| --production | Specify the production DSpace system      | **[1]** |
-| --staging    | Specify the staging DSpace system         | **[1]** |
-| --full       | Show full community path to the community |         |
-| --fast       | Used saved data if possible               |         |
-| --uuid       | Output only UUIDs                         | **[2]** |
-| --handle     | Output only handles                       | **[2]** |
-| --name       | Output only names                         | **[2]** |
-| --quiet      | Suppress console output                   |         |
-| --verbose    | Verbose console output                    |         |
-| --debug      | Diagnostic console output                 |         |
+| Option        | Description                               | Notes   |
+|:--------------|:------------------------------------------|:--------|
+| --production  | Specify the production DSpace system      | **[1]** |
+| --staging     | Specify the staging DSpace system         | **[1]** |
+| --development | Specify the development DSpace system     | **[1]** |
+| --full        | Show full community path to the community |         |
+| --fast        | Used saved data if possible               |         |
+| --uuid        | Output only UUIDs                         | **[2]** |
+| --handle      | Output only handles                       | **[2]** |
+| --name        | Output only names                         | **[2]** |
+| --quiet       | Suppress console output                   |         |
+| --verbose     | Verbose console output                    |         |
+| --debug       | Diagnostic console output                 |         |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -565,6 +575,7 @@ individual items separated by ";", "|" or "\n".
 |:----------------------------------|:------------------------------------------------------------------|:----------------------|
 | --production                      | Specify the production DSpace system                              | **[1]**               |
 | --staging                         | Specify the staging DSpace system                                 | **[1]**               |
+| --development                     | Specify the development DSpace system                             | **[1]**               |
 | --all                             | Delete all items from collections listed in `data/collection.txt` |                       |
 | --handle (HANDLE\|LIST)           | A single handle or list of handles to delete                      | **[2]**               |
 | --mapfile (FILE\|LIST)            | A file or list of files, each with handles of items to delete     | **[2]**,&nbsp;**[3]** |
@@ -602,10 +613,11 @@ the collection.
 
 #### Options
 
-| Option       | Description                          | Notes   |
-|:-------------|:-------------------------------------|:--------|
-| --production | Specify the production DSpace system | **[1]** |
-| --staging    | Specify the staging DSpace system    | **[1]** |
+| Option        | Description                           | Notes   |
+|:--------------|:--------------------------------------|:--------|
+| --production  | Specify the production DSpace system  | **[1]** |
+| --staging     | Specify the staging DSpace system     | **[1]** |
+| --development | Specify the development DSpace system | **[1]** |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -627,12 +639,13 @@ dspace_solr [DEPLOYMENT] [OPTIONS]
 
 #### Options
 
-| Option       | Description                                | Notes   |
-|:-------------|:-------------------------------------------|:--------|
-| --production | Specify the production DSpace system       | **[1]** |
-| --staging    | Specify the staging DSpace system          | **[1]** |
-| -chrome      | Specify display in a local Chrome browser  | **[2]** |
-| -firefox     | Specify display in a local Firefox browser | **[2]** |
+| Option        | Description                                | Notes   |
+|:--------------|:-------------------------------------------|:--------|
+| --production  | Specify the production DSpace system       | **[1]** |
+| --staging     | Specify the staging DSpace system          | **[1]** |
+| --development | Specify the development DSpace system      | **[1]** |
+| -chrome       | Specify display in a local Chrome browser  | **[2]** |
+| -firefox      | Specify display in a local Firefox browser | **[2]** |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -652,13 +665,14 @@ dspace_solr_export [DEPLOYMENT] [OPTIONS]
 
 #### Options
 
-| Option       | Description                                | Notes         |
-|:-------------|:-------------------------------------------|:--------------|
-| --production | Specify the production DSpace system       | **[1]**       |
-| --staging    | Specify the staging DSpace system          | **[1]**       |
-| --start DATE | Get records submitted no earlier than DATE |               |
-| --end DATE   | Get records submitted no later than DATE   |               |
-| --rows N     | Only fetch N records                       | Default: 5000 |
+| Option        | Description                                | Notes         |
+|:--------------|:-------------------------------------------|:--------------|
+| --production  | Specify the production DSpace system       | **[1]**       |
+| --staging     | Specify the staging DSpace system          | **[1]**       |
+| --development | Specify the development DSpace system      | **[1]**       |
+| --start DATE  | Get records submitted no earlier than DATE |               |
+| --end DATE    | Get records submitted no later than DATE   |               |
+| --rows N      | Only fetch N records                       | Default: 5000 |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -680,13 +694,14 @@ dspace_update_home [DEPLOYMENT] --check [--quiet]
 
 #### Options
 
-| Option       | Description                          | Notes   |
-|:-------------|:-------------------------------------|:--------|
-| --production | Specify the production DSpace system | **[1]** |
-| --staging    | Specify the staging DSpace system    | **[1]** |
-| --as-needed  | Skip copy if up-to-date              |         |
-| --check      | Indicate whether up-to-date          |         |
-| --quiet      | Suppress console output              | **[2]** |
+| Option        | Description                           | Notes   |
+|:--------------|:--------------------------------------|:--------|
+| --production  | Specify the production DSpace system  | **[1]** |
+| --staging     | Specify the staging DSpace system     | **[1]** |
+| --development | Specify the development DSpace system | **[1]** |
+| --as-needed   | Skip copy if up-to-date               |         |
+| --check       | Indicate whether up-to-date           |         |
+| --quiet       | Suppress console output               | **[2]** |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -708,10 +723,11 @@ dspace_prep [DEPLOYMENT]
 
 #### Options
 
-| Option       | Description                          | Notes   |
-|:-------------|:-------------------------------------|:--------|
-| --production | Specify the production DSpace system | **[1]** |
-| --staging    | Specify the staging DSpace system    | **[1]** |
+| Option        | Description                           | Notes   |
+|:--------------|:--------------------------------------|:--------|
+| --production  | Specify the production DSpace system  | **[1]** |
+| --staging     | Specify the staging DSpace system     | **[1]** |
+| --development | Specify the development DSpace system | **[1]** |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -734,10 +750,11 @@ dspace_restart [DEPLOYMENT]
 
 #### Options
 
-| Option       | Description                          | Notes   |
-|:-------------|:-------------------------------------|:--------|
-| --production | Specify the production DSpace system | **[1]** |
-| --staging    | Specify the staging DSpace system    | **[1]** |
+| Option        | Description                           | Notes   |
+|:--------------|:--------------------------------------|:--------|
+| --production  | Specify the production DSpace system  | **[1]** |
+| --staging     | Specify the staging DSpace system     | **[1]** |
+| --development | Specify the development DSpace system | **[1]** |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -759,10 +776,11 @@ dspace_retheme [DEPLOYMENT]
 
 #### Options
 
-| Option       | Description                          | Notes   |
-|:-------------|:-------------------------------------|:--------|
-| --production | Specify the production DSpace system | **[1]** |
-| --staging    | Specify the staging DSpace system    | **[1]** |
+| Option        | Description                           | Notes   |
+|:--------------|:--------------------------------------|:--------|
+| --production  | Specify the production DSpace system  | **[1]** |
+| --staging     | Specify the staging DSpace system     | **[1]** |
+| --development | Specify the development DSpace system | **[1]** |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -791,6 +809,7 @@ dspace_structure [DEPLOYMENT] --create --community NAME [--collection NAME]
 |:------------------|:------------------------------------------------------|:--------|
 | --production      | Specify the production DSpace system                  | **[1]** |
 | --staging         | Specify the staging DSpace system                     | **[1]** |
+| --development     | Specify the development DSpace system                 | **[1]** |
 | --check           | Verify all expected communities and collections exist |         |
 | --refresh         | Refresh handles in tmp/saved/*/structure.txt          |         |
 | --create          | Create all expected communities and collections       |         |
@@ -834,6 +853,7 @@ the following:
 |:------------------|:-----------------------------------------------------------|:--------|
 | --production      | Specify the production DSpace system                       | **[1]** |
 | --staging         | Specify the staging DSpace system                          | **[1]** |
+| --development     | Specify the development DSpace system                      | **[1]** |
 | --retry           | Overwrite existing import directory and zip file(s)        |         |
 | --force           | Acquire fresh LibraOpen exports                            |         |
 | --start DATE      | Passed to `bin/dspace_libra_export`                        |         |
