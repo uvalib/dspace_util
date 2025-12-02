@@ -6,7 +6,7 @@
 source 'https://rubygems.org'
 git_source(:github) { "https://github.com/#{_1}.git" }
 
-ruby '3.4.5'
+ruby '3.4.7'
 
 # =============================================================================
 # For src/dspace_import_zip
