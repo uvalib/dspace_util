@@ -918,10 +918,6 @@ Run a DSpace command as user "dspace".
 
 Export DSpace item records.
 
-### `dspace_solr_export`
-
-Retrieve DSpace Solr search records.
-
 ### `dspace_import`
 
 Takes a zip file (generated via `dspace_import_zip` on the local development
