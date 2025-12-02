@@ -84,7 +84,7 @@ fi
 
 # Adjust source(s) based on whether the target is local or remote.
 SOURCE=()
-if [[ "$DIRECTION" = "$SEND" ]] ; then
+if [[ "$DIRECTION" == "$SEND" ]] ; then
 
     case "$TARGET" in
         scp:*)  ;; # Full remote target URI assumed
@@ -107,7 +107,7 @@ if [[ "$DIRECTION" = "$SEND" ]] ; then
         SOURCE+=("$FILE")
     done
 
-elif [[ "$DIRECTION" = "$RECV" ]] ; then
+elif [[ "$DIRECTION" == "$RECV" ]] ; then
 
     case "$TARGET" in
         :*|scp:*|'') TARGET='.' ;;

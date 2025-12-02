@@ -123,8 +123,8 @@ class Options < BaseOptions
   #
   def new_parser(&blk)
     super do |p|
-      p.on('-r', '--record RECORDS',         'List of records to extract')                              { @select      += list(_1) }
-      p.on('-s', '--skip RECORDS',           'List of records to ignore')                               { @reject      += list(_1) }
+      p.on('-r', '--record LIST',            'List of records to extract')                              { @select      += list(_1) }
+      p.on('-s', '--skip LIST',              'List of records to ignore')                               { @reject      += list(_1) }
       p.on('-c', '--common DIRECTORY',       "Common root for export and import dirs (#{COMMON_DIR})")  { @common_root  = _1 }
       p.on('-e', '--export DIRECTORY',       "Existing source dir (def: '#{EXPORT_DIR}')")              { @export_root  = _1 }
       p.on('-i', '--import DIRECTORY',       "Destination dir to be created (def: '#{IMPORT_DIR}')")    { @import_root  = _1 }

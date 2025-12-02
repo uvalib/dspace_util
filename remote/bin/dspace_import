@@ -66,7 +66,7 @@ function set_zip() # path_name
 {
     local VALUE="$1"
     [[ "$VALUE" ]] || return
-    [[ "$ZIP_PATH" = "$VALUE" ]] && return
+    [[ "$ZIP_PATH" == "$VALUE" ]] && return
     [[ "$ZIP_PATH" ]] && abort "zipfile path already set to '$ZIP_PATH'"
     ZIP_PATH="$VALUE"
 }

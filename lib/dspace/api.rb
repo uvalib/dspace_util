@@ -140,23 +140,23 @@ module Dspace::Api
     # @return [Hash{String=>Dspace::Item::Entry}]
     #
     def find_or_fetch(*item, **opt)
-      c_opt = opt.extract!(:fetch, :fast, :write_saved) # For current_table.
-      e_opt = opt.extract!(:sort_key, :no_mark, :full)  # For execute.
-      saved = item.blank? && opt.compact.blank?         # Use current_table?
+      ct_opt = opt.extract!(:fetch, :fast, :write_saved) # For current_table.
+      ex_opt = opt.extract!(:sort_key, :no_mark, :full)  # For execute.
+      saved  = item.blank? && opt.compact.blank?         # Use current_table?
       debug do
         case
-          when !saved       then branch = 'EXECUTE'
-          when c_opt[:fast] then branch = 'STORED'
-          else                   branch = 'CURRENT'
+          when !saved        then branch = 'EXECUTE'
+          when ct_opt[:fast] then branch = 'STORED'
+          else                    branch = 'CURRENT'
         end
-        i, o, e, c = [item, opt, e_opt, c_opt].map(&:inspect)
+        i, o, e, c = [item, opt, ex_opt, ct_opt].map(&:inspect)
         "#{self.class}.#{__method__} #{branch} #{i} #{o} #{e} #{c}"
       end
       # noinspection RubyMismatchedReturnType
       if saved
-        current_table(**e_opt, **c_opt)
+        current_table(**ex_opt, **ct_opt)
       else
-        execute(*item, **e_opt, **opt)
+        execute(*item, **ex_opt, **opt)
       end
     end
 
@@ -173,9 +173,9 @@ module Dspace::Api
       debug { "#{self.class}.#{__method__} sort_key: #{sort_key}, no_mark: #{no_mark}, full: #{full}, #{opt}" }
 
       start       = Time.now
-      tr_opt      = opt.extract!(:result_key).merge!(full: full)
+      ti_opt      = opt.extract!(:result_key).merge!(full: full)
       list, pages = get_items(**opt)
-      result      = transform_items(list, **tr_opt)
+      result      = transform_items(list, **ti_opt)
 
       # If more pages are available, get each of them in sequence.
       if pages > 1
@@ -184,7 +184,8 @@ module Dspace::Api
         show_char ms_opt[:marker] unless no_mark # For completion of page 0.
         mark_steps(1...pages, **ms_opt) do |page|
           list, _ = get_items(**opt, page: page)
-          result.merge!(transform_items(list, **tr_opt))
+          items = transform_items(list, **ti_opt)
+          result.merge!(items)
         end
       end
 

@@ -9,7 +9,7 @@ ERROR_STATUS=100
 [[ "$BIN_DIR"  ]] || BIN_DIR=`dirname "$PROGRAM"`
 [[ "$PROGNAME" ]] || PROGNAME=`basename "$PROGRAM"`
 
-[[ ":$PATH:" = *":$BIN_DIR:"* ]] || PATH="$BIN_DIR:$PATH"
+[[ ":$PATH:" == *":$BIN_DIR:"* ]] || PATH="$BIN_DIR:$PATH"
 
 # =============================================================================
 # Functions
@@ -32,7 +32,7 @@ function flag_arg() # --flag=value | --flag value
 {
     local FLAG="$1"                         # "--flag=value" or "flag value".
     local VALUE="${FLAG#*=}"                # Check for "--flag=value".
-    [[ "$VALUE" = "$FLAG" ]] && VALUE="$2"  # Default to "flag value".
+    [[ "$VALUE" == "$FLAG" ]] && VALUE="$2" # Default to "flag value".
     blank "$VALUE" && abort "missing $FLAG argument"
     echo "$VALUE"
 }

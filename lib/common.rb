@@ -19,7 +19,7 @@ require 'pp'
 #
 # @type [String]
 #
-PROJECT_DIRECTORY = File.dirname(__FILE__, 2)
+PROJECT_DIRECTORY = File.dirname(__FILE__, 2).freeze
 
 # Target DSpace deployment (either "staging" or "production").
 #

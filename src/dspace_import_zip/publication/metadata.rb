@@ -110,7 +110,7 @@ module Publication::Metadata
     #
     # @return [String, nil]
     #
-    def lang_iso(value, field: :language)
+    def language_iso(value, field: :language)
       value = value[field] if value.is_a?(Hash)
       value = value.to_s.strip
       # noinspection RubyMismatchedReturnType
@@ -338,7 +338,7 @@ module Publication::Metadata
         multi( :author_ids,        'contributor',  'author')         { authors[_1] }
         multi( :contributor_ids,   'contributor')                    { contributors[_1] }
         multi( :language,          'language')
-        multi( :language,          'language',     'iso')            { lang_iso(_1) }
+        multi( :language,          'language',     'iso')            { language_iso(_1) }
         multi( :rights,            'rights')                         { rights(_1) }
         multi( :rights,            'rights',       'uri')            { rights_uri(_1) }
         multi( :keyword,           'subject')

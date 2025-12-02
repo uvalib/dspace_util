@@ -63,7 +63,7 @@ if [[ "$CHECK" || "$NEEDED" ]] ; then
     REMOTE=`
         dspace_sh "
             test -d bin || exit 9
-            ls -t bin/* | tail -1 | xargs stat -c '%Y'
+            ls -t bin/* | head -1 | xargs stat -c '%Y'
         "
     `
     case $? in

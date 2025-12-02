@@ -112,10 +112,10 @@ class BaseOptions
     @parser = OptionParser.new do |p|
       p.banner += "\n#{leading_help}\n" if leading_help.present?
       blk&.call(p)
-      p.on('-q', '--[no-]quiet',   'Suppress console output') { @quiet     = _1 }
-      p.on('-v', '--[no-]verbose', 'Verbose console output')  { @verbose   = _1 }
-      p.on('-d', '--[no-]debug',   'Debug console output')    { @debug     = _1 }
-      p.on('-h', '--help',         'Show this help message')  { @help_exit = true }
+      p.on('-q', '--[no-]quiet',   'Suppress console output')   { @quiet     = _1 }
+      p.on('-v', '--[no-]verbose', 'Verbose console output')    { @verbose   = _1 }
+      p.on('-d', '--[no-]debug',   'Diagnostic console output') { @debug     = _1 }
+      p.on('-h', '--help',         'Show this help message')    { @help_exit = true }
       p.separator "\n#{trailing_help}" if trailing_help.present?
     end
   end

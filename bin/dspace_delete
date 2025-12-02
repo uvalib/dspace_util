@@ -175,9 +175,9 @@ for NAME in "${NAMES[@]}"; do
 done
 
 # Ensure items to delete were specified in some manner.
-declare -i H_COUNT=${#HANDLES[*]}
-declare -i M_COUNT=${#MAP_FILES[*]}
-declare -i C_COUNT=${#COLLECTIONS[*]}
+declare -i H_COUNT=${#HANDLES[@]}
+declare -i M_COUNT=${#MAP_FILES[@]}
+declare -i C_COUNT=${#COLLECTIONS[@]}
 [[ `expr $H_COUNT + $M_COUNT + $C_COUNT` -eq 0 ]] && abort 'no items specified'
 
 # =============================================================================

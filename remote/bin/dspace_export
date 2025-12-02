@@ -75,9 +75,9 @@ done
 # =============================================================================
 
 if [[ "$HELP" ]] ; then
-    echo "Usage: $PROGNAME -i target_item [flags]"
-    echo "Usage: $PROGNAME -c target_collection [flags]"
-    echo 'DSpace export flags:'
+    echo "Usage: $PROGNAME -i TARGET_ITEM [OPTIONS]"
+    echo "Usage: $PROGNAME -c TARGET_COLLECTION [OPTIONS]"
+    echo 'DSpace export options:'
     dspace export --help | sed -e '/^usage.*$/d' -e '/^\s*-t,/d'
     exit 0
 fi
