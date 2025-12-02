@@ -14,6 +14,19 @@ require 'nokogiri'
 class Xml < Nokogiri::XML::Builder
 
   # ===========================================================================
+  # :section: Constants
+  # ===========================================================================
+
+  # Indicate whether DSpace metadata should be provided with embedded HTML.
+  #
+  # If *true*, this would likely require DSpace configuration changes.
+  # If *false*, HTML element tags will appear escaped like `&lt;TAG&gt;`.
+  #
+  # @type [Boolean]
+  #
+  DSPACE_HTML = false
+
+  # ===========================================================================
   # :section:
   # ===========================================================================
 
@@ -82,6 +95,55 @@ class Xml < Nokogiri::XML::Builder
       # noinspection RubyResolve
       dcvalue(v, element: e, **qualifier)
     end
+  end
+
+  # ===========================================================================
+  # :section: Nokogiri::XML::Builder overrides
+  # ===========================================================================
+
+  public
+
+  # Render the object as XML.
+  #
+  # @param [Array<any>] args          @see Nokogiri::XML::Node#serialize
+  #
+  # @return [String]
+  #
+  def to_xml(*args)
+    restore_html(super)
+  end if DSPACE_HTML
+
+  # ===========================================================================
+  # :section: Internal methods
+  # ===========================================================================
+
+  protected
+
+  # Match a span of text which represents an encoded HTML element which may
+  # contain newlines.
+  #
+  # This is adequate for the LibraOpen dataset but not in general because it
+  # assumes that HTML elements are never nested inside HTML elements of the
+  # same type.
+  #
+  # @type [Regexp]
+  #
+  HTML_PATTERN = %r{(&lt;(.*?)&gt;.*?&lt;/\2&gt;)}m
+
+  # Restore encoded HTML.
+  #
+  # @param [String] text
+  #
+  # @return [String]
+  #
+  def restore_html(text)
+    head, html, rest = text.partition(HTML_PATTERN)
+    return head if html.blank?
+    tag  = html.match(/^&lt;(.*?)&gt;/).then { $1 }
+    html = html.sub(%r{\A&lt;#{tag}&gt;(.*?)&lt;/#{tag}&gt;\Z}m, '\1')
+    html = restore_html(html)
+    rest = restore_html(rest)
+    "#{head}<#{tag}>#{html}</#{tag}>#{rest}"
   end
 
 end
