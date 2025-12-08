@@ -62,7 +62,7 @@ done
 # =============================================================================
 
 NAMES=("$@")
-LAST_INDEX=`expr $# - 1`
+LAST_INDEX=`expr ${#NAMES[@]} - 1`
 INITIAL_NAMES=("${NAMES[@]:0:$LAST_INDEX}")
 FINAL_NAME="${NAMES[$LAST_INDEX]}"
 
