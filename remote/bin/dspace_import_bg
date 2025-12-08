@@ -2,8 +2,8 @@
 #
 # Run dspace_import on multiple zip files in the background.
 #
-# This is primarily for use by `dspace_import` on the developer machine to have
-# a single process which can be run in the background.
+# This is primarily for use by `dspace_import` on the developer workstation to
+# have a single process which can be run in the background.
 #
 # Usage: dspace_import_bg ZIP_FILES... [--foreground] [DSPACE_IMPORT_OPTS]
 
@@ -14,8 +14,10 @@ source "$BIN_DIR/dspace_values"
 
 NOHUP='true'    # Background the import process.
 WAIT='true'     # Wait for background import process to finish.
-ZIP_FILES=()    # Zip import files.
+
 SRC_DIR=''      # Directory of input zip file.
+ZIP_FILES=()    # Zip import files.
+
 ARGS=()         # Other arguments passed to dspace_import.
 IN_ARGS=''      # When true remaining options are for dspace_import.
 

@@ -2,8 +2,8 @@
 #
 # Run `dspace import --delete` in the background.
 #
-# This is primarily for use by `dspace_delete` on the developer machine to have
-# a single process which can be run in the background.
+# This is primarily for use by `dspace_delete` on the developer workstation to
+# have a single process which can be run in the background.
 #
 # Usage: dspace_delete_bg MAPFILE [--foreground] [DSPACE_IMPORT_OPTS]
 # Usage: dspace_delete_bg --mapfile MAPFILE [--foreground] [DSPACE_IMPORT_OPTS]
@@ -60,7 +60,7 @@ esac
 
 if [[ "$DSPACE_DOCKER" ]] ; then
     # If DSpace runs in a Docker container, $MAP_FILE must be absolute
-    # (otherwise it would be expected in the top-level of the container's file
+    # (otherwise it would be expected at the root of the container's file
     # system).
     case "$SRC_DIR" in
         ''|"$IMPORT_PATH"|"$HOST_IMPORT_PATH") SRC_DIR="$DSPACE_IMPORT_PATH" ;;

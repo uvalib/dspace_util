@@ -74,7 +74,11 @@ module Dspace::Community
     include Dspace::Api
     include Dspace::Community::Path
 
-    def full_path = self[__method__] # Full community path of community.
+    # Full community path of community.
+    #
+    # @return [String, nil]
+    #
+    def full_path = self[__method__]
 
     KEYS = (superclass::KEYS + instance_methods(false)).freeze
 

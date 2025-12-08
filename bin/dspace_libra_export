@@ -70,7 +70,7 @@ fi
 mkdir -p "$OUT_DIR"
 
 # =============================================================================
-# Ensure terraform-infrastructure repo is on the local machine.
+# Ensure terraform-infrastructure repo is on the local developer workstation.
 # =============================================================================
 
 if [[ ! -d "$TI_PRJ" ]] ; then

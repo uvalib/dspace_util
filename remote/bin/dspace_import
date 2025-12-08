@@ -24,7 +24,7 @@
 # -s    --source        Source directory of zipfile
 # -c    --collection    Destination collection                      By Handle or database ID
 # -m    --mapfile       Mapfile for items                           Will be created by --add
-# -e    --eperson       Email of person doing import
+# -e    --eperson       DSpace account doing the import
 # -w    --workflow      Send through the collection's workflow
 # -n    --notify        Kicks off email reporting imported items
 # -v    --validate      Test run; do not actually import items
@@ -49,11 +49,13 @@ NOHUP=''        # Background the import process.
 WAIT=''         # Wait for background import process to finish.
 HELP=''         # Display help only.
 KEEP_MAP=''     # Do not backup existing mapfile.
+
 MAP_FILE=''     # Name of output mapfile.
 ZIP_FILE=''     # Name of input zip file.
 ZIP_PATH=''     # Path to input zip file.
 SRC_DIR=''      # Directory of input zip file.
 COLLECTION=''   # Expect items to have a "collections" file.
+
 ARGS=()         # Other arguments passed to `dspace import`.
 
 EPERSON='libra@virginia.edu' # DSpace account of submitter.
@@ -158,8 +160,8 @@ fi
 
 # If DSpace runs in a Docker container, zip files must be in the directory
 # which is mounted within the Docker container at $DSPACE_IMPORT_PATH, and
-# $MAP_FILE must be absolute (otherwise it will be deposited in the top-level
-# of the container's file system).
+# $MAP_FILE must be absolute (otherwise it would be deposited at the root of
+# the container's file system).
 if [[ "$DSPACE_DOCKER" ]] ; then
     case "$SRC_DIR" in
         "$IMPORT_PATH"|"$HOST_IMPORT_PATH") SRC_DIR="$DSPACE_IMPORT_PATH" ;;

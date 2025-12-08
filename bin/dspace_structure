@@ -31,6 +31,7 @@ CREATE=''                           # Create communities/collections.
 CHECK=''                            # Check only.
 HELP=''                             # Display help only.
 ALL=''                              # All communities/collections from $SRC_TXT
+
 SRC_TXT="$DAT_DIR/collection.txt"   # Defined communities/collections.
 DST_TXT="$TMP_DIR/saved/$DSPACE_DEPLOYMENT/structure.txt" # ...with handles.
 SRC_XML='structure.xml'             # Supplied communities/collections.

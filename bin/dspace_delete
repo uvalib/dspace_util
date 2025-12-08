@@ -46,10 +46,12 @@ NOHUP='true'    # Background the delete process.
 WAIT='true'     # Wait for background delete process to finish.
 HELP=''         # Display help only.
 ALL=''          # All items from collections in data/collection.txt
+
 NAMES=()        # Arguments to be interpreted for handles of items to delete.
 HANDLES=()      # Handles of items to delete.
 MAP_FILES=()    # Source mapfile(s).
 COLLECTIONS=()  # Source collections.
+
 ARGS=()         # Other arguments passed to dspace_delete_bg.
 IN_ARGS=''      # When true remaining options are for dspace_delete_bg.
 

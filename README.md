@@ -26,8 +26,9 @@ this includes:
 author or other contributor.
 
 Because large quantities of data may be transferred, a local directory with
-sufficiently large storage capacity should be set aside for the purpose of
-gathering exports from LibraOpen and converting them to DSpace imports.
+sufficiently large storage capacity should be set aside on the developer
+workstation for the purpose of gathering exports from LibraOpen and converting
+them to DSpace imports.
 Programs here assume this directory can be found at the location defined as
 \$COMMON_ROOT in `dspace_values`, along with the \$EXPORT_DIR and \$IMPORT_DIR
 subdirectory names.
@@ -143,8 +144,8 @@ So, steps must be taken to avoid importing the previously-imported entities.
 The strategy is to make use of the map files that "dspace import" creates which
 list each import subdirectory alongside the handle of the DSpace item created
 for it.
-These map files can be copied from the DSpace host back to the development
-machine and supplied as arguments to indicate which imports should _not_ be
+These map files can be copied from the DSpace host back to the developer
+workstation and supplied as arguments to indicate which imports should _not_ be
 included in the next run.
 
 For example, say that you have 2500 exports to submit, and have already gone
@@ -167,9 +168,9 @@ will cause the rest of the items to be imported:
 bin/dspace_import --retry --phase 3 --skip tmp/dspace-import-1.map --skip tmp/dspace-import-2.map
 ```
 
-This will regenerate the local import directory to contain only the non-skipped
-items, resulting in a zip file through which only the remaining
-(previously-failed) items are imported into DSpace.
+This will regenerate the local import directory on the developer workstation to
+contain only the non-skipped items, resulting in a zip file through which only
+the remaining (previously-failed) items are imported into DSpace.
 
 ## Developer Desktop Utilities
 
@@ -191,7 +192,7 @@ All scripts assume that AWS Command Line utilities have been installed and are
 available in the current \$PATH.
 
 Additionally, `dspace_libra_export` requires these programs to be installed on
-local workstation and available in the current \$PATH:
+the developer workstation and available in the current \$PATH:
 
 * ccrypt
 * terraform
@@ -998,8 +999,8 @@ Export DSpace item records.
 
 ### `dspace_import`
 
-Takes a zip file (generated via `dspace_import_zip` on the local development
-machine) and submits the items to DSpace in bulk.
+Takes a zip file (generated via `dspace_import_zip` on the developer
+workstation) and submits the items to DSpace in bulk.
 
 The DSpace import process is rather slow and happens in several phases:
 * First, items are extracted from the zip file into a subdirectory created
@@ -1022,21 +1023,21 @@ large bulk submissions into batches.
 
 This command can be run manually on the DSpace host, however it may be
 preferable to run the entire end-to-end LibraOpen-export-to-DSpace-import
-process from the local development machine through the `dspace_import` command.
+process from the developer workstation through the `dspace_import` command.
 
 ### `dspace_import_bg`
 
 Run dspace_import on multiple zip files in the background.
 
-This is primarily for use by `dspace_import` on the developer machine to have
-a single process which can be run in the background.
+This is primarily for use by `dspace_import` on the developer workstation to
+have a single process which can be run in the background.
 
 ### `dspace_delete_bg`
 
 Run `dspace import --delete` in the background.
 
-This is primarily for use by `dspace_delete` on the developer machine to have
-a single process which can be run in the background.
+This is primarily for use by `dspace_delete` on the developer workstation to
+have a single process which can be run in the background.
 
 ### `dspace_prep`
 

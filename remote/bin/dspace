@@ -36,7 +36,7 @@ while [[ $# -gt 0 ]] ; do
     case "$1" in
         bash|shell) DOCKER_CMD=(bash -l -i) ;;
         sh)         DOCKER_CMD=(sh -l -i) ;;
-        *)          break ;; # Remainder to command run in container.
+        *)          break ;; # Remainder is to command run in the container.
     esac
     shift
 done

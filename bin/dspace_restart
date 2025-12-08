@@ -44,7 +44,7 @@ case "${TARGET,,}" in
 esac
 
 # =============================================================================
-# Ensure terraform-infrastructure repo is up-to-date on the local machine.
+# Ensure terraform-infrastructure repo is up-to-date on the local workstation.
 # =============================================================================
 
 if [[ -d "$TI_PRJ" ]] ; then
