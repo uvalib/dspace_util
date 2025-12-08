@@ -1,0 +1,31 @@
+#! /bin/bash
+#
+# The full identifier of a DSpace EPerson, defaulting to the import submitter.
+#
+# Usage: dspace_account                 # The default DSpace account.
+# Usage: dspace_account submitter       # The DSpace import submitter account.
+# Usage: dspace_account administrator   # A DSpace administrator account.
+
+readonly SUBMITTER_ACCOUNT='libra@virginia.edu'
+readonly ADMINISTRATOR_ACCOUNT='rwl@virginia.edu'
+
+ACCOUNT="$SUBMITTER_ACCOUNT"            # Default account.
+[[ "$EPERSON" ]] && ACCOUNT="$EPERSON"  # Exported $EPERSON value.
+
+# =============================================================================
+# Process optional command line argument.
+# =============================================================================
+
+case "$1" in
+    '')         ;; # Default account or exported $EPERSON value.
+    *@*)        ACCOUNT="$1" ;;
+    submit*)    ACCOUNT="$SUBMITTER_ACCOUNT" ;;
+    admin*)     ACCOUNT="$ADMINISTRATOR_ACCOUNT" ;;
+    *)          ACCOUNT="$1@virginia.edu" ;;
+esac
+
+# =============================================================================
+# Output the indicated DSpace account.
+# =============================================================================
+
+echo "$ACCOUNT"

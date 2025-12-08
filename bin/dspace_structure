@@ -36,7 +36,6 @@ SRC_TXT="$DAT_DIR/collection.txt"   # Defined communities/collections.
 DST_TXT="$TMP_DIR/saved/$DSPACE_DEPLOYMENT/structure.txt" # ...with handles.
 SRC_XML='structure.xml'             # Supplied communities/collections.
 DST_XML='structure_handles.xml'     # Generated handles.
-EPERSON='rwl@virginia.edu'          # Must be an administrator.
 
 declare -A ARGS_TABLE               # Collections provided keyed by community.
 declare -A CREATE_TABLE             # Collections to create keyed by community.
@@ -333,9 +332,10 @@ else
 fi
 
 dspace_sh "
+    EPERSON=\`dspace_account administrator\`
     cd '$DSPACE_IMPORT_DIR' &&
     $COPY_SRC &&
-    dspace structure-builder -f '$SRC' -o '$DST' -e '$EPERSON' &&
+    dspace structure-builder -f '$SRC' -o '$DST' -e \$EPERSON &&
     cat '$DST_XML'
 " < "$SRC_XML" > "$DST_XML"
 

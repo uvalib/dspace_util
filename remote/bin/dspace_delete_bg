@@ -17,10 +17,10 @@ NOHUP='true'    # Background the delete process.
 WAIT='true'     # Wait for background delete process to finish.
 MAP_FILE=''     # The single mapfile provided.
 SRC_DIR=''      # Directory of map file.
+EPERSON=''      # DSpace account of submitter.
+
 ARGS=()         # Other arguments passed to `dspace import --delete`.
 IN_ARGS=''      # When true remaining options are for `dspace import --delete`.
-
-EPERSON='libra@virginia.edu' # DSpace account of submitter.
 
 # =============================================================================
 # Process command line arguments.
@@ -52,11 +52,7 @@ done
 dspace_prep || exit $?
 
 # Make sure the submitter is in the form of a DSpace user name.
-case "$EPERSON" in
-    *@*)    ;; # OK
-    '')     EPERSON="$USER@virginia.edu" ;;
-    *)      EPERSON="$EPERSON@virginia.edu" ;;
-esac
+EPERSON=`dspace_account "$EPERSON"`
 
 if [[ "$DSPACE_DOCKER" ]] ; then
     # If DSpace runs in a Docker container, $MAP_FILE must be absolute

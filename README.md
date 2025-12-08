@@ -1043,6 +1043,10 @@ have a single process which can be run in the background.
 
 Prepare for importing to DSpace.
 
+### `dspace_account`
+
+Output the DSpace account (EPerson) to use with a DSpace CLI command.
+
 ### `dspace_deployment`
 
 Report the DSpace deployment of the current system.

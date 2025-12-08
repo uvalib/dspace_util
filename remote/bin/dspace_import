@@ -54,11 +54,10 @@ MAP_FILE=''     # Name of output mapfile.
 ZIP_FILE=''     # Name of input zip file.
 ZIP_PATH=''     # Path to input zip file.
 SRC_DIR=''      # Directory of input zip file.
+EPERSON=''      # DSpace account of submitter.
 COLLECTION=''   # Expect items to have a "collections" file.
 
 ARGS=()         # Other arguments passed to `dspace import`.
-
-EPERSON='libra@virginia.edu' # DSpace account of submitter.
 
 # =============================================================================
 # Functions
@@ -135,11 +134,7 @@ fi
 [[ "$MAP_FILE" ]] || MAP_FILE=`basename "$ZIP_FILE" .zip`.map
 
 # Make sure the submitter is in the form of a DSpace user name.
-case "$EPERSON" in
-    *@*)    ;; # OK
-    '')     EPERSON="$USER@virginia.edu" ;;
-    *)      EPERSON="$EPERSON@virginia.edu" ;;
-esac
+EPERSON=`dspace_account "$EPERSON"`
 
 # Make a relative source directory path absolute.
 [[ "$SRC_DIR" ]] || SRC_DIR="$IMPORT_PATH"
