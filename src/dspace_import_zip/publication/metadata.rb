@@ -278,7 +278,7 @@ module Publication::Metadata
       'Cell-to-cell'              => 'Cell-to-Cell',
       'Charlottesville, VA'       => 'Charlottesville, Virginia',
       'Colleciton'                => 'Collection',
-      'Colletion'                 => 'collection',
+      'Colletion'                 => 'Collection',
       'Community-building'        => 'Community-Building',
       'Consumer-resource'         => 'Consumer-Resource',
       'Context-dependence'        => 'Context Dependence',

@@ -55,7 +55,7 @@ class TableOptions < BaseOptions
       p.on('--uuid',      'Output only UUIDs')           { @uuid   = true }
       p.on('--handle',    'Output only handles')         { @handle = true }
       p.on('--name',      'Output only names')           { @name   = true }
-      p.on('--[no-]full', 'Show full community path')    { @full   = _1 }
+      p.on('--[no-]full', 'Show full Community path')    { @full   = _1 }
       p.on('--[no-]fast', 'Used saved data if possible') { @fast   = _1 }
       p.on('--[no-]data', 'Output for data processing')  { @data   = _1 }
       blk&.call(p)

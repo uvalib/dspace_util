@@ -143,10 +143,10 @@ if [[ "$HELP" ]] ; then
     --staging       Delete from the staging DSpace service.
 
     OPTIONS:
-    --all           All items from collections in data/collection.txt
+    --all           All items from Collections in data/collection.txt
     --handle        Next is a handle or list of handles.
     --mapfile       Next is a mapfile or newline-delimited list of mapfiles.
-    --collection    Next is a collection or list of collections.
+    --collection    Next is a Collection or list of Collections.
     --foreground    Do not run in the background with "nohup".
 EOF
     exit 0

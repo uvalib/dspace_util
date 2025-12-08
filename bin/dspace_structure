@@ -164,11 +164,11 @@ if [[ "$HELP" ]] ; then
     --staging           Operate on the staging DSpace service.
 
     OPTIONS:
-    --check             Verify all expected communities and collections exist.
+    --check             Verify all expected Communities and Collections exist.
     --refresh           Refresh handles in tmp/saved/*/structure.txt.
-    --create            Create all expected communities and collections.
-    --community NAME    Create community.
-    --collection NAME   Create collection.
+    --create            Create all expected Communities and Collections.
+    --community NAME    Create Community.
+    --collection NAME   Create Collection.
 EOF
     exit 0
 fi
