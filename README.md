@@ -67,7 +67,13 @@ In-depth documentation of DSpace entities is sparse;
 some insight into the implementation can be gleaned from the
 ["GitHub issue comments"][GIT].
 
-### Steps
+### Prepare DSpace
+
+Because the import process distributes Publications into Collections, the
+Communities and Collections defined in "data/collection.txt" are expected to
+have already been established by `dspace_structure --create`.
+
+### Perform Import
 
 The `dspace_import` program orchestrates several steps implemented by other
 programs implemented here in order to affect a transfer of LibraOpen data to
@@ -84,7 +90,7 @@ DSpace.
 * Finally, for each zip file `remote/bin/dspace_import`, running on the DSpace
   host, is invoked to run the DSpace command-line import.
 
-### Phases
+### Import Phases
 
 If there are a 1000 or less OrgUnits, Persons, and Publications to be imported
 then the entire import can fit into a single zip file.
@@ -374,7 +380,7 @@ With no arguments, all OrgUnits are listed.
 | --production  | Specify the production DSpace system     | **[1]** |
 | --staging     | Specify the staging DSpace system        | **[1]** |
 | --development | Specify the development DSpace system    | **[1]** |
-| --scope       | Limit search to the indicated collection |         |
+| --scope       | Limit search to the indicated Collection |         |
 | --fast        | Used saved data if possible              |         |
 | --uuid        | Output only UUIDs                        | **[2]** |
 | --handle      | Output only handles                      | **[2]** |
@@ -410,7 +416,7 @@ With no arguments, all Persons are listed.
 | --production  | Specify the production DSpace system     | **[1]** |
 | --staging     | Specify the staging DSpace system        | **[1]** |
 | --development | Specify the development DSpace system    | **[1]** |
-| --scope       | Limit search to the indicated collection |         |
+| --scope       | Limit search to the indicated Collection |         |
 | --fast        | Used saved data if possible              |         |
 | --uuid        | Output only UUIDs                        | **[2]** |
 | --handle      | Output only handles                      | **[2]** |
@@ -436,7 +442,7 @@ dspace_publication [DEPLOYMENT] [OPTIONS] [TERM...]
 ```
 
 Each TERM argument may be "author:AUTHOR_NAME", "title:TITLE_TEXT", or a
-publication handle.
+Publication entity handle.
 (A string without a prefix is assumed to be TITLE_TEXT.)
 With no arguments, all Publications are listed.
 
@@ -447,7 +453,7 @@ With no arguments, all Publications are listed.
 | --production  | Specify the production DSpace system     | **[1]** |
 | --staging     | Specify the staging DSpace system        | **[1]** |
 | --development | Specify the development DSpace system    | **[1]** |
-| --scope       | Limit search to the indicated collection |         |
+| --scope       | Limit search to the indicated Collection |         |
 | --fast        | Used saved data if possible              |         |
 | --uuid        | Output only UUIDs                        | **[2]** |
 | --handle      | Output only handles                      | **[2]** |
@@ -464,7 +470,7 @@ NOTES<br/>
 
 ### `dspace_collection`
 
-Get information about DSpace collections in tabular form.
+Get information about DSpace Collections in tabular form.
 
 #### Usage
 
@@ -473,7 +479,7 @@ dspace_collection [DEPLOYMENT] [OPTIONS]
 ```
 
 This does not currently take arguments.
-With no arguments, all collections are listed.
+With no arguments, all Collections are listed.
 
 #### Options
 
@@ -482,7 +488,7 @@ With no arguments, all collections are listed.
 | --production  | Specify the production DSpace system       | **[1]** |
 | --staging     | Specify the staging DSpace system          | **[1]** |
 | --development | Specify the development DSpace system      | **[1]** |
-| --full        | Show full community path to the collection |         |
+| --full        | Show full Community path to the Collection |         |
 | --fast        | Used saved data if possible                |         |
 | --uuid        | Output only UUIDs                          | **[2]** |
 | --handle      | Output only handles                        | **[2]** |
@@ -499,7 +505,7 @@ NOTES<br/>
 
 ### `dspace_community`
 
-Get information about DSpace communities in tabular form.
+Get information about DSpace Communities in tabular form.
 
 #### Usage
 
@@ -508,7 +514,7 @@ dspace_community [DEPLOYMENT] [OPTIONS]
 ```
 
 This does not currently take arguments.
-With no arguments, all communities are listed.
+With no arguments, all Communities are listed.
 
 #### Options
 
@@ -517,7 +523,7 @@ With no arguments, all communities are listed.
 | --production  | Specify the production DSpace system      | **[1]** |
 | --staging     | Specify the staging DSpace system         | **[1]** |
 | --development | Specify the development DSpace system     | **[1]** |
-| --full        | Show full community path to the community |         |
+| --full        | Show full Community path to the Community |         |
 | --fast        | Used saved data if possible               |         |
 | --uuid        | Output only UUIDs                         | **[2]** |
 | --handle      | Output only handles                       | **[2]** |
@@ -534,7 +540,7 @@ NOTES<br/>
 
 ### `dspace_delete`
 
-Remove DSpace items by name or collection.
+Remove DSpace items by name or Collection.
 
 #### Usage
 
@@ -554,7 +560,7 @@ Each ITEM may be:
   Mapfiles may be either be in the two column format expected by DSpace where
   the second column is a handle, or simple lists of handles one per line.
 
-* A collection or list of collections.<br/>
+* A Collection or list of Collections.<br/>
   Collections can be specified by handle (or as a file containing handles)
   but only after a --collection flag; plain arguments which are handles will
   always be interpreted as items.
@@ -577,10 +583,10 @@ individual items separated by ";", "|" or "\n".
 | --production                      | Specify the production DSpace system                              | **[1]**               |
 | --staging                         | Specify the staging DSpace system                                 | **[1]**               |
 | --development                     | Specify the development DSpace system                             | **[1]**               |
-| --all                             | Delete all items from collections listed in `data/collection.txt` |                       |
+| --all                             | Delete all items from Collections listed in `data/collection.txt` |                       |
 | --handle (HANDLE\|LIST)           | A single handle or list of handles to delete                      | **[2]**               |
 | --mapfile (FILE\|LIST)            | A file or list of files, each with handles of items to delete     | **[2]**,&nbsp;**[3]** |
-| --collection (NAME\|HANDLE\|LIST) | A collection or list of collections whose items will be deleted   | **[2]**,&nbsp;**[4]** |
+| --collection (NAME\|HANDLE\|LIST) | A Collection or list of Collections whose items will be deleted   | **[2]**,&nbsp;**[4]** |
 | --foreground                      | Do not run in the background with "nohup"                         |                       |
 
 NOTES<br/>
@@ -590,7 +596,7 @@ NOTES<br/>
 list of handles, one per line, which will be converted into that form.<br/>
 **[4]** Collections may be specified as names or as handles.  The set of items
 to delete is determined by fetching the list of items within each
-collection.<br/>
+Collection.<br/>
 
 <!---------------------------------------------------------------------------->
 
@@ -608,9 +614,9 @@ dspace_lookup [DEPLOYMENT] UUID
 For convenience, a full path can be supplied and the item identifier will be
 extracted from it.
 
-The item may be a collection, however DSpace only returns metadata about the
-collection itself and does not provide a way to get the items associated with
-the collection.
+The item may be a Collection, however DSpace only returns metadata about the
+Collection itself and does not provide a way to get the items associated with
+the Collection.
 
 #### Options
 
@@ -790,10 +796,10 @@ NOTES<br/>
 
 ### `dspace_structure`
 
-Generate DSpace communities and collections via `dspace structure-builder`.
+Generate DSpace Communities and Collections via `dspace structure-builder`.
 
 NOTE: Collections are not created with an entity type.
-That will have to be modified manually for any collection created here.
+That will have to be modified manually for any Collection created here.
 
 #### Usage
 
@@ -811,11 +817,11 @@ dspace_structure [DEPLOYMENT] --create --community NAME [--collection NAME]
 | --production      | Specify the production DSpace system                  | **[1]** |
 | --staging         | Specify the staging DSpace system                     | **[1]** |
 | --development     | Specify the development DSpace system                 | **[1]** |
-| --check           | Verify all expected communities and collections exist |         |
+| --check           | Verify all expected Communities and Collections exist |         |
 | --refresh         | Refresh handles in tmp/saved/*/structure.txt          |         |
-| --create          | Create all expected communities and collections       |         |
-| --community NAME  | Create community                                      |         |
-| --collection NAME | Create collection                                     | **[2]** |
+| --create          | Create all expected Communities and Collections       |         |
+| --community NAME  | Create Community                                      |         |
+| --collection NAME | Create Collection                                     | **[2]** |
 
 NOTES<br/>
 **[1]** Default taken from the DSPACE_DEPLOYMENT environment variable.<br/>
@@ -898,10 +904,10 @@ this would be the option to use to cause that to happen.
 ##### --collection
 
 This should probably not be used since imported entities are generated with a
-"collections" file which specifies the appropriate collection depending on the
+"collections" file which specifies the appropriate Collection depending on the
 nature of the entity (Publication, Person, or OrgUnit).
-Due to the way that the DSpace command line works, specifying a collection will
-mean that _all_ imported entities will be placed into that collection
+Due to the way that the DSpace command line works, specifying a Collection will
+mean that _all_ imported entities will be placed into that Collection
 (which is probably not desirable for OrgUnit and Person entities).
 
 <!---------------------------------------------------------------------------->
@@ -1007,7 +1013,7 @@ The DSpace import process is rather slow and happens in several phases:
     under `/opt/dspace/imports/importSAF`.
 * This expanded data is used to create data for each item.
 * Items are submitted to the Solr index.
-* Finally, the items will appear in the DSpace UI in the target collection.
+* Finally, the items will appear in the DSpace UI in the target Collection.
 
 Imported items will only appear in DSpace if all phases are completed.
 Failure of any item will result in failure of all items to be submitted.

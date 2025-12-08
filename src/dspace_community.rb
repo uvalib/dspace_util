@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Get information about DSpace communities and sub-communities.
+# Get information about DSpace Communities and sub-Communities.
 
 require 'common'
 require 'logging'
@@ -15,7 +15,7 @@ require 'table_listing'
 # :section: Classes
 # =============================================================================
 
-# Display of communities in tabular form.
+# Display of Communities in tabular form.
 #
 class CommunityListing < TableListing
 
@@ -29,10 +29,10 @@ end
 # :section: Methods
 # =============================================================================
 
-# Generate an output table of DSpace communities.
+# Generate an output table of DSpace Communities.
 #
 # @param [Array<String>] _community   Currently unused.
-# @param [Boolean, nil]  full         Show community name as path (option.full)
+# @param [Boolean, nil]  full         Show Community name as path (option.full)
 # @param [Boolean, nil]  fast         Used saved data if possible (option.fast)
 # @param [Hash]          opt          Passed to CommunityListing.
 #

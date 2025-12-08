@@ -32,7 +32,7 @@ end
 # Generate an output table of the given DSpace Persons.
 #
 # @param [Array<String>] person       All Persons if empty.
-# @param [String, nil]   scope        Limit to given collection (option.scope)
+# @param [String, nil]   scope        Limit to given Collection (option.scope)
 # @param [Boolean, nil]  fast         Used saved data if possible (option.fast)
 # @param [Hash]          opt          Passed to PersonListing.
 #

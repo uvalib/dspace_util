@@ -36,7 +36,7 @@ set -- "${SCRIPT_ARGS[@]}"
 [[ "$DSPACE_PREFIX"     ]] || export DSPACE_PREFIX='item'
 [[ "$DSPACE_IMPORT_DIR" ]] || export DSPACE_IMPORT_DIR='import'
 
-# Names of "UVA Open Community" destination collections.
+# Names of "UVA Open Community" destination Collections.
 [[ "$PUB_COLLECTION"  ]] || export PUB_COLLECTION='~ GENERAL, Outside UVA'
 [[ "$USR_COLLECTION"  ]] || export USR_COLLECTION='Profiles'
 [[ "$ORG_COLLECTION"  ]] || export ORG_COLLECTION='OrgUnits'

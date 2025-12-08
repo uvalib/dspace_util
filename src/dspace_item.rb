@@ -18,7 +18,7 @@ require 'item_listing'
 # Generate an output table of DSpace items.
 #
 # @param [Array<String>] name         All items if empty.
-# @param [String, nil]   scope        Limit to given collection (option.scope)
+# @param [String, nil]   scope        Limit to given Collection (option.scope)
 # @param [Boolean, nil]  fast         Used saved data if possible (option.fast)
 # @param [Hash]          opt          Passed to ItemListing.
 #

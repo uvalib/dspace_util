@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Get information about DSpace communities in tabular form.
+# Get information about DSpace Communities in tabular form.
 #
 # Usage: dspace_community [DEPLOYMENT] [OPTIONS]
 # Usage: dspace_community --help

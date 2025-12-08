@@ -6,10 +6,10 @@
 # Usage: dspace_delete [DEPLOYMENT] --all
 #
 # OPTIONS
-#   --all           All items from collections listed in data/collection.txt.
+#   --all           All items from Collections listed in data/collection.txt.
 #   --handle        Next is a handle or list of handles.
 #   --mapfile       Next is a mapfile or newline-delimited list of mapfiles.
-#   --collection    Next is a collection or list of collections.
+#   --collection    Next is a Collection or list of Collections.
 #   --foreground    Do not run in the background with "nohup".
 #
 # Each ITEM may be:
@@ -23,7 +23,7 @@
 #   Mapfiles may be either be in the two column format expected by DSpace where
 #   the second column is a handle, or simple lists of handles one per line.
 #
-# * A collection or list of collections.
+# * A Collection or list of Collections.
 #   Collections can be specified by handle (or as a file containing handles)
 #   but only after a --collection flag; plain arguments which are handles will
 #   always be interpreted as items.
@@ -45,12 +45,12 @@ source "$BIN_DIR/dspace_values"
 NOHUP='true'    # Background the delete process.
 WAIT='true'     # Wait for background delete process to finish.
 HELP=''         # Display help only.
-ALL=''          # All items from collections in data/collection.txt
+ALL=''          # All items from Collections in data/collection.txt
 
 NAMES=()        # Arguments to be interpreted for handles of items to delete.
 HANDLES=()      # Handles of items to delete.
 MAP_FILES=()    # Source mapfile(s).
-COLLECTIONS=()  # Source collections.
+COLLECTIONS=()  # Source Collections.
 
 ARGS=()         # Other arguments passed to dspace_delete_bg.
 IN_ARGS=''      # When true remaining options are for dspace_delete_bg.
@@ -156,14 +156,14 @@ fi
 # Finish gathering specifiers of items to delete.
 # =============================================================================
 
-# Get "--all" collections from the data file.
+# Get "--all" Collections from the data file.
 if [[ "$ALL" ]] ; then
     COLL_LINES="$PRJ_DIR/data/collection.txt"
     COLL_NAMES=`data_lines "$COLL_LINES" | data_column 2`
     add_collection "$COLL_NAMES"
 fi
 
-# Analyze direct arguments into handles, mapfiles, and collections.
+# Analyze direct arguments into handles, mapfiles, and Collections.
 for NAME in "${NAMES[@]}"; do
     if [[ "$NAME" =~ item/[0-9]+ ]] ; then
         add_handle "$NAME"
@@ -205,7 +205,7 @@ for FILE in "${MAP_FILES[@]}" ; do
     cat "$FILE" | sed -E 's/^.*(item\/[0-9]+).*$/\1/' >> "$TMP_SRC"
 done
 
-# Get item handles from each collection.
+# Get item handles from each Collection.
 if [[ $C_COUNT -gt 0 ]] ; then
     announce "Listing items from $C_COUNT collections"
     for COLLECTION in "${COLLECTIONS[@]}" ; do

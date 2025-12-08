@@ -19,8 +19,8 @@ require_relative 'entity'
 # :section: Constants
 # =============================================================================
 
-# Whether Publications are to be imported into multiple collections.  If not,
-# all are imported into the collection named by ENV['PUB_COLLECTION'].
+# Whether Publications are to be imported into multiple Collections.  If not,
+# all are imported into the Collection named by ENV['PUB_COLLECTION'].
 #
 # @type [Boolean]
 #

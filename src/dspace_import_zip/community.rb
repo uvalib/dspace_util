@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Get existing communities from the DSpace instance.
+# Get existing Communities from the DSpace instance.
 
 require 'common'
 require 'dspace'
@@ -12,15 +12,15 @@ require 'dspace'
 # :section: Classes
 # =============================================================================
 
-# A table of DSpace communities.
+# A table of DSpace Communities.
 #
 class Community < Hash
 
-  # The name of the DSpace community.
+  # The name of the DSpace Community.
   # @return [String]
   def name = self[__method__]
 
-  # The DSpace handle associated with the community.
+  # The DSpace handle associated with the Community.
   # @return [String]
   def handle = self[__method__]
 
@@ -46,7 +46,7 @@ class Community < Hash
     # :section:
     # =========================================================================
 
-    # Existing communities acquired from DSpace.
+    # Existing Communities acquired from DSpace.
     #
     # @param [Hash] opt               To DSpace#communities on first run.
     #

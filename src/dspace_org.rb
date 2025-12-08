@@ -32,7 +32,7 @@ end
 # Generate an output table of DSpace OrgUnits.
 #
 # @param [Array<String>] org          All OrgUnits if empty.
-# @param [String, nil]   scope        Limit to given collection (option.scope)
+# @param [String, nil]   scope        Limit to given Collection (option.scope)
 # @param [Boolean, nil]  fast         Used saved data if possible (option.fast)
 # @param [Hash]          opt          Passed to OrgUnitListing.
 #

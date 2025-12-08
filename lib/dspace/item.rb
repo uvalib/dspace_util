@@ -96,7 +96,7 @@ module Dspace::Item
     # Fetch information about the given DSpace items.
     #
     # @param [Array<String,Hash>] item    Specific items to find.
-    # @param [String, nil]        scope   Limit to the given collection.
+    # @param [String, nil]        scope   Limit to the given Collection.
     # @param [Hash]               opt     Passed to super.
     #
     # @return [Hash{String=>Entry}]
@@ -163,7 +163,7 @@ module Dspace::Item
 
     protected
 
-    # Return the UUID associated with the given collection identity.
+    # Return the UUID associated with the given Collection identity.
     #
     # @param [String, nil] arg        Collection name, handle or UUID.
     # @param [Boolean]     fatal      If *false*, allow failed scope lookup.

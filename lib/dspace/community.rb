@@ -3,11 +3,11 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# DSpace API community methods.
+# DSpace API Community methods.
 
 require 'dspace/item'
 
-# Information about current DSpace communities.
+# Information about current DSpace Communities.
 #
 module Dspace::Community
 
@@ -15,7 +15,7 @@ module Dspace::Community
   # :section: Modules
   # ===========================================================================
 
-  # Methods supporting community paths.
+  # Methods supporting Community paths.
   #
   module Path
 
@@ -27,7 +27,7 @@ module Dspace::Community
 
     public
 
-    # Community / sub-community / collection separator.
+    # Community / sub-Community / Collection separator.
     #
     # @type [String]
     #
@@ -39,7 +39,7 @@ module Dspace::Community
 
     public
 
-    # Indicate whether the argument could be a full community path.
+    # Indicate whether the argument could be a full Community path.
     #
     # @param [String, nil] arg
     #
@@ -53,7 +53,7 @@ module Dspace::Community
 
     public
 
-    # Storage for community paths already looked-up.
+    # Storage for Community paths already looked-up.
     #
     # @return [Hash{String=>Hash}]
     #
@@ -67,14 +67,14 @@ module Dspace::Community
   # :section: Classes
   # ===========================================================================
 
-  # Information for a community acquired from the DSpace API.
+  # Information for a Community acquired from the DSpace API.
   #
   class Entry < Dspace::Item::Entry
 
     include Dspace::Api
     include Dspace::Community::Path
 
-    # Full community path of community.
+    # Full Community path of Community.
     #
     # @return [String, nil]
     #
@@ -92,7 +92,7 @@ module Dspace::Community
     #
     # @param [Hash, nil] obj          Provided directly or:
     # @param [Hash]      opt          Provided via keyword arguments.
-    # @param [Boolean]   full         If *true*, add community path to name.
+    # @param [Boolean]   full         If *true*, add Community path to name.
     #
     def initialize(obj = nil, full: nil, **opt)
       super(obj, **opt)
@@ -131,7 +131,7 @@ module Dspace::Community
 
     protected
 
-    # The community/sub-community path to the given collection.
+    # The Community/sub-Community path to the given Collection.
     #
     # @param [Hash, nil]   obj
     # @param [String, nil] base       Initial base path name.
@@ -152,7 +152,7 @@ module Dspace::Community
       path.reverse.join(SEPARATOR).presence
     end
 
-    # The DSpace API URL for the parent community.
+    # The DSpace API URL for the parent Community.
     #
     # @param [Hash, nil] obj
     #
@@ -163,7 +163,7 @@ module Dspace::Community
       obj.dig(:_links, :parentCommunity, :href) || parent_url(obj[:uuid])
     end
 
-    # The DSpace API URL for the parent community.
+    # The DSpace API URL for the parent Community.
     #
     # @param [String, nil] uuid
     # @param [String]      endpoint   Format string for the URL endpoint.
@@ -177,7 +177,7 @@ module Dspace::Community
 
   end
 
-  # Acquire communities from DSpace.
+  # Acquire Communities from DSpace.
   #
   class Lookup
 
@@ -189,7 +189,7 @@ module Dspace::Community
 
     protected
 
-    # Fetch the DSpace API search result objects for collections.
+    # Fetch the DSpace API search result objects for Collections.
     #
     # @param [Hash] opt               Passed to #dspace_api.
     #
@@ -229,7 +229,7 @@ module Dspace::Community
 
     public
 
-    # Existing communities acquired from DSpace.
+    # Existing Communities acquired from DSpace.
     #
     # @param [Hash] opt               To #get_current_table on first run.
     #
@@ -260,7 +260,7 @@ module Dspace::Community
   # :section: Methods
   # ===========================================================================
 
-  # Get information about DSpace communities.
+  # Get information about DSpace Communities.
   #
   # @param [Hash] opt                 Passed to Lookup#find_or_fetch.
   #

@@ -8,9 +8,9 @@
 # For convenience, a full path can be supplied and the item identifier will be
 # extracted from it.
 #
-# The item may be a collection, however DSpace only returns metadata about the
-# collection itself and does not provide a way to get the items associated with
-# the collection.
+# The item may be a Collection, however DSpace only returns metadata about the
+# Collection itself and does not provide a way to get the items associated with
+# the Collection.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`

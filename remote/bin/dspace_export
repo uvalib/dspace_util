@@ -3,7 +3,7 @@
 # Export items from DSpace within a DSpace login shell.
 #
 # -i    The ID or Handle of target item (sets --type ITEM)
-# -c    The ID or Handle of target collection (sets --type COLLECTION)
+# -c    The ID or Handle of target Collection (sets --type COLLECTION)
 # -*    One of the "dspace export" options below.
 #
 # For reference, "dspace export" command line options are:
@@ -12,7 +12,7 @@
 # Short Long
 # ----- ---------   ------------------------------- ----------------------------------
 # -t    --type      Type of export                  "COLLECTION" or "ITEM"
-# -i    --id        The ID or Handle of target      Where target is collection or item
+# -i    --id        The ID or Handle of target      Where target is Collection or item
 # -d    --dest      The destination path for export
 # -n    --number    Starting sequence number
 # -m    --migrate   Export target for migration     Removes DSpace metadata
@@ -28,7 +28,7 @@ BIN_DIR=`dirname "$PROGRAM"`
 source "$BIN_DIR/dspace_values"
 
 ITEM='' # ID or Handle of target item.
-COLL='' # ID or Handle of target collection.
+COLL='' # ID or Handle of target Collection.
 DST=''  # The destination path for export.
 NUM='0' # Starting sequence number.
 TYPE='' # Inferred from --id or --collection.

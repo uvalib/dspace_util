@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Generate DSpace communities and collections via `dspace structure-builder`.
+# Generate DSpace Communities and Collections via `dspace structure-builder`.
 #
 # Usage: dspace_structure [DEPLOYMENT] [--check]
 # Usage: dspace_structure [DEPLOYMENT] --refresh
@@ -9,14 +9,14 @@
 # Usage: dspace_structure --help
 #
 # OPTIONS
-#   --check             Verify all expected communities and collections exist.
+#   --check             Verify all expected Communities and Collections exist.
 #   --refresh           Refresh handles in tmp/saved/*/structure.txt.
-#   --create            Create all expected communities and collections.
-#   --community NAME    Create community.
-#   --collection NAME   Create collection.
+#   --create            Create all expected Communities and Collections.
+#   --community NAME    Create Community.
+#   --collection NAME   Create Collection.
 #
 # NOTE: Collections are not created with an entity type.
-# That will have to be modified manually for any collection created here.
+# That will have to be modified manually for any Collection created here.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
@@ -27,18 +27,18 @@ TMP_DIR="$PRJ_DIR/tmp"
 source "$BIN_DIR/dspace_values"
 
 REFRESH=''                          # Refresh tmp/saved/*/structure.txt.
-CREATE=''                           # Create communities/collections.
+CREATE=''                           # Create Communities/Collections.
 CHECK=''                            # Check only.
 HELP=''                             # Display help only.
-ALL=''                              # All communities/collections from $SRC_TXT
+ALL=''                              # All Communities/Collections from $SRC_TXT
 
-SRC_TXT="$DAT_DIR/collection.txt"   # Defined communities/collections.
+SRC_TXT="$DAT_DIR/collection.txt"   # Defined Communities/Collections.
 DST_TXT="$TMP_DIR/saved/$DSPACE_DEPLOYMENT/structure.txt" # ...with handles.
-SRC_XML='structure.xml'             # Supplied communities/collections.
+SRC_XML='structure.xml'             # Supplied Communities/Collections.
 DST_XML='structure_handles.xml'     # Generated handles.
 
-declare -A ARGS_TABLE               # Collections provided keyed by community.
-declare -A CREATE_TABLE             # Collections to create keyed by community.
+declare -A ARGS_TABLE               # Collections provided keyed by Community.
+declare -A CREATE_TABLE             # Collections to create keyed by Community.
 
 readonly ORIGINAL_IFS="$IFS"
 readonly TAB='   '
@@ -114,7 +114,7 @@ function table_add() # table_var key value
 
 PREVIOUS_COMMUNITY=''
 
-function community_arg() # community
+function community_arg() # Community
 {
     local COMMUNITY="$1"
     local COLLECTION=''
@@ -122,7 +122,7 @@ function community_arg() # community
     PREVIOUS_COMMUNITY="$COMMUNITY"
 }
 
-function collection_arg() # collection
+function collection_arg() # Collection
 {
     local COMMUNITY="$PREVIOUS_COMMUNITY"
     local COLLECTION="$1"
@@ -174,7 +174,7 @@ EOF
 fi
 
 # =============================================================================
-# Build a table of communities/collections to create.
+# Build a table of Communities/Collections to create.
 # =============================================================================
 
 SRC_DATA=''         # Lines formatted like $SRC_TXT data.
@@ -216,7 +216,7 @@ if [[ "$CHECK" || "$REFRESH" ]] ; then
     COMM_NAMES=(`echo "$COMM_LINES" | data_column 3`)
     COLL_NAMES=(`echo "$COLL_LINES" | data_column 4`)
 
-    # Check for existing required communities and collections.
+    # Check for existing required Communities and Collections.
     for COMMUNITY in $COMMUNITY_NAMES; do
         COMM_IDX=`array_index COMM_NAMES "$COMMUNITY"`
         [[ "$COMM_IDX" ]] || ERRORS+=("missing community '$COMMUNITY'")
@@ -283,7 +283,7 @@ fi
 dspace_prep
 
 # =============================================================================
-# Create $SRC_XML from $SRC_TXT or communities/collections from command line.
+# Create $SRC_XML from $SRC_TXT or Communities/Collections from command line.
 # =============================================================================
 
 function escape_xml() # string
@@ -317,7 +317,7 @@ cd "$TMP_DIR"
 IFS="$ORIGINAL_IFS"
 
 # =============================================================================
-# Generate communities/collections from $SRC_XML and get back $DST_XML.
+# Generate Communities/Collections from $SRC_XML and get back $DST_XML.
 # =============================================================================
 
 if [[ "$DSPACE_DOCKER" ]] ; then

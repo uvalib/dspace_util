@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Get information about DSpace collections.
+# Get information about DSpace Collections.
 
 require 'common'
 require 'logging'
@@ -15,7 +15,7 @@ require 'table_listing'
 # :section: Classes
 # =============================================================================
 
-# Display of collections in tabular form.
+# Display of Collections in tabular form.
 #
 class CollectionListing < TableListing
 
@@ -29,10 +29,10 @@ end
 # :section: Methods
 # =============================================================================
 
-# Generate an output table of DSpace collections.
+# Generate an output table of DSpace Collections.
 #
 # @param [Array<String>] _collection  Currently unused.
-# @param [Boolean, nil]  full         Show collection as path (option.full)
+# @param [Boolean, nil]  full         Show Collection as path (option.full)
 # @param [Boolean, nil]  fast         Used saved data if possible (option.fast)
 # @param [Hash]          opt          Passed to CollectionListing.
 #

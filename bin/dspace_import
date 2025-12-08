@@ -16,7 +16,7 @@
 #
 # The program passes its arguments to dspace_import_zip except for a limited
 # set of options accepted by the remote dspace_import script (and then only
-# with the long form using double dashes) to specify the collection or the
+# with the long form using double dashes) to specify the Collection or the
 # EPerson submitter.
 #
 # As a safeguard, if the target directory already contains zip file(s) the

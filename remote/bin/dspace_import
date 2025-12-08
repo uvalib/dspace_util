@@ -22,13 +22,13 @@
 # -r    --replace       Replace items listed in mapfile             Can't use with -a or -d
 # -d    --delete        Delete items listed in mapfile              Can't use with -a or -r
 # -s    --source        Source directory of zipfile
-# -c    --collection    Destination collection                      By Handle or database ID
+# -c    --collection    Destination Collection                      By Handle or database ID
 # -m    --mapfile       Mapfile for items                           Will be created by --add
 # -e    --eperson       DSpace account doing the import
-# -w    --workflow      Send through the collection's workflow
+# -w    --workflow      Send through the Collection's workflow
 # -n    --notify        Kicks off email reporting imported items
 # -v    --validate      Test run; do not actually import items
-# -p    --template      Apply the collection template
+# -p    --template      Apply the Collection template
 # -R    --resume        Resume a failed import                      For --add only
 # -h    --help          Command help
 # -z    --zip           Zipfile
@@ -38,7 +38,7 @@
 #
 # @see https://wiki.lyrasis.org/display/DSDOC8x/Importing+and+Exporting+Items+via+Simple+Archive+Format
 
-# NOTE: Review bin/dspace_collection for proper target collections.
+# NOTE: Review bin/dspace_collection for proper target Collections.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`

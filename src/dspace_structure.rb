@@ -90,11 +90,11 @@ def output_collections(file = nil, **opt)
   good
 end
 
-# Extract collections from the output of `dspace structure-builder`.
+# Extract Collections from the output of `dspace structure-builder`.
 #
 # @param [String, IO, nil] file       File source or $stdin if empty.
 #
-# @return [Hash{String=>String}]      Handle mapped to collection name.
+# @return [Hash{String=>String}]      Handle mapped to Collection name.
 # @return [nil]                       If there were XML parse errors.
 #
 def parse_structure_xml(file = nil)
@@ -112,7 +112,7 @@ def parse_structure_xml(file = nil)
     return
   end
 
-  # Extract collection handle/name pairs.
+  # Extract Collection handle/name pairs.
   pairs = []
   doc.xpath('//community').each do |community|
     comm = community.xpath('name').text

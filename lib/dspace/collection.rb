@@ -3,11 +3,11 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# DSpace API collection methods.
+# DSpace API Collection methods.
 
 require 'dspace/community'
 
-# Information about current DSpace collections.
+# Information about current DSpace Collections.
 #
 module Dspace::Collection
 
@@ -15,15 +15,15 @@ module Dspace::Collection
   # :section: Classes
   # ===========================================================================
 
-  # Information for a collection acquired from the DSpace API.
+  # Information for a Collection acquired from the DSpace API.
   #
-  # Note that there is no functional relationship between communities and
-  # collections in DSpace; the superclass relationship is used here only to
-  # inherit common aspects of community path definition.
+  # Note that there is no functional relationship between Communities and
+  # Collections in DSpace; the superclass relationship is used here only to
+  # inherit common aspects of Community path definition.
   #
   class Entry < Dspace::Community::Entry
 
-    def entity_type = self[__method__] # Type of collection items
+    def entity_type = self[__method__] # Type of Collection items
 
     KEYS = (superclass::KEYS + instance_methods(false)).freeze
 
@@ -37,7 +37,7 @@ module Dspace::Collection
     #
     # @param [Hash, nil] obj          Provided directly or:
     # @param [Hash]      opt          Provided via keyword arguments.
-    # @param [Boolean]   full         If *true*, add community path to name.
+    # @param [Boolean]   full         If *true*, add Community path to name.
     #
     def initialize(obj = nil, full: nil, **opt)
       super
@@ -50,7 +50,7 @@ module Dspace::Collection
 
     protected
 
-    # The DSpace API URL for the parent community.
+    # The DSpace API URL for the parent Community.
     #
     # @param [String, nil] uuid
     # @param [String]      endpoint   Format string for the URL endpoint.
@@ -68,7 +68,7 @@ module Dspace::Collection
 
     protected
 
-    # Get the collection type from the DSpace data value.
+    # Get the Collection type from the DSpace data value.
     #
     # @param [Hash, nil] obj
     # @param [String]    missing      Default result.
@@ -82,7 +82,7 @@ module Dspace::Collection
 
   end
 
-  # Acquire collections from DSpace.
+  # Acquire Collections from DSpace.
   #
   class Lookup
 
@@ -94,7 +94,7 @@ module Dspace::Collection
 
     protected
 
-    # Fetch the DSpace API search result objects for collections.
+    # Fetch the DSpace API search result objects for Collections.
     #
     # @param [Hash] opt               Passed to #dspace_api.
     #
@@ -134,7 +134,7 @@ module Dspace::Collection
 
     public
 
-    # Existing collections acquired from DSpace.
+    # Existing Collections acquired from DSpace.
     #
     # @param [Hash] opt               To #get_current_table on first run.
     #
@@ -165,7 +165,7 @@ module Dspace::Collection
   # :section: Methods
   # ===========================================================================
 
-  # Get information about DSpace collections.
+  # Get information about DSpace Collections.
   #
   # @param [Hash] opt                 Passed to Lookup#find_or_fetch.
   #

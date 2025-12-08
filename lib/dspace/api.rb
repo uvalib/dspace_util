@@ -50,13 +50,13 @@ module Dspace::Api
   #
   HANDLE_PREFIX = ENV['DSPACE_PREFIX'].freeze
 
-  # Local DSpace collection for Person entities.
+  # Local DSpace Collection for Person entities.
   #
   # @type [String]
   #
   PERSON_COLLECTION = ENV['USR_COLLECTION'].freeze
 
-  # Local DSpace collection for OrgUnit entities.
+  # Local DSpace Collection for OrgUnit entities.
   #
   # @type [String]
   #
@@ -212,7 +212,7 @@ module Dspace::Api
 
     protected
 
-    # Fetch the DSpace API search result objects for collections.
+    # Fetch the DSpace API search result objects for Collections.
     #
     # @param [Symbol] item_type       E.g. :communities, :collections
     # @param [Hash]   opt             Passed to #dspace_api.

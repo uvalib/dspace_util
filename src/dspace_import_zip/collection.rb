@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Get configured or existing collections from the DSpace instance.
+# Get configured or existing Collections from the DSpace instance.
 
 require 'common'
 require 'dspace'
@@ -12,20 +12,20 @@ require 'dspace'
 # :section: Classes
 # =============================================================================
 
-# An association of a DSpace collection with one or more normalized department
+# An association of a DSpace Collection with one or more normalized department
 # names.
 #
 class Collection < Hash
 
-  # The name of the DSpace collection.
+  # The name of the DSpace Collection.
   # @return [String]
   def name = self[__method__]
 
-  # The DSpace handle associated with the collection.
+  # The DSpace handle associated with the Collection.
   # @return [String]
   def handle = self[__method__]
 
-  # Departments associated with the collection.
+  # Departments associated with the Collection.
   # @return [Array<Dept>]
   def depts = self[__method__]
 
@@ -107,7 +107,7 @@ class Collection < Hash
       @current_table ||= Dspace.collections(**opt)
     end
 
-    # The handle of the existing DSpace collection identified by the value of
+    # The handle of the existing DSpace Collection identified by the value of
     # `ENV[var]`.
     #
     # @param [String] var
@@ -133,7 +133,7 @@ class Collection < Hash
 
     public
 
-    # The handle of the collection that should be the destination for
+    # The handle of the Collection that should be the destination for
     # publications by authors/contributors associated with *org*.
     #
     # @param [Dspace::OrgUnit::Entry, OrgUnit::Import] org
@@ -145,7 +145,7 @@ class Collection < Hash
       dept_collection[dept]&.first
     end
 
-    # Mapping of department to one or more collection handles.
+    # Mapping of department to one or more Collection handles.
     #
     # @return [Hash{Dept=>Array<String>}]
     #
@@ -161,7 +161,7 @@ class Collection < Hash
         }.transform_values(&:uniq).freeze
     end
 
-    # Mapping of collection handle to associated departments.
+    # Mapping of Collection handle to associated departments.
     #
     # @return [Hash{String=>Collection]
     #
@@ -175,7 +175,7 @@ class Collection < Hash
 
     protected
 
-    # Read the data file which associates collections their handles and add in
+    # Read the data file which associates Collections their handles and add in
     # normalized department names.
     #
     # @param [String] file            Project-relative path to the data file.
@@ -189,7 +189,7 @@ class Collection < Hash
       end
     end
 
-    # Mapping of collection name to associated departments.
+    # Mapping of Collection name to associated departments.
     #
     # @return [Hash{String=>Array<String>]
     #
@@ -197,7 +197,7 @@ class Collection < Hash
       @department_table ||= get_department_table.freeze
     end
 
-    # Read the data file which associates collections with normalized
+    # Read the data file which associates Collections with normalized
     # department name(s).
     #
     # @param [String] file            Project-relative path to the data file.

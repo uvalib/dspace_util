@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Get information about DSpace collections in tabular form.
+# Get information about DSpace Collections in tabular form.
 #
 # Usage: dspace_collection [DEPLOYMENT] [OPTIONS]
 # Usage: dspace_collection --help
