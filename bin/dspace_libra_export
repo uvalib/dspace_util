@@ -6,9 +6,10 @@
 #
 # OPTIONS
 #   --force         Overwrite existing destination subdirectory.
-#   --common dir    Common root for export and import directories.
-#   --export name   Destination subdirectory name for copied exports.
-#   --start  date   Export items submitted from this date through the present.
+#   --common DIR    Common root for export and import directories.
+#   --export NAME   Destination subdirectory name for copied exports.
+#   --start  DATE   Export items submitted from this date through the end date.
+#   --end    DATE   Export items submitted up to this date (default: today).
 #
 # If a common directory is given, $LIBRA_EXPORT_SRC is copied there rather than
 # the default ($COMMON_ROOT from dspace_values).
@@ -28,15 +29,16 @@ readonly TI_PRJ=`realpath "$PRJ_DIR/../terraform-infrastructure"`
 # Properties of the remote system.
 readonly LIBRA_HOST='10.130.110.92'
 readonly LIBRA_USER='ec2-user'
-readonly EXPORT_SRC='libra-open-export' # Export subdirectory name.
+readonly LIBRA_EXPORT_SRC='libra-open-export' # Export subdirectory name.
 
 # =============================================================================
 # Process command line arguments.
 # =============================================================================
 
-OUT_DIR="$COMMON_ROOT"
-OUT_NAME="$EXPORT_DIR"
+OUT_DIR=''
+OUT_NAME=''
 START_DATE=''
+END_DATE=''
 FORCE=''
 
 while [[ $# -gt 0 ]] ; do
@@ -44,13 +46,16 @@ while [[ $# -gt 0 ]] ; do
         -f|--force)     FORCE=true;      shift 1 ;;
         -c|--common)    OUT_DIR="$2";    shift 2 ;;
         -e|--export)    OUT_NAME="$2";   shift 2 ;;
-        -s|--start)     START_DATE="$2"; shift 2 ;;
+        --start)        START_DATE="$2"; shift 2 ;;
+        --end)          END_DATE="$2";   shift 2 ;;
         *)              abort "invalid arg '$ARG'" ;;
     esac
 done
 
-[[ "$OUT_DIR"  ]] || OUT_DIR="$PWD"
-[[ "$OUT_NAME" ]] || OUT_NAME="$EXPORT_SRC"
+[[ "$OUT_DIR"    ]] || OUT_DIR="$COMMON_ROOT"
+[[ "$OUT_NAME"   ]] || OUT_NAME="$EXPORT_DIR"
+[[ "$START_DATE" ]] || START_DATE='2000-01-01'  # Start date is required.
+[[ "$END_DATE"   ]] || END_DATE=`date -I`       # Default end date is today.
 
 # =============================================================================
 # Avoid overwriting an existing export subdirectory.
@@ -92,6 +97,9 @@ if [[ ! -f "$UNENCRYPTED" ]] ; then
 fi
 REMOTE_CREDENTIALS="$PWD/$UNENCRYPTED"
 
+#announce "Interactive shell to $LIBRA_HOST"
+#exec ssh -i "$REMOTE_CREDENTIALS" "$LIBRA_USER@$LIBRA_HOST"
+
 # =============================================================================
 # Ensure credentials are in place for the playbook.
 # =============================================================================
@@ -122,7 +130,11 @@ cd "$TI_PRJ/libra-aptrust/production" || exit $?
 
 [[ "$AWS_REGION" ]] || export AWS_REGION='us-east-1'
 terraform init || exit $?
-terraform apply -auto-approve -var export_start_date=$START_DATE || exit $?
+
+T_ARGS=(-auto-approve)
+[[ "$START_DATE" ]] && T_ARGS+=(-var "export_start_date=$START_DATE")
+[[ "$END_DATE"   ]] && T_ARGS+=(-var "export_end_date=$END_DATE")
+terraform apply "${T_ARGS[@]}" || exit $?
 
 # =============================================================================
 # Perform the LibraOpen export and recursively copy to $DST_DIR.
@@ -130,29 +142,41 @@ terraform apply -auto-approve -var export_start_date=$START_DATE || exit $?
 
 cd "$TI_PRJ/libra-aptrust/production/ansible" || exit $?
 
-SRC_DIR="/mnt/scratch/$EXPORT_SRC"
+SRC_DIR="/mnt/scratch/$LIBRA_EXPORT_SRC"
 
 announce 'Clearing remote export directory'
 ansible-playbook clean_libra_open_export.yml || exit $?
 
-announce 'Generating remote export'
+announce "Generating remote export $START_DATE thru $END_DATE"
 ansible-playbook deploy_libra_open_export.yml || exit $?
 
-announce 'Waiting for export completion'
+announce "Verify export start for $START_DATE thru $END_DATE"
+CONTAINER_NAME="${LIBRA_EXPORT_SRC}-production"
+GET_CONTAINER_ID="\`sudo docker stats --no-stream | awk '\$2 == \"$CONTAINER_NAME\" { print \$1 }'\`"
+CHECK_CONTAINER_ID="CONTAINER_ID=$GET_CONTAINER_ID && test \$CONTAINER_ID"
+ssh -i "$REMOTE_CREDENTIALS" "$LIBRA_USER@$LIBRA_HOST" "$CHECK_CONTAINER_ID" ||
+    abort 'no Docker container active'
+
+announce "Waiting for export completion for $START_DATE thru $END_DATE"
 ssh -i "$REMOTE_CREDENTIALS" "$LIBRA_USER@$LIBRA_HOST" "
     PAUSE=5
     PREVIOUS=0
     while sleep \$PAUSE ; do
-        COUNT=\`ls $SRC_DIR 2>/dev/null | wc -l\`
-        test \$COUNT -gt 0 -a \$COUNT -eq \$PREVIOUS && exit
-        echo \"waiting - \$COUNT exported\"
+        STATE=''
+        COUNT=\`ls '$SRC_DIR' 2>/dev/null | wc -l\`
+        if test \$COUNT -eq 0 ; then
+            STATE='not started'
+        elif test \$PREVIOUS -lt \$COUNT ; then
+            STATE=\"\$COUNT exported\"
+        elif $CHECK_CONTAINER_ID ; then
+            STATE=\"\$COUNT exported\"
+        else
+            exit
+        fi
+        echo waiting - \$STATE
         PREVIOUS=\$COUNT
-        test \$PREVIOUS -gt 0 && PAUSE=1
     done
 "
 
-announce "Copying $EXPORT_SRC to $DST_DIR"
+announce "Copying $LIBRA_EXPORT_SRC to $DST_DIR"
 scp -r -i "$REMOTE_CREDENTIALS" "$LIBRA_USER@$LIBRA_HOST:$SRC_DIR" "$DST_DIR"
-
-#announce "Interactive shell to $LIBRA_HOST"
-#ssh -i "$REMOTE_CREDENTIALS" "$LIBRA_USER@$LIBRA_HOST"

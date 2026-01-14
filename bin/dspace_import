@@ -11,6 +11,7 @@
 #   --retry         Regenerate imports and submit the new zips.
 #   --force         Re-acquire LibraOpen exports, generate imports, and submit.
 #   --start DATE    Acquire LibraOpen exports starting with DATE.
+#   --end   DATE    Acquire LibraOpen exports up through DATE.
 #   --remote        Assume zip files have already been copied to remote system.
 #   --foreground    Do not run in the background with "nohup".
 #
@@ -22,9 +23,9 @@
 # As a safeguard, if the target directory already contains zip file(s) the
 # script will exit unless --retry or --force is used.
 #
-# Since --start deals with acquiring LibraOpen exports, it is only meaningful
-# if --force is used to re-create $EXPORT_DIR, or if it is already missing or
-# empty.
+# Since --start and --end deal with acquiring LibraOpen exports, they are only
+# meaningful if $EXPORT_DIR is currently missing or empty, or if --force is
+# used to re-create it.
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
@@ -53,6 +54,7 @@ while [[ $# -gt 0 ]] ; do
         --remote)       REMOTE_ONLY=true ;;
         --foreground)   NOHUP='' ;;
         --start)        EXPORT_ARGS+=("$1" "$2"); shift ;;
+        --end)          EXPORT_ARGS+=("$1" "$2"); shift ;;
         --collection=*) REMOTE_ARGS+=("'$1'") ;;
         --collection)   REMOTE_ARGS+=("'$1=$2'"); shift ;;
         --eperson=*)    REMOTE_ARGS+=("'$1'") ;;
@@ -80,6 +82,7 @@ if [[ "$HELP" ]] ; then
     --retry       Regenerate imports and submit the new zips.
     --force       Re-acquire LibraOpen exports, generate imports, and submit.
     --start DATE  Acquire LibraOpen exports starting with DATE.
+    --end   DATE  Acquire LibraOpen exports up through DATE.
     --remote      Assume zip files have already been copied to remote system.
     --foreground  Do not pass --nohup to the remote `dspace_import`.
 

@@ -880,18 +880,19 @@ dspace_import [DEPLOYMENT] [OPTIONS] [GENERATE_OPT] [REMOTE_OPT]
 All options are passed to the local `bin/dspace_import_zip` script except for
 the following:
 
-| Option            | Description                                                | Notes   |
-|:------------------|:-----------------------------------------------------------|:--------|
-| --production      | Specify the production DSpace system                       | **[1]** |
-| --staging         | Specify the staging DSpace system                          | **[1]** |
-| --development     | Specify the development DSpace system                      | **[1]** |
-| --retry           | Overwrite existing import directory and zip file(s)        |         |
-| --force           | Acquire fresh LibraOpen exports                            |         |
-| --start DATE      | Passed to `bin/dspace_libra_export`                        |         |
-| --eperson ID      | Passed to `remote/bin/dspace_import`                       |         |
-| --collection COLL | Passed to `remote/bin/dspace_import`                       |         |
-| --remote          | Assume zip files have already been copied to remote system |         |
-| --foreground      | Do not run in the background with "nohup"                  |         |
+| Option            | Description                                                | Notes                 |
+|:------------------|:-----------------------------------------------------------|:----------------------|
+| --production      | Specify the production DSpace system                       | **[1]**,&nbsp;**[2]** |
+| --staging         | Specify the staging DSpace system                          | **[1]**,&nbsp;**[2]** |
+| --development     | Specify the development DSpace system                      | **[1]**,&nbsp;**[2]** |
+| --retry           | Overwrite existing import directory and zip file(s)        |                       |
+| --force           | Acquire fresh LibraOpen exports                            |                       |
+| --start DATE      | Passed to `bin/dspace_libra_export`                        |                       |
+| --end DATE        | Passed to `bin/dspace_libra_export`                        |                       |
+| --eperson ID      | Passed to `remote/bin/dspace_import`                       |                       |
+| --collection COLL | Passed to `remote/bin/dspace_import`                       |                       |
+| --remote          | Assume zip files have already been copied to remote system |                       |
+| --foreground      | Do not run in the background with "nohup"                  |                       |
 
 NOTES<br/>
 **[1]** Dashes not required if the first command line argument.<br/>
@@ -911,13 +912,13 @@ While normally the script makes use of the contents of an existing LibraOpen
 export directory, using this option forces the acquiring of fresh LibraOpen
 exports.
 
-##### --start DATE
+##### --start DATE | --end DATE
 
-This option will cause LibraOpen exports to be acquired which were created on
-or after the given date.
+These options will cause LibraOpen exports to be acquired which were created on
+or after the given start date up through the given end date.
 This only applies if the export directory is empty or does not exist;
-otherwise this option has no effect unless the "--force" option is supplied in
-order to force a new export/import sequence.
+otherwise these options have no effect unless the "--force" option is supplied
+in order to force a new export/import sequence.
 
 ##### --eperson
 
@@ -986,8 +987,8 @@ installed via `rvm` with a gemset named by ".ruby-gemset".
 
 ### `dspace_libra_export`
 
-This script generates "libra-open-export" in the current directory by 
-executing Ansible playbooks which run `rake libraoc:export:export_works`.
+This script generates \$EXPORT_DIR in the \$COMMON_ROOT directory by executing
+Ansible playbooks which run `rake libraoc:export:export_works`.
 
 Note that the intermediate destination is a shared resource also used by the
 LibraOpen APTrust bagger.
@@ -1011,6 +1012,7 @@ dspace_libra_export [OPTIONS]
 | --common DIR_PATH | Root directory of the output directory                   |       |
 | --export DIR_NAME | Name of the output directory                             |       |
 | --start DATE      | Get LibraOpen exports created on or after the given date |       |
+| --end DATE        | Get LibraOpen exports created up through the given date  |       |
 
 <!---------------------------------------------------------------------------->
 
