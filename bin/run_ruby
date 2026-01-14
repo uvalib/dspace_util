@@ -2,7 +2,7 @@
 #
 # Run a src/*.rb Ruby program from this project.
 #
-# Usage: run_ruby PROGRAM [DEPLOYMENT] [OPTIONS]
+# Usage: run_ruby [DEPLOYMENT] PROGRAM [OPTIONS]
 #
 # These programs assume that the Ruby version indicated by ".ruby-version" has
 # been installed via `rvm` with a gemset named by ".ruby-gemset".

@@ -139,8 +139,9 @@ if [[ "$HELP" ]] ; then
     echo "Usage: $PROGNAME [DEPLOYMENT] --all"
     cat <<'EOF'
     DEPLOYMENT:
-    --production    Delete from the production DSpace service.
-    --staging       Delete from the staging DSpace service.
+      production    Delete from the production DSpace service.
+      staging       Delete from the staging DSpace service.
+      development   Delete from the development DSpace service.
 
     OPTIONS:
     --all           All items from Collections in data/collection.txt

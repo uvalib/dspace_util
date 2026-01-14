@@ -160,8 +160,9 @@ if [[ "$HELP" ]] ; then
     echo "Usage: $PROGNAME [DEPLOYMENT] --create --community NAME [--collection NAME]"
     cat <<'EOF'
     DEPLOYMENT:
-    --production        Operate on the production DSpace service.
-    --staging           Operate on the staging DSpace service.
+      production        Operate on the production DSpace service.
+      staging           Operate on the staging DSpace service.
+      development       Operate on the development DSpace service.
 
     OPTIONS:
     --check             Verify all expected Communities and Collections exist.

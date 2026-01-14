@@ -72,8 +72,9 @@ if [[ "$HELP" ]] ; then
     echo "Usage: $PROGNAME [DEPLOYMENT] [OPTIONS] [GENERATE_OPT] [REMOTE_OPT]"
     cat <<'EOF'
     DEPLOYMENT:
-    --production  Import to the production DSpace service.
-    --staging     Import to the staging DSpace service.
+      production  Import to the production DSpace service.
+      staging     Import to the staging DSpace service.
+      development Import to the development DSpace service.
 
     OPTIONS:
     --retry       Regenerate imports and submit the new zips.

@@ -16,8 +16,14 @@ LOCAL_VALUES="$BIN_DIR/.values"
 [[ -f "$LOCAL_VALUES" ]] && source "$LOCAL_VALUES"
 
 # Extract the script argument indicating which deployment to interact with.
+# If it comes first then "-" flag characters are not required.
 # This is the option indicated by [DEPLOYMENT] in script usage comments.
 SCRIPT_ARGS=()
+case "$1" in
+    prod*) export DSPACE_DEPLOYMENT='production';  shift ;;
+    stag*) export DSPACE_DEPLOYMENT='staging';     shift ;;
+    dev*)  export DSPACE_DEPLOYMENT='development'; shift ;;
+esac
 for ARG in "$@" ; do
     case "$ARG" in
         --deployment=p*|--prod*) export DSPACE_DEPLOYMENT='production' ;;
