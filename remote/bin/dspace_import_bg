@@ -46,7 +46,8 @@ dspace_prep || exit $?
 # Make sure zip file is in terms of the location within the Docker container.
 if [[ "$DSPACE_DOCKER" ]] ; then
     SRC_DIR="$DSPACE_IMPORT_PATH"
-elif [[ "$SRC_DIR" != "$PWD" ]] ; then
+else
+    [[ "$SRC_DIR" ]] || SRC_DIR="$HOST_IMPORT_PATH"
     cd "$SRC_DIR" || exit $?
 fi
 
