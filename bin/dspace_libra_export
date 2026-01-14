@@ -10,11 +10,11 @@
 #   --export name   Destination subdirectory name for copied exports.
 #   --start  date   Export items submitted from this date through the present.
 #
-# If a common directory is given, libra-open-export is copied there rather than
+# If a common directory is given, $LIBRA_EXPORT_SRC is copied there rather than
 # the default ($COMMON_ROOT from dspace_values).
 #
-# If an export name is given, libra-open-export is placed into a subdirectory
-# with that name rather than the default ($EXPORT_DIR from dspace_values).
+# If an export name is given, $LIBRA_EXPORT_SRC copied into a subdirectory with
+# that name rather than the default ($EXPORT_DIR from dspace_values).
 
 PROGRAM=`realpath "$0"`
 BIN_DIR=`dirname "$PROGRAM"`
@@ -115,7 +115,7 @@ if [[ ! -f "$LIBRA_GEN" ]] ; then
 fi
 
 # =============================================================================
-# Initialize Terraform
+# Set up Terraform
 # =============================================================================
 
 cd "$TI_PRJ/libra-aptrust/production" || exit $?

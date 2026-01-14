@@ -54,7 +54,7 @@ function url_encode() # string
 # =============================================================================
 
 # This controls the number of records exported (by default 10).
-# The complete set of LibraOpen items is less than 3000.
+# The complete set of LibraOpen items is around 3000.
 ROWS=5000
 END_DATE=''
 START_DATE=''

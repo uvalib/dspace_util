@@ -47,8 +47,8 @@ The ["Batch Metadata Editing"][CSV] page, regarding CSV imports, suggests
 limiting batches to 1000 items.
 Since this seems to apply to SAF imports as well, this guideline has been
 embedded into `dspace_import_zip` logic so that attempting to import more than
-1000 entities will result in the generation of multiple zip files which must
-be imported in separate runs.
+1000 entities will result in the generation of multiple zip files
+(which must be imported in separate runs).
 
 This approach presents a problem when Persons and/or OrgUnits have to be
 created:
@@ -80,10 +80,10 @@ programs implemented here in order to affect a transfer of LibraOpen data to
 DSpace.
 
 * First, `dspace_libra_export` acquires LibraOpen export into the \$COMMON_ROOT
-  subdirectory referenced by \$EXPORT_DIR.
+  subdirectory named by \$EXPORT_DIR.
 
 * Next, `dspace_import_zip` transforms \$EXPORT_DIR item subdirectories into
-  DSpace import items within the \$COMMON_ROOT subdirectory referenced by
+  DSpace import items within the \$COMMON_ROOT subdirectory named by
   \$IMPORT_DIR and then into one or more zip files whose names are prefixed
   with \$IMPORT_DIR.
 
