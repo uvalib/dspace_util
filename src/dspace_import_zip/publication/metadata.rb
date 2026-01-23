@@ -90,6 +90,8 @@ module Publication::Metadata
     #
     # @type [Hash{String=>String}]
     #
+    # @see https://github.com/uvalib/libra-oc/blob/master/config/authorities/languages.yml
+    #
     LANGUAGE = {
       'Chinese'    => 'zh',
       'English'    => 'en',
@@ -125,32 +127,36 @@ module Publication::Metadata
     #
     # @type [Array<String>]
     #
+    # @see https://github.com/uvalib/libra-oc/blob/master/config/authorities/licenses.yml
+    #
     RIGHTS = [
-      'All rights reserved (no additional license for public reuse)',             # [0]
-      'CC0 1.0 Universal',                                                        # [1]
-      'Attribution 2.0 Generic (CC BY)',                                          # [2]
-      'Attribution 4.0 International (CC BY)',                                    # [3]
-      'Attribution-NoDerivatives 4.0 International (CC BY-ND)',                   # [4]
-      'Attribution-NonCommercial 4.0 International (CC BY-NC)',                   # [5]
-      'Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND)',  # [6]
-      'Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA)',     # [7]
-      'Attribution-ShareAlike 4.0 International (CC BY-SA)',                      # [8]
+      'Attribution 4.0 International (CC BY)',                                    # [0]
+      'Attribution-NoDerivatives 4.0 International (CC BY-ND)',                   # [1]
+      'Attribution-ShareAlike 4.0 International (CC BY-SA)',                      # [2]
+      'Attribution-NonCommercial 4.0 International (CC BY-NC)',                   # [3]
+      'Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND)',  # [4]
+      'Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA)',     # [5]
+      'CC0 1.0 Universal',                                                        # [6]
+      'All rights reserved (no additional license for public reuse)',             # [7]
+      'Attribution 2.0 Generic (CC BY)',                                          # [8]
     ].freeze
 
     # Translation of Libra "rights" field index value to a "dc.rights.uri".
     #
     # @type [Array<String,nil>]
     #
+    # @see https://github.com/uvalib/libra-oc/blob/master/config/authorities/licenses.yml
+    #
     RIGHTS_URI = [
-      nil,                                                  # [0]
-      'https://creativecommons.org/publicdomain/zero/1.0/', # [1]
-      'https://creativecommons.org/licenses/by/2.0/',       # [2]
-      'https://creativecommons.org/licenses/by/4.0/',       # [3]
-      'https://creativecommons.org/licenses/by-nd/4.0/',    # [4]
-      'https://creativecommons.org/licenses/by-nc/4.0/',    # [5]
-      'https://creativecommons.org/licenses/by-nc-nd/4.0/', # [6]
-      'https://creativecommons.org/licenses/by-nc-sa/4.0/', # [7]
-      'https://creativecommons.org/licenses/by-sa/4.0/',    # [8]
+      'https://creativecommons.org/licenses/by/4.0/',       # [0]
+      'https://creativecommons.org/licenses/by-nd/4.0/',    # [1]
+      'https://creativecommons.org/licenses/by-sa/4.0/',    # [2]
+      'https://creativecommons.org/licenses/by-nc/4.0/',    # [3]
+      'https://creativecommons.org/licenses/by-nc-nd/4.0/', # [4]
+      'https://creativecommons.org/licenses/by-nc-sa/4.0/', # [5]
+      'https://creativecommons.org/publicdomain/zero/1.0/', # [6]
+      nil,                                                  # [7]
+      'https://creativecommons.org/licenses/by/2.0/',       # [8]
     ].freeze
 
     # Get a DSpace "dc.rights" value from a LibraOpen "rights" field value.
@@ -369,6 +375,8 @@ module Publication::Metadata
     # will not reject unexpected values).
     #
     # @type [Hash{String=>String}]
+    #
+    # @see https://github.com/uvalib/libra-oc/blob/master/config/authorities/resource_types.yml
     #
     RESOURCE_TYPE = {
       'Part of Book'                  => 'Book chapter',
