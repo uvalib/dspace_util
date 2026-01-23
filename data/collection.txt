@@ -12,17 +12,17 @@ College of Arts & Sciences                          |   Biology                 
 College of Arts & Sciences                          |   Chemistry                                                       | Chemistry
 College of Arts & Sciences                          |   Classics                                                        | Classics
 College of Arts & Sciences                          |   Drama                                                           | Drama
-College of Arts & Sciences                          |   East Asian                                                      | East Asian Language Literature and Cultures
+College of Arts & Sciences                          |   East Asian Languages, Literatures, and Cultures                 | East Asian Language Literature and Cultures
 College of Arts & Sciences                          |   Economics                                                       | Economics
 College of Arts & Sciences                          |   English                                                         | English
 College of Arts & Sciences                          |   Environmental Sciences                                          | Environmental Sciences
 College of Arts & Sciences                          |   French                                                          | French
 College of Arts & Sciences                          |   Geography                                                       | Geography
-College of Arts & Sciences                          |   German                                                          | German
+College of Arts & Sciences                          |   Germanic Languages and Literatures                              | German
 College of Arts & Sciences                          |   History                                                         | History
 College of Arts & Sciences                          |   Mathematics                                                     | Mathematics
 College of Arts & Sciences                          |   Media Studies                                                   | Media Studies
-College of Arts & Sciences                          |   Middle Eastern and South Asian                                  | Middle Eastern and South Asian Languages and Cultures
+College of Arts & Sciences                          |   Middle Eastern and South Asian Languages and Cultures           | Middle Eastern and South Asian Languages and Cultures
 College of Arts & Sciences                          |   Music                                                           | Music
 College of Arts & Sciences                          |   Philosophy                                                      | Philosophy
 College of Arts & Sciences                          |   Physics                                                         | Physics
