@@ -40,15 +40,17 @@ OUT_NAME=''
 START_DATE=''
 END_DATE=''
 FORCE=''
+HELP=''
 
 while [[ $# -gt 0 ]] ; do
     case "$1" in
-        -f|--force)     FORCE=true;      shift 1 ;;
-        -c|--common)    OUT_DIR="$2";    shift 2 ;;
-        -e|--export)    OUT_NAME="$2";   shift 2 ;;
-        --start)        START_DATE="$2"; shift 2 ;;
-        --end)          END_DATE="$2";   shift 2 ;;
-        *)              abort "invalid arg '$ARG'" ;;
+        --help)     HELP=true;       shift 1 ;;
+        --force)    FORCE=true;      shift 1 ;;
+        --common)   OUT_DIR="$2";    shift 2 ;;
+        --export)   OUT_NAME="$2";   shift 2 ;;
+        --start)    START_DATE="$2"; shift 2 ;;
+        --end)      END_DATE="$2";   shift 2 ;;
+        *)          abort "invalid arg '$ARG'" ;;
     esac
 done
 
@@ -56,6 +58,23 @@ done
 [[ "$OUT_NAME"   ]] || OUT_NAME="$EXPORT_DIR"
 [[ "$START_DATE" ]] || START_DATE='2000-01-01'  # Start date is required.
 [[ "$END_DATE"   ]] || END_DATE=`date -I`       # Default end date is today.
+
+# =============================================================================
+# Early exit for "--help".
+# =============================================================================
+
+if [[ "$HELP" ]] ; then
+    echo "Usage: $PROGNAME [OPTIONS]"
+    cat <<'EOF'
+    OPTIONS:
+    --force             Replace the target output directory
+    --common DIR_PATH   Root directory of the output directory
+    --export DIR_NAME   Name of the output directory
+    --start DATE        Export items created on or after the given date
+    --end DATE          Export items created up through the given date
+EOF
+    exit 0
+fi
 
 # =============================================================================
 # Avoid overwriting an existing export subdirectory.

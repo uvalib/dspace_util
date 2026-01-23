@@ -1006,13 +1006,13 @@ dspace_libra_export [OPTIONS]
 
 #### Options
 
-| Option            | Description                                              | Notes |
-|:------------------|:---------------------------------------------------------|:------|
-| --force           | Replace the target output directory                      |       |
-| --common DIR_PATH | Root directory of the output directory                   |       |
-| --export DIR_NAME | Name of the output directory                             |       |
-| --start DATE      | Get LibraOpen exports created on or after the given date |       |
-| --end DATE        | Get LibraOpen exports created up through the given date  |       |
+| Option            | Description                                     | Notes |
+|:------------------|:------------------------------------------------|:------|
+| --force           | Replace the target output directory             |       |
+| --common DIR_PATH | Root directory of the output directory          |       |
+| --export DIR_NAME | Name of the output directory                    |       |
+| --start DATE      | Export items created on or after the given date |       |
+| --end DATE        | Export items created up through the given date  |       |
 
 <!---------------------------------------------------------------------------->
 
