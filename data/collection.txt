@@ -19,6 +19,7 @@ College of Arts & Sciences                          |   Environmental Sciences  
 College of Arts & Sciences                          |   French                                                          | French
 College of Arts & Sciences                          |   Geography                                                       | Geography
 College of Arts & Sciences                          |   Germanic Languages and Literatures                              | German
+College of Arts & Sciences                          |   Global Studies                                                  | Global Studies; Global Studies and Politics; Global Environments + Sustainability
 College of Arts & Sciences                          |   History                                                         | History
 College of Arts & Sciences                          |   Mathematics                                                     | Mathematics
 College of Arts & Sciences                          |   Media Studies                                                   | Media Studies
@@ -34,7 +35,6 @@ College of Arts & Sciences                          |   Spanish, Italian & Portu
 College of Arts & Sciences                          |   Women, Gender & Sexuality                                       | Women, Gender & Sexuality
 Darden School of Business                           | ~ GENERAL, Darden School of Business                              | Academic Operations
 Frank Batten School of Leadership and Public Policy | ~ GENERAL, Frank Batten School of Leadership and Public Policy    | Leadership and Public Policy; Dean Administration; Social Entrepreneurship Initiative
-Global Studies                                      | ~ GENERAL, Global Studies                                         | Global Studies; Global Studies and Politics; Global Environments + Sustainability
 McIntire School of Commerce                         | ~ GENERAL, McIntire School of Commerce                            | Commerce
 School of Architecture                              | ~ GENERAL, School of Architecture                                 | Architecture; Dean's Office, School of Architecture
 School of Architecture                              |   Architectural History                                           | Architectural History
